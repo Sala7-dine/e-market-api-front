@@ -1,6 +1,6 @@
-import { useState , useEffect } from "react";
+import { useState , useRef } from "react";
 import { Link , useNavigate } from "react-router-dom";
-import axios from "axios";
+import axios from "../../config/axios";
 import Cookie from "js-cookie";
 
 const Login = () => {
@@ -11,28 +11,30 @@ const Login = () => {
         password : ""
     });
 
+    const errorRef = useRef(null);
+
+    const handleError = () => {
+        errorRef.current.style.display = "none";
+        errorRef.current.innerHTML = "";
+    }
+
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        await axios.post("https://e-market-dh-03e9602f6d1a.herokuapp.com/api/auth/login" , {...data})
+        await axios.post("auth/login", {...data})
             .then((response) => {
-
                 const token = response.data.accessToken;
-                console.log(token)
-                Cookie.set("accessToken" ,token,
-                    {
-                        expires: 1 / 24,
-                        secure: true,
-                        sameSite: "Strict",
-                        path: "/", // accessible partout dans le site
-                    }
-                );
-
+                Cookie.set("accessToken", token, {
+                    expires: 1 / 24,
+                    secure: true,
+                    sameSite: "Strict",
+                    path: "/",
+                });
+                return navigate("/");
             }).catch((err) => {
-                console.log(err.response.data)
+                errorRef.current.style.display = "block";
+                errorRef.current.innerHTML = err.response.data.error;
             });
-
-        return navigate("/");
 
     }
 
@@ -42,12 +44,15 @@ const Login = () => {
                 <div className="max-w-[480px] w-full">
 
                     <div className="p-6 sm:p-8 rounded-2xl bg-white border border-gray-200 shadow-sm">
-                        <h1 className="text-slate-900 text-center text-3xl font-semibold">Sign in</h1>
-                        <form className="mt-12 space-y-6" onSubmit={handleSubmit}>
+                        <div className="flex flex-col justify-center items-center gap-5">
+                            <h1 className="text-slate-900 text-center text-3xl font-semibold">Sign in</h1>
+                            <span className="text-sm text-red-400 hidden" ref={errorRef}>Email or passowrd incorrect</span>
+                        </div>
+                        <form className="mt-5 space-y-2" onSubmit={handleSubmit}>
                             <div>
                                 <label className="text-slate-900 text-sm font-medium mb-2 block">Email</label>
                                 <div className="relative flex items-center">
-                                    <input name="email" type="email"  required
+                                    <input name="email" type="email"  required onFocus={handleError}
                                            className="w-full text-slate-900 text-sm border border-slate-300 px-4 py-3 pr-8 rounded-md outline-blue-600"
                                            placeholder="Enter your email"
                                            value={data.email}
@@ -65,7 +70,7 @@ const Login = () => {
                             <div>
                                 <label className="text-slate-900 text-sm font-medium mb-2 block">Password</label>
                                 <div className="relative flex items-center">
-                                    <input name="password" type="password" required
+                                    <input name="password" type="password" required onFocus={handleError}
                                            className="w-full text-slate-900 text-sm border border-slate-300 px-4 py-3 pr-8 rounded-md outline-blue-600"
                                            placeholder="Enter password"
                                             value={data.password}
