@@ -11,13 +11,27 @@ const Home = () => {
 
         const fetchProducts = async () => {
             const response = await axios.get('/products');
-            //const user = await axios.get("/users/me");
-            //console.log("user : ", user.data);
             if (response) return response;
         }
 
         fetchProducts().then((res) => {
             setProducts([...res.data.data]);
+        }).catch((err) => {
+            console.log(err);
+        });
+    } , []);
+
+
+    useEffect(() => {
+
+        const getUser = async () => {
+            const response = await axios.get("/users/me");
+
+            if (response) return response;
+        }
+
+        getUser().then((res) => {
+            console.log("user : ", res.data);
         }).catch((err) => {
             console.log(err);
         });
@@ -131,13 +145,13 @@ const Home = () => {
 
                     {
                         products.map((product, index) =>
-                            <div key={product.id || index} className="group overflow-hidden relative">
-                                <a href="javascript:void(0)" className="block">
+                            <div key={product._id || index} className="group overflow-hidden relative">
+                                <Link to={`/product/${product._id}`} className="block">
                                     <div className="aspect-[3/4] bg-slate-100 w-full overflow-hidden">
-                                        <img src="https://readymadeui.com/images/fashion-img-1.webp" alt="Product-1"
+                                        <img src={product.images?.[0] || "https://readymadeui.com/images/fashion-img-1.webp"} alt={product.title}
                                              className="w-full h-full object-cover object-top hover:scale-110 transition-all duration-700"/>
                                     </div>
-                                </a>
+                                </Link>
                                 <div className="p-4 relative">
                                     <div className="flex flex-wrap justify-between gap-2 w-full absolute px-4 pt-3 z-10
                                             transition-all duration-500
