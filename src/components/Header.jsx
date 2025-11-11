@@ -69,7 +69,7 @@ const Header = () => {
                     {/* Logo */}
                     <Link
                         to="/"
-                        className={`flex items-center space-x-3 group ${isHomePage ? 'text-white' : ''}`}
+                        className={`flex items-center space-x-3 group ${isHomePage ? 'text-black' : ''}`}
                     >
                         <div className={`p-2 rounded-xl transition-all ${
                             isHomePage
@@ -82,19 +82,16 @@ const Header = () => {
                     </Link>
 
                     {/* Desktop Navigation */}
-                    <div className="hidden md:flex items-center space-x-2">
+                    {/* Desktop Navigation */}
+                    <div className="hidden md:flex items-center space-x-2 ">
                         {navLinks.map((link) => (
                             <Link
                                 key={link.path}
                                 to={link.path}
-                                className={`relative px-5 py-2.5 text-md font-medium transition-all duration-300 rounded-lg ${
+                                className={`relative px-5 py-2.5 text-sm font-bold transition-all duration-300 rounded-lg ${
                                     location.pathname === link.path
-                                        ? isHomePage
-                                            ? 'text-white bg-white/10'
-                                            : 'text-primary bg-primary/10'
-                                        : isHomePage
-                                            ? 'text-white/70 hover:text-white hover:bg-white/5'
-                                            : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                                        ? 'text-primary bg-primary/10'
+                                        : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'
                                 }`}
                             >
                                 {link.name}

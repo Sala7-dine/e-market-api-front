@@ -1,0 +1,10 @@
+services:
+  frontend:
+    build: .
+    ports:
+      - "3000:5173"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - VITE_HOST=0.0.0.0
