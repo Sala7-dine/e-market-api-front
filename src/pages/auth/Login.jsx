@@ -1,15 +1,16 @@
 import { useState , useRef } from "react";
 import { Link , useNavigate } from "react-router-dom";
-import axios from "../../config/axios";
-import Cookie from "js-cookie";
+import { useAuth } from "../../contexts/AuthContext";
 
 const Login = () => {
 
     const navigate = useNavigate();
+    const { login } = useAuth();
     const [data , setData] = useState({
         email : "",
         password : ""
     });
+
 
     const errorRef = useRef(null);
 
@@ -21,20 +22,13 @@ const Login = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        await axios.post("auth/login", {...data})
-            .then((response) => {
-                const token = response.data.accessToken;
-                Cookie.set("accessToken", token, {
-                    expires: 1 / 24,
-                    secure: true,
-                    sameSite: "Strict",
-                    path: "/",
-                });
-                return navigate("/");
-            }).catch((err) => {
-                errorRef.current.style.display = "block";
-                errorRef.current.innerHTML = err.response.data.error;
-            });
+        try {
+            await login(data);
+            navigate("/");
+        } catch (error) {
+            errorRef.current.style.display = "block";
+            errorRef.current.innerHTML = error.response?.data?.error || "Login failed";
+        }
 
     }
 

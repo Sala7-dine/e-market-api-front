@@ -1,9 +1,11 @@
 import {useState , useRef} from "react";
 import {Link, useNavigate} from "react-router-dom";
-import axios from "axios";
+import { useAuth } from "../../contexts/AuthContext.jsx";
+
 const Register = () => {
 
     const navigate = useNavigate();
+    const { register } = useAuth();
     const [data , setData] = useState({
         fullName : "",
         email : "",
@@ -63,14 +65,12 @@ const Register = () => {
             password : data.password
         }
 
-        await axios.post('https://e-market-dh-03e9602f6d1a.herokuapp.com/api/auth/register' , newData)
-            .then((response) => {
-                console.log(response.data);
-            }).catch((err)=>{
-                console.log(err.response.data);
-        });
-
-        return navigate("/");
+        try {
+            register(newData);
+            navigate("/login");
+        }catch (e) {
+            console.log(e);
+        };
     }
 
     return (
