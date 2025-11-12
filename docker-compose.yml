@@ -8,3 +8,10 @@ services:
       - /app/node_modules
     environment:
       - VITE_HOST=0.0.0.0
+    develop:
+      watch:
+        - action: sync
+          path: ./src
+          target: /app/src
+        - action: rebuild
+          path: package.json

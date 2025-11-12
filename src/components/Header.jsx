@@ -4,12 +4,13 @@ import { Menu, X, ShoppingBag, User } from 'lucide-react';
 import Cookie from "js-cookie";
 import {jwtDecode} from "jwt-decode";
 import axios from "../config/axios";
+import { useAuth } from '../contexts/AuthContext';
 
 const Header = () => {
     const [isScrolled, setIsScrolled] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const location = useLocation();
-    const navigate = useNavigate();
+    const { isAuthenticated, logout } = useAuth();
 
     useEffect(() => {
         const handleScroll = () => {
@@ -27,33 +28,6 @@ const Header = () => {
     ];
 
     const isHomePage = location.pathname === '/';
-
-    const isAuthenticated = () => {
-        const token = Cookie.get('accessToken');
-        if (!token) return false;
-
-        try {
-            const decodded = jwtDecode(token);
-            const currentTime = Date.now() / 1000;
-
-            return decodded.exp >= currentTime;
-
-        } catch (err) {
-            console.log(err.message);
-            Cookie.remove('accessToken');
-            return false;
-        }
-    }
-
-    const handleLogout = async () => {
-        try {
-            await axios.post("auth/logout");
-            Cookie.remove('accessToken');
-            navigate('/login');
-        } catch (err) {
-            console.error("Erreur logout :", err.response?.data);
-        }
-    }
 
 
     return (
@@ -101,36 +75,49 @@ const Header = () => {
 
                     { isAuthenticated() ?
                         <Link
-                            to="/login"
-                            onClick={handleLogout}
-                            className={`relative px-5 py-2 text-md font-medium transition-all duration-300 rounded-lg text-white/70 hover:text-white hover:bg-white/5`}>
-                            Deconnexion
-                        </Link> :
-                        <div className="hidden md:flex text-white">
+                            to="/"
+                            onClick={logout}
+                            className="text-sm cursor-pointer relative px-6 py-2.5 text-black font-semibold border rounded-full overflow-hidden group">
+                                <span
+                                    className="absolute left-0 top-0 w-full h-full bg-black transform -translate-x-full group-hover:translate-x-0 transition-transform duration-300 ease-in-out z-0"></span>
+                            <span className="relative z-10 group-hover:text-white transition-colors duration-300">Deconnexion</span>
+                        </Link>
+                        :
+                        <div className="hidden md:flex text-black gap-2">
 
                             <Link
                                 to="/login"
-                                className={`relative px-5 py-2 text-md font-medium transition-all duration-300 rounded-lg text-white/70 hover:text-white hover:bg-white/5`}>
-                                Sign in
+                                className="text-sm cursor-pointer relative px-6 py-2.5 text-black font-semibold border rounded-full overflow-hidden group">
+                                <span
+                                    className="absolute left-0 top-0 w-full h-full bg-black transform -translate-x-full group-hover:translate-x-0 transition-transform duration-300 ease-in-out z-0"></span>
+                                <span className="relative z-10 group-hover:text-white transition-colors duration-300">Sign in</span>
                             </Link>
 
-                            <Link
-                                to="/register"
-                                className={`relative px-5 py-2 text-md font-medium transition-all duration-300 rounded-lg text-white/70 hover:text-white hover:bg-white/5`}>
-                                Sign Up
-                            </Link>
+                                {/*<Link*/}
+                                {/*    to="/login"*/}
+                                {/*    className={`relative px-5 py-2 text-md font-medium transition-all duration-300 rounded-lg text-black hover:text-white hover:bg-black`}>*/}
+                                {/*    Sign in*/}
+                                {/*</Link>*/}
+
+                                <Link
+                                    to="/register"
+                                    className="text-sm cursor-pointer relative px-6 py-2.5 text-black font-semibold border border-black rounded-full overflow-hidden group">
+                                <span
+                                    className="absolute left-0 top-0 w-full h-full bg-black transform -translate-x-full group-hover:translate-x-0 transition-transform duration-300 ease-in-out z-0"></span>
+                                    <span className="relative z-10 group-hover:text-white transition-colors duration-300">Sign up</span>
+                                </Link>
 
                         </div>
 
                     }
 
 
-
                 </div>
 
                 {/* Mobile Menu */}
                 {isMobileMenuOpen && (
-                    <div className={`md:hidden py-6 border-t animate-fadeIn ${isHomePage ? 'bg-white/5 backdrop-blur-lg' : 'bg-muted/50'}`}>
+                    <div
+                        className={`md:hidden py-6 border-t animate-fadeIn ${isHomePage ? 'bg-white/5  backdrop-blur-lg' : 'bg-muted/50'}`}>
                         <div className="flex flex-col space-y-2">
                             {navLinks.map((link) => (
                                 <Link
