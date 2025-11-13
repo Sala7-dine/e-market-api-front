@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchUsers } from '../../features/usersSlice'; 
+import { fetchUsers,deleteUser } from '../../features/usersSlice'; 
 
 const UserList = () => {
   const dispatch = useDispatch();
@@ -10,6 +10,10 @@ const UserList = () => {
   useEffect(() => {
     dispatch(fetchUsers());
   }, [dispatch]);
+   const handleDelete=(userId)=>{
+    console.log(userId);
+    dispatch(deleteUser(userId));
+   }
 
   if (loading) return <p>Chargement...</p>;
   if (error) return <p style={{ color: 'red' }}>{error}</p>;
@@ -22,6 +26,7 @@ const UserList = () => {
           users.map((user) => (
             <li key={user._id}>
               {user.fullname} ({user.email})
+              <button onClick={() => handleDelete(user._id)}>Supprimer</button>
             </li>
           ))
         ) : (

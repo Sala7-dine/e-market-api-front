@@ -8,7 +8,7 @@ const userService = {
    
   },
   deleteUser: async (id) => {
-    const res = await axios.delete(`/users/${id}`);
+    const res = await axios.delete(`/users/delete/${id}`);
     return res.data;
   },
 };

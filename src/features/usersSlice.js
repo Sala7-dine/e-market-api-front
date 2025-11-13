@@ -14,7 +14,15 @@ export const fetchUsers = createAsyncThunk(
     }
   }
 );
-
+export const deleteUser = createAsyncThunk("users/delete", async (id) => {
+  try{
+const response= await userService.deleteUser(id);
+return response;
+  }
+  catch(error){
+         return thunkAPI.rejectWithValue(err.response?.data?.message || err.message); 
+  }
+});
 // 🔹 Slice
 const usersSlice = createSlice({
   name: 'users',
