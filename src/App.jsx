@@ -7,6 +7,7 @@ import Login  from "./pages/auth/Login.jsx";
 import Home  from "./pages/Home.jsx";
 import ProductDetail from "./pages/ProductDetail.jsx";
 import { AuthProvider } from "./contexts/AuthContext";
+import UserList from './pages/admin/UserList.jsx';
 
 function App() {
 
@@ -21,6 +22,7 @@ function App() {
                     <Route path="/login" element={<Login />} />
                     <Route path="/Register" element={<Register />} />
                     <Route path="/product/:id" element={<ProductDetail />} />
+                     <Route path="/users" element={<UserList />} />
                 </Routes>
             </AuthProvider>
         </BrowserRouter>
