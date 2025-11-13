@@ -1,32 +1,46 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { createProduct } from "../../features/productSlice";
+import {
+  createProduct,
+  fetchProducts,
+  selectProducts,
+  selectProductsError,
+  selectProductsLoading,
+} from "../../features/productSlice";
+import ProductSkeletonLoader from "../../components/Products/ProductCardLoader.jsx.jsx";
+import AddProductModal from "../../components/Products/AddProductModal.jsx";
+import EditProductModal from "../../components/Products/EditProductModal.jsx";
+import ViewProductModal from "../../components/Products/ViewProductModal.jsx";
+
 const SellerDashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const dispatch = useDispatch();
-  
-  const {products, loading, error}  = useSelector((state) => state.salah);
+  const [isAddOpen, setIsAddOpen] = useState(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isViewOpen, setIsViewOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
 
-  const handleCreateProduct = () => {
-     const newProduct = {
-      title: "product lalalalal",
-      description: "product description",
-      prix: 100,
-      stock: 23,
-      categories: ["69033fa338ce7562a73261dc"]
-      // images: 
-    };
-    dispatch(createProduct(newProduct));
-  }
+  const dispatch = useDispatch();
+
+  const products = useSelector(selectProducts);
+  const loading = useSelector(selectProductsLoading);
+  const error = useSelector(selectProductsError);
+
+  // Make productList safe: accept array or object shapes (data / list)
+  const productList = Array.isArray(products)
+    ? products
+    : products?.data ?? products?.list ?? [];
+
+  useEffect(() => {
+    dispatch(fetchProducts());
+  }, [dispatch]);
 
   const [stats] = useState({
-    totalRevenue: 24580.50,
+    totalRevenue: 24580.5,
     orders: 342,
     products: 68,
-    visitors: 12543
+    visitors: 12543,
   });
-
 
   const [recentOrders] = useState([
     { id: "ORD-2501", customer: "Sarah Johnson", product: "Premium Cotton T-Shirt", amount: 29.99, status: "pending", date: "Nov 12, 2025" },
@@ -35,23 +49,13 @@ const SellerDashboard = () => {
     { id: "ORD-2504", customer: "James Wilson", product: "Cotton T-Shirt", amount: 29.99, status: "delivered", date: "Nov 10, 2025" },
   ]);
 
-
-  // console.log(error);
-  
-  // const [products] = useState([
-  //   { id: 1, name: "Premium Cotton T-Shirt", price: 29.99, stock: 150, sold: 234, image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400" },
-  //   { id: 2, name: "Designer Jeans", price: 79.99, stock: 45, sold: 189, image: "https://images.unsplash.com/photo-1542272604-787c3835535d?w=400" },
-  //   { id: 3, name: "Leather Jacket", price: 199.99, stock: 8, sold: 67, image: "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=400" },
-  //   { id: 4, name: "Summer Dress", price: 59.99, stock: 92, sold: 156, image: "https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=400" },
-  // ]);
-
   const getStatusColor = (status) => {
     const colors = {
       pending: "bg-yellow-100 text-yellow-800",
       processing: "bg-blue-100 text-blue-800",
       shipped: "bg-purple-100 text-purple-800",
       delivered: "bg-green-100 text-green-800",
-      cancelled: "bg-red-100 text-red-800"
+      cancelled: "bg-red-100 text-red-800",
     };
     return colors[status] || "bg-gray-100 text-gray-800";
   };
@@ -62,6 +66,8 @@ const SellerDashboard = () => {
     { id: "orders", label: "Orders", icon: "M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" },
     { id: "analytics", label: "Analytics", icon: "M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" },
   ];
+
+  if (error) return <div className="text-red-600">Error: {String(error)}</div>;
 
   return (
     <div className="flex h-screen bg-gray-50">
@@ -269,7 +275,7 @@ const SellerDashboard = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                   </svg>
                 </div>
-                <button onClick={handleCreateProduct} className="ml-4 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2">
+                <button onClick={() => { setSelectedProduct(null); setIsAddOpen(true); }} className="ml-4 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2">
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                   </svg>
@@ -277,42 +283,48 @@ const SellerDashboard = () => {
                 </button>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {products.map((product) => (
-                  <div key={product.id} className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow">
-                    <div className="aspect-square bg-gray-100 overflow-hidden">
-                      <img src={product.image} alt={product.name} className="w-full h-full object-cover hover:scale-110 transition-transform duration-500" />
-                    </div>
-                    <div className="p-4">
-                      <h3 className="font-semibold text-gray-900 mb-2 truncate">{product.name}</h3>
-                      <div className="space-y-2 mb-4">
-                        <div className="flex justify-between text-sm">
-                          <span className="text-gray-600">Price:</span>
-                          <span className="font-semibold text-gray-900">${product.price}</span>
+              {loading ? (
+                <ProductSkeletonLoader />
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {productList.map((product) => (
+                    <div key={product._id ?? product.id} className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow">
+                      <div className="aspect-square bg-gray-100 overflow-hidden">
+                        <img src={product.images ?? product.image} alt={product.title ?? product.name} className="w-full h-full object-cover hover:scale-110 transition-transform duration-500" />
+                      </div>
+                      <div className="p-4">
+                        <h3 className="font-semibold text-gray-900 mb-2 truncate">{product.title ?? product.name}</h3>
+                        <div className="space-y-2 mb-4">
+                          <div className="flex justify-between text-sm">
+                            <span className="text-gray-600">Price:</span>
+                            <span className="font-semibold text-gray-900">${product.prix ?? product.price}</span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span className="text-gray-600">Stock:</span>
+                            <span className={`font-semibold ${ (product.stock ?? 0) < 20 ? 'text-red-600' : 'text-gray-900'}`}>
+                              {product.stock ?? product.qty ?? 0} units
+                            </span>
+                          </div>
                         </div>
-                        <div className="flex justify-between text-sm">
-                          <span className="text-gray-600">Stock:</span>
-                          <span className={`font-semibold ${product.stock < 20 ? 'text-red-600' : 'text-gray-900'}`}>
-                            {product.stock} units
-                          </span>
-                        </div>
-                        <div className="flex justify-between text-sm">
-                          <span className="text-gray-600">Sold:</span>
-                          <span className="font-semibold text-green-600">{product.sold}</span>
+                        <div className="flex space-x-2">
+                          <button
+                            onClick={() => { setSelectedProduct(product); setIsEditOpen(true); }}
+                            className="flex-1 bg-gray-100 text-gray-700 py-2 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => { setSelectedProduct(product); setIsViewOpen(true); }}
+                            className="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                          >
+                            View
+                          </button>
                         </div>
                       </div>
-                      <div className="flex space-x-2">
-                        <button className="flex-1 bg-gray-100 text-gray-700 py-2 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium">
-                          Edit
-                        </button>
-                        <button className="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium">
-                          View
-                        </button>
-                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
@@ -387,18 +399,18 @@ const SellerDashboard = () => {
                 <div className="bg-white rounded-xl border border-gray-200 p-6">
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">Best Sellers</h3>
                   <div className="space-y-4">
-                    {products.slice(0, 3).map((product, index) => (
-                      <div key={product.id} className="flex items-center justify-between pb-4 border-b border-gray-100 last:border-0">
+                    {productList.slice(0, 3).map((product, index) => (
+                      <div key={product._id ?? product.id} className="flex items-center justify-between pb-4 border-b border-gray-100 last:border-0">
                         <div className="flex items-center space-x-3">
                           <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
-                            <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+                            <img src={product.images ?? product.image} alt={product.title ?? product.name} className="w-full h-full object-cover" />
                           </div>
                           <div>
-                            <p className="font-medium text-gray-900">{product.name}</p>
-                            <p className="text-sm text-gray-600">{product.sold} sold</p>
+                            <p className="font-medium text-gray-900">{product.title ?? product.name}</p>
+                            <p className="text-sm text-gray-600">{product.sold ?? 0} sold</p>
                           </div>
                         </div>
-                        <span className="font-semibold text-gray-900">${(product.price * product.sold).toLocaleString()}</span>
+                        <span className="font-semibold text-gray-900">${((product.prix ?? product.price ?? 0) * (product.sold ?? 0)).toLocaleString()}</span>
                       </div>
                     ))}
                   </div>
@@ -408,6 +420,11 @@ const SellerDashboard = () => {
           )}
         </main>
       </div>
+
+      {/* Modals */}
+      <AddProductModal isOpen={isAddOpen} onClose={() => setIsAddOpen(false)} selectedProduct={selectedProduct} />
+      <EditProductModal isOpen={isEditOpen} onClose={() => { setIsEditOpen(false); setSelectedProduct(null); }} product={selectedProduct} />
+      <ViewProductModal isOpen={isViewOpen} onClose={() => { setIsViewOpen(false); setSelectedProduct(null); }} product={selectedProduct} />
     </div>
   );
 };
