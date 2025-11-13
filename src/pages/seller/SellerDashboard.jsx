@@ -1,13 +1,24 @@
 import { useState } from "react";
-import { useDispatch } from "react-redux";
-
+import { useDispatch, useSelector } from "react-redux";
+import { createProduct } from "../../features/productSlice";
 const SellerDashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  // const products = useSelector(selectAllProducts);
-    // console.log(productts);
-    const dispatch = useDispatch();
+  const dispatch = useDispatch();
+  
+  const {products, loading, error}  = useSelector((state) => state.salah);
 
+  const handleCreateProduct = () => {
+     const newProduct = {
+      title: "product lalalalal",
+      description: "product description",
+      prix: 100,
+      stock: 23,
+      categories: ["69033fa338ce7562a73261dc"]
+      // images: 
+    };
+    dispatch(createProduct(newProduct));
+  }
 
   const [stats] = useState({
     totalRevenue: 24580.50,
@@ -16,6 +27,7 @@ const SellerDashboard = () => {
     visitors: 12543
   });
 
+
   const [recentOrders] = useState([
     { id: "ORD-2501", customer: "Sarah Johnson", product: "Premium Cotton T-Shirt", amount: 29.99, status: "pending", date: "Nov 12, 2025" },
     { id: "ORD-2502", customer: "Michael Chen", product: "Designer Jeans", amount: 79.99, status: "processing", date: "Nov 12, 2025" },
@@ -23,6 +35,9 @@ const SellerDashboard = () => {
     { id: "ORD-2504", customer: "James Wilson", product: "Cotton T-Shirt", amount: 29.99, status: "delivered", date: "Nov 10, 2025" },
   ]);
 
+
+  // console.log(error);
+  
   // const [products] = useState([
   //   { id: 1, name: "Premium Cotton T-Shirt", price: 29.99, stock: 150, sold: 234, image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400" },
   //   { id: 2, name: "Designer Jeans", price: 79.99, stock: 45, sold: 189, image: "https://images.unsplash.com/photo-1542272604-787c3835535d?w=400" },
@@ -254,7 +269,7 @@ const SellerDashboard = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                   </svg>
                 </div>
-                <button className="ml-4 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2">
+                <button onClick={handleCreateProduct} className="ml-4 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2">
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                   </svg>
