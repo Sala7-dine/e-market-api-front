@@ -1,0 +1,180 @@
+.user-list{
+    display:flex;
+    justify-content: center;
+    align-items: right;
+    flex-direction: column;
+    gap:1rem;
+}
+
+.user-list h2{ 
+   
+
+
+
+font-family: 'Playfair Display';
+font-style: normal;
+font-weight: 500;
+font-size: 24px;
+line-height: 36px;
+
+display: flex;
+align-items: center;
+
+color: #2C2825;
+
+
+
+}
+.user-list p{
+  
+
+font-family: 'Inter';
+font-style: normal;
+font-weight: 400;
+font-size: 20px;
+
+
+display: flex;
+align-items: center;
+
+color: #6B6560;
+
+
+}
+.stat-user{
+    display:flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap:2rem;
+}
+.stat-item{
+  background-color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width:25%;
+  gap:2rem;
+
+    padding:1.5rem;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+}
+.stat-item h3{
+    color:#6B6560;
+    /* Utilisateurs Actifs */
+
+
+font-family: 'Inter';
+font-style: normal;
+font-weight: 400;
+font-size: 1.2rem;
+
+
+display: flex;
+align-items: center;
+
+color: #6B6560;
+
+
+
+}
+.stat-item p{
+    /* Heading 2 → 6 */
+
+
+
+font-family: 'Playfair Display';
+font-style: normal;
+font-weight: 500;
+font-size: 1rem;
+
+display: flex;
+align-items: center;
+
+color: #2C2825;
+
+
+}
+
+
+
+
+/* Styles pour le tableau */
+.users-table-container {
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  overflow: hidden;
+}
+
+.users-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.users-table th,
+.users-table td {
+  padding: 15px;
+  text-align: left;
+  border-bottom: 1px solid #ecf0f1;
+}
+
+.users-table th {
+  background-color:white;
+  color: white;
+  font-weight: 600;
+  
+
+font-style: normal;
+font-weight: 500;
+font-size: 14px;
+line-height: 20px;
+/* or 143% */
+
+
+color: #2C2825;
+
+
+
+}
+
+.users-table tbody tr:hover {
+  background-color: #F5F1EB;
+}
+
+/* Styles pour le statut */
+.status {
+  padding: 5px 10px;
+  border-radius: 15px;
+  font-size: 12px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.status.active {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.status.blocked {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+
+
+/* Responsive */
+@media (max-width: 768px) {
+  .users-table-container {
+    overflow-x: auto;
+  }
+  
+  .users-table {
+    min-width: 600px;
+  }
+  
+  .stat-user {
+    grid-template-columns: 1fr;
+  }
+}

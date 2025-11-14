@@ -1,0 +1,66 @@
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 25px;
+ background-color: white;
+
+  box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.1), 0px 1px 2px -1px rgba(0, 0, 0, 0.1);
+}
+
+.search-input {
+  flex: 1;
+  max-width: 500px;
+  padding: 10px 12px;
+border-radius: 1.25rem;
+background: #FFFFFF;
+text-align: start;
+  border: 1px solid #ccc;
+ 
+font-style: normal;
+font-weight: 400;
+font-size: 16px;
+line-height: 19px;
+ 
+display: flex;
+align-items: center;
+
+color: rgba(44, 40, 37, 0.5);
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.notification {
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+}
+
+.user-name {
+    
+  font-weight: 500;
+}
+.role-name{
+    display:flex;
+    flex-direction: column;
+}
+
+.user-role {
+  font-size: 12px;
+  color: #888;
+}
