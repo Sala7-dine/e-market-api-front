@@ -8,6 +8,7 @@ import Home  from "./pages/Home.jsx";
 import ProductDetail from "./pages/ProductDetail.jsx";
 import { AuthProvider } from "./contexts/AuthContext";
 import SellerDashboard from './pages/seller/SellerDashboard.jsx';
+import Profile from './pages/Profile.jsx';
 
 function App() {
 
@@ -23,6 +24,7 @@ function App() {
                     <Route path="/Register" element={<Register />} />
                     <Route path="/product/:id" element={<ProductDetail />} />
                     <Route path="/seller/dashboard" element={<SellerDashboard />} />
+                    <Route path="/profile" element={<Profile />} />
                 </Routes>
             </AuthProvider>
         </BrowserRouter>
