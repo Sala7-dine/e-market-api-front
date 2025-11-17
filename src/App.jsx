@@ -12,6 +12,7 @@ import SellerDashboard from './pages/seller/SellerDashboard.jsx';
 import AdminLayout from './pages/admin/AdminLayout.jsx';
 import Categories from './pages/admin/Categories.jsx';
 
+import Profile from './pages/Profile.jsx';
 
 function App() {
 
@@ -28,6 +29,7 @@ function App() {
                         <Route path="/product/:id" element={<ProductDetail />} />
                         <Route path="/users" element={<UserList />} />
                         <Route path="/seller/dashboard" element={<SellerDashboard />} />
+                         <Route path="/profile" element={<Profile />} />
                         <Route path="/admin" element={<AdminLayout />}>
                             <Route path="users" element={<UserList />} />
                                <Route path="categories" element={<Categories />} />
