@@ -1,10 +1,14 @@
 import  '../../assets/styles/admin/header.css'
 import boy from '../../assets/images/boy.jpg';
+import { useAuth } from '../../contexts/AuthContext';
 
 
 
  const  AdminHeader = () => {
-    
+    const {user,token}=useAuth();
+    console.log("token in header",token)
+    console.log("user ino header",user)
+
     
     return ( 
         <>
@@ -23,8 +27,9 @@ import boy from '../../assets/images/boy.jpg';
             className="user-avatar"
           />
           <div  className='role-name'>
-          <span className="user-name">Sarah Anderson</span>
-          <span className="user-role">Administrateur</span></div>
+          <span className="user-name">{user?.fullName} </span>
+          <span className="user-role">{user?.role}</span>
+          </div>
         </div>
       </div>
     </header>

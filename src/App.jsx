@@ -10,6 +10,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import UserList from './pages/admin/UserList.jsx';
 import SellerDashboard from './pages/seller/SellerDashboard.jsx';
 import AdminLayout from './pages/admin/AdminLayout.jsx';
+import Categories from './pages/admin/Categories.jsx';
 
 
 function App() {
@@ -29,8 +30,8 @@ function App() {
                         <Route path="/seller/dashboard" element={<SellerDashboard />} />
                         <Route path="/admin" element={<AdminLayout />}>
                             <Route path="users" element={<UserList />} />
-                            {/* <Route path="products" element={<ProductList />} />
-                            <Route path="reviews" element={<ReviewList />} /> */}
+                               <Route path="categories" element={<Categories />} />
+                           
                         </Route>
                     </Routes>
                 </AuthProvider>

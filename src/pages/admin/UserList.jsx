@@ -43,7 +43,7 @@ const UserList = () => {
 
         </div>
         <div className="users-table-container">
-          <table className="users-table">
+          <table className="categories-table">
             <thead>
               <tr>
                 <th>ID</th>
