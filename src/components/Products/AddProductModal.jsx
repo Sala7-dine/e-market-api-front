@@ -1,8 +1,63 @@
-const AddProductModal = ({ isOpen, onClose }) => {
+import { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { createProduct, selectProductsLoading, selectProductsError, fetchProducts } from "../../features/productSlice";
+
+const AddProductModal = ({ isOpen, onClose, categories = [] }) => {
+  const dispatch = useDispatch();
+  const loading = useSelector(selectProductsLoading);
+  const error = useSelector(selectProductsError);
+
+  const [formData, setFormData] = useState({
+    title: "",
+    description: "",
+    prix: "",
+    stock: "",
+    categories: [],
+  });
+  const [images, setImages] = useState([]);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    if (name === 'categories') {
+      const selectedOptions = Array.from(e.target.selectedOptions, option => option.value);
+      setFormData({ ...formData, [name]: selectedOptions });
+    } else {
+      setFormData({ ...formData, [name]: value });
+    }
+  };
+
+  const handleImageChange = (e) => {
+    const files = Array.from(e.target.files);
+    setImages(prevImages => [...prevImages, ...files]);
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const formDataToSend = new FormData();
+    formDataToSend.append('title', formData.title);
+    formDataToSend.append('description', formData.description);
+    formDataToSend.append('prix', formData.prix);
+    formDataToSend.append('stock', formData.stock);
+    formData.categories.forEach((categoryId) => {
+      formDataToSend.append('categories[]', categoryId);
+    });
+    images.forEach((image) => {
+      formDataToSend.append('images', image);
+    });
+    dispatch(createProduct(formDataToSend)).then((result) => {
+      if (result.meta.requestStatus === 'fulfilled') {
+        dispatch(fetchProducts());
+        onClose();
+        setFormData({ title: "", description: "", prix: "", stock: "", categories: [] });
+        setImages([]);
+      }
+    });
+  };
+
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
       <div className="bg-white rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto m-4">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
@@ -18,7 +73,13 @@ const AddProductModal = ({ isOpen, onClose }) => {
         </div>
 
         {/* Content */}
-        <div className="p-6 space-y-6">
+        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+          {error && (
+            <div className="text-red-600 text-sm">
+              {typeof error === 'object' ? JSON.stringify(error, null, 2) : error}
+            </div>
+          )}
+
           {/* Title */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -27,6 +88,9 @@ const AddProductModal = ({ isOpen, onClose }) => {
             <input
               type="text"
               name="title"
+              value={formData.title}
+              onChange={handleChange}
+              required
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="Enter product title"
             />
@@ -40,6 +104,9 @@ const AddProductModal = ({ isOpen, onClose }) => {
             <textarea
               name="description"
               rows={4}
+              value={formData.description}
+              onChange={handleChange}
+              required
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="Enter product description"
             />
@@ -53,9 +120,12 @@ const AddProductModal = ({ isOpen, onClose }) => {
               </label>
               <input
                 type="number"
-                name="price"
+                name="prix"
                 min="0"
                 step="0.01"
+                value={formData.prix}
+                onChange={handleChange}
+                required
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="0.00"
               />
@@ -68,6 +138,9 @@ const AddProductModal = ({ isOpen, onClose }) => {
                 type="number"
                 name="stock"
                 min="0"
+                value={formData.stock}
+                onChange={handleChange}
+                required
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="0"
               />
@@ -79,12 +152,20 @@ const AddProductModal = ({ isOpen, onClose }) => {
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Category *
             </label>
-            <input
-              type="text"
-              name="category"
+            <select
+              name="categories"
+              multiple
+              value={formData.categories}
+              onChange={handleChange}
+              required
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="e.g., Électronique"
-            />
+            >
+              {categories.map((category) => (
+                <option key={category._id} value={category._id}>
+                  {category.name}
+                </option>
+              ))}
+            </select>
           </div>
 
           {/* Images Upload */}
@@ -93,13 +174,15 @@ const AddProductModal = ({ isOpen, onClose }) => {
               Product Images
             </label>
             <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-500 transition-colors cursor-pointer">
-              <input
-                type="file"
-                multiple
-                accept="image/*"
-                className="hidden"
-                id="image-upload"
-              />
+            <input
+              type="file"
+              multiple
+              accept="image/*"
+              onChange={handleImageChange}
+              className="hidden"
+              id="image-upload"
+              name="images"
+            />
               <label htmlFor="image-upload" className="cursor-pointer">
                 <svg className="w-12 h-12 text-gray-400 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -109,41 +192,49 @@ const AddProductModal = ({ isOpen, onClose }) => {
               </label>
             </div>
 
-            {/* Image Previews Placeholder */}
-            <div className="grid grid-cols-4 gap-4 mt-4">
-              {/* Example preview - you'll handle the actual previews */}
-              <div className="relative group">
-                <div className="w-full h-24 bg-gray-100 rounded-lg flex items-center justify-center">
-                  <span className="text-xs text-gray-400">Preview</span>
-                </div>
-                <button
-                  type="button"
-                  className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
+            {/* Image Previews */}
+            {images.length > 0 && (
+              <div className="grid grid-cols-4 gap-4 mt-4">
+                {images.map((file, index) => (
+                  <div key={index} className="relative group">
+                    <img
+                      src={URL.createObjectURL(file)}
+                      alt={`Preview ${index + 1}`}
+                      className="w-full h-24 object-cover rounded-lg"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setImages(images.filter((_, i) => i !== index))}
+                      className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                ))}
               </div>
-            </div>
+            )}
           </div>
 
           {/* Action Buttons */}
           <div className="flex space-x-3 pt-4">
             <button
+              type="button"
               onClick={onClose}
               className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
             >
               Cancel
             </button>
             <button
-              type="button"
-              className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+              type="submit"
+              disabled={loading}
+              className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50"
             >
-              Add Product
+              {loading ? "Adding..." : "Add Product"}
             </button>
           </div>
-        </div>
+        </form>
       </div>
     </div>
   );
