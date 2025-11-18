@@ -6,9 +6,11 @@ import Footer from "../components/Footer.jsx";
 import banner1 from '../assets/images/banner-1.png';
 import banner2 from '../assets/images/banner-2.png';
 import banner3 from '../assets/images/banner-3.png';
+import { useDispatch } from "react-redux";
+import {addToCart} from "../features/cartSlice.js";
 
 const Home = () => {
-
+    const dispatch = useDispatch();
     const [products, setProducts] = useState([]);
     const [currentSlide, setCurrentSlide] = useState(0);
 
@@ -101,6 +103,12 @@ const Home = () => {
 
     const goToSlide = (index) => {
         setCurrentSlide(index);
+    };
+
+    const handleAddToCart = (product) => {
+        console.log("clicked");
+        console.log("produit", product);
+        dispatch(addToCart({productId: product._id, quantity: 1}));
     };
 
     return (
@@ -214,7 +222,8 @@ const Home = () => {
                                                             data-original="#000000"></path>
                                                     </svg>
                                                 </button>
-                                                <button type="button" title="Add to cart"
+                                                <button onClick={()=> handleAddToCart(product) }
+                                                type="button" title="Add to cart"
                                                         className="bg-transparent outline-0 border-0 cursor-pointer">
                                                     <svg xmlns="http://www.w3.org/2000/svg"
                                                          className="fill-slate-800 w-5 h-5 inline-block"

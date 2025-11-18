@@ -1,12 +1,15 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Menu, X, ShoppingBag, User } from "lucide-react";
+import { Menu, X, ShoppingBag, User, ShoppingCart } from "lucide-react";
 import Cookie from "js-cookie";
-import { jwtDecode } from "jwt-decode";
-import axios from "../config/axios";
+// import { jwtDecode } from "jwt-decode";
+// import axios from "../config/axios";
 import { useAuth } from "../contexts/AuthContext";
+import { selectCartCount } from "../features/cartSlice.js";
+import { useSelector } from "react-redux";
 
 const Header = () => {
+  const cartCount = useSelector(selectCartCount);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
@@ -98,6 +101,14 @@ const Header = () => {
                 <span className="relative z-10 group-hover:text-white transition-colors duration-300">
                   Deconnexion
                 </span>
+              </Link>
+              <Link to="/cart" className="relative">
+                <ShoppingCart className="w-10 h-10 text-black hover:text-gray-700 transition" />
+                {cartCount > 0 && (
+                  <span className="absolute -top-1 -right-2 bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5">
+                    {cartCount}
+                  </span>
+                )}
               </Link>
             </div>
           ) : (

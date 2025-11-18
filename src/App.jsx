@@ -13,6 +13,7 @@ import AdminLayout from './pages/admin/AdminLayout.jsx';
 import Categories from './pages/admin/Categories.jsx';
 
 import Profile from './pages/Profile.jsx';
+import Cart from "./pages/Cart.jsx";
 
 function App() {
 
@@ -30,6 +31,7 @@ function App() {
                         <Route path="/users" element={<UserList />} />
                         <Route path="/seller/dashboard" element={<SellerDashboard />} />
                          <Route path="/profile" element={<Profile />} />
+                         <Route path="/cart" element={<Cart />} />
                         <Route path="/admin" element={<AdminLayout />}>
                             <Route path="users" element={<UserList />} />
                                <Route path="categories" element={<Categories />} />

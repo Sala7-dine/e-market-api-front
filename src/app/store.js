@@ -4,11 +4,13 @@ import categoryReducer from '../features/categorySlice'
 
 
 import productReducer from "../features/productSlice"
+import cartReducer from "../features/cartSlice"
  const store = configureStore({
     reducer: {
         salah: productReducer,
         users:userReducer,
-        categories:categoryReducer
+        categories:categoryReducer,
+        cart: cartReducer,
     }
 });
 
