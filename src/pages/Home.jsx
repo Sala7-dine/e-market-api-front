@@ -56,6 +56,8 @@ const Home = () => {
 
         const fetchProducts = async () => {
             const response = await axios.get('/products');
+            console.log("hello");
+            console.log(response);
             if (response) return response;
         }
 
