@@ -1,0 +1,178 @@
+import { useEffect } from 'react';
+import { addToCart, getCart, removeFromCart, updateProductQuantity} from '../features/cartSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { Trash2, ShoppingBag } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+
+export default function Cart() {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  //on recupere le panier et l'état depuis le store
+  const {cart} = useSelector((state) => state.cart);
+  const loading = useSelector((state) => state.loading);
+  const cartItems = cart || [];
+
+  useEffect(()=>{
+    dispatch(getCart());
+  }, [dispatch]);
+
+  // console.log("cart:", cart);
+  // Calcul du total
+
+  const subtotal = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+  const taxRate = 0.08; // 8% de taxe
+  const estimatedTax = subtotal * taxRate;
+  const total = subtotal + estimatedTax;
+
+  //mette à jours la quantité
+  const updateQuantity = (productId, quantity) => {
+    console.log("inside updateQuantity");
+    if (quantity < 1) return;
+     dispatch(updateProductQuantity({ productId, quantity}))
+      .then(() => dispatch(getCart())); // rafraîchir le panier
+  };
+
+  // Supprimer un article
+  const removeItem = (productId) => {
+    console.log("id",productId);
+    dispatch(removeFromCart({productId}));
+  };
+
+  return (
+    <div className="min-h-screen bg-[#F5F0EC] py-8 px-4">
+      <div className="max-w-7xl mx-auto">
+        {/* En-tête */}
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-serif text-gray-800 mb-2">
+            Your Shopping Cart
+          </h1>
+          <p className="text-gray-500">
+            Review your items before checkout
+          </p>
+        </div>
+
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Liste des articles */}
+          <div className="flex-1 space-y-4">
+            {loading ? (
+               <p className="text-center text-gray-500">Loading cart...</p>
+            ) : cartItems.length === 0 ? (
+              <div className="bg-white rounded-2xl shadow-sm p-12 text-center">
+                <ShoppingBag className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                <p className="text-gray-500 text-lg">Your cart is empty</p>
+              </div>
+            ) : (
+              cartItems.map((item) => (
+                <div
+                  key={item.productId}
+                  className="bg-white rounded-2xl shadow-sm p-6 flex items-center gap-6"
+                >
+                  {/* Image du produit */}
+                  <img
+                    src={item.image}
+                    alt={item.title}
+                    className="w-28 h-28 rounded-xl object-cover"
+                  />
+
+                  {/* Informations du produit */}
+                  <div className="flex-1">
+                    <h3 className="text-lg font-serif text-gray-800 mb-1">
+                      {item.title}
+                    </h3>
+                    <p className="text-sm text-gray-500 mb-3">
+                      {item.categories}
+                    </p>
+                    <p className="text-xl font-medium text-gray-800">
+                      ${item.price.toFixed(2)}
+                    </p>
+                  </div>
+
+                  {/* Contrôles de quantité */}
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-gray-600 mr-2">
+                        Quantity:
+                      </span>
+                      <button
+                        onClick={() => updateQuantity(item.productId, item.quantity - 1)}
+                        className="w-8 h-8 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
+                        aria-label="Decrease quantity"
+                      >
+                        −
+                      </button>
+                      <span className="w-12 text-center font-medium text-gray-800">
+                        {item.quantity}
+                      </span>
+                      <button
+                        onClick={() => updateQuantity(item.productId, item.quantity + 1)}
+                        className="w-8 h-8 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
+                        aria-label="Increase quantity"
+                      >
+                        +
+                      </button>
+                    </div>
+
+                    {/* Bouton supprimer */}
+                    <button
+                      onClick={() => removeItem(item.productId)}
+                      className="p-2 text-gray-400 hover:text-red-500 transition-colors"
+                      aria-label="Remove item"
+                    >
+                      <Trash2 className="w-5 h-5" />
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+
+          {/* Résumé de commande */}
+          <div className="lg:w-96">
+            <div className="bg-white rounded-2xl shadow-sm p-8 sticky top-8">
+              <h2 className="text-2xl font-serif text-gray-800 mb-6">
+                Order Summary
+              </h2>
+
+              {/* Détails des prix */}
+              <div className="space-y-4 mb-6">
+                <div className="flex justify-between text-gray-600">
+                  <span>Subtotal</span>
+                  <span>${subtotal.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between text-gray-600">
+                  <span>Estimated Tax</span>
+                  <span>${estimatedTax.toFixed(2)}</span>
+                </div>
+                <div className="h-px bg-gray-200"></div>
+                <div className="flex justify-between text-xl font-semibold text-gray-800">
+                  <span>Total</span>
+                  <span>${total.toFixed(2)}</span>
+                </div>
+              </div>
+
+              {/* Bouton de paiement */}
+              <button
+                disabled={cartItems.length === 0}
+                className="w-full bg-[#8A6B58] text-white py-4 rounded-full font-medium hover:bg-[#725744] transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-2 mb-4"
+              >
+                <ShoppingBag className="w-5 h-5" />
+                Proceed to Checkout
+              </button>
+
+              {/* Bouton continuer les achats */}
+              <button onClick={()=>navigate("/")} className="w-full border border-gray-300 text-gray-700 py-4 rounded-full font-medium hover:bg-gray-50 transition-colors">
+                Continue Shopping
+              </button>
+
+              {/* Message de livraison gratuite */}
+              <p className="text-center text-sm text-gray-500 mt-6">
+                Free shipping on orders over $200
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
