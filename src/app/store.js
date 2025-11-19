@@ -7,7 +7,7 @@ import productReducer from "../features/productSlice"
 import cartReducer from "../features/cartSlice"
  const store = configureStore({
     reducer: {
-        salah: productReducer,
+        products: productReducer,
         users:userReducer,
         categories:categoryReducer,
         cart: cartReducer,
