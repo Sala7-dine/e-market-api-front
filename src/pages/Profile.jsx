@@ -76,9 +76,7 @@ export default function Profile() {
         formData.append("currentPassword", currentPassword);
       }
 
-      const res = await axios.patch("users/me", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      const res = await axios.patch("/users/me", formData);
 
       setMessage("Profile updated successfully!");
       setUser(res.data);
