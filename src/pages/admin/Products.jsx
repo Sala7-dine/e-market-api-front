@@ -12,7 +12,9 @@ const Products = () => {
       price: 1299.99,
       images: [
         "https://images.unsplash.com/photo-1592899677977-9c10ca588bbd?w=150&h=150&fit=crop",
-        "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=150&h=150&fit=crop"
+        "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=150&h=150&fit=crop",
+         "https://images.unsplash.com/photo-1541807084-5c52b6b3adef?w=150&h=150&fit=crop",
+          "https://images.unsplash.com/photo-1541807084-5c52b6b3adef?w=150&h=150&fit=crop"
       ]
     },
     {
@@ -22,7 +24,8 @@ const Products = () => {
       stock: 12,
       price: 1499.99,
       images: [
-        "https://images.unsplash.com/photo-1541807084-5c52b6b3adef?w=150&h=150&fit=crop"
+        "https://images.unsplash.com/photo-1541807084-5c52b6b3adef?w=150&h=150&fit=crop",
+         "https://images.unsplash.com/photo-1541807084-5c52b6b3adef?w=150&h=150&fit=crop"
       ]
     },
      {
@@ -155,7 +158,7 @@ const Products = () => {
                     className="btn-view"
                     onClick={() => handleViewImages(product)}
                   >
-                    <FaEye />
+                    <FaEye  size={16} color="#A0522D" />
                   </button>
                 </td>
                 <td>
