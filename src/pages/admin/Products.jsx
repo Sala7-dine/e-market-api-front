@@ -1,57 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { FaEye, FaEdit, FaTrash, FaPlus } from "react-icons/fa";
 import "../../assets/styles/admin/Products.css";
-import { fetchAllProducts } from "../../features/productSlice";
+import { fetchAllProducts ,deleteproduct} from "../../features/productSlice";
 import { useDispatch, useSelector } from "react-redux";
 
 const Products = () => {
-
-  //   {
-  //     id: 1,
-  //     title: "iPhone 14 Pro",
-  //     description: "Smartphone Apple avec écran Dynamic Island",
-  //     stock: 25,
-  //     price: 1299.99,
-  //     images: [
-  //       "https://images.unsplash.com/photo-1592899677977-9c10ca588bbd?w=150&h=150&fit=crop",
-  //       "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=150&h=150&fit=crop",
-  //        "https://images.unsplash.com/photo-1541807084-5c52b6b3adef?w=150&h=150&fit=crop",
-  //         "https://images.unsplash.com/photo-1541807084-5c52b6b3adef?w=150&h=150&fit=crop"
-  //     ]
-  //   },
-  //   {
-  //     id: 2,
-  //     title: "MacBook Air M2",
-  //     description: "Ordinateur portable ultra-fin avec puce M2",
-  //     stock: 12,
-  //     price: 1499.99,
-  //     images: [
-  //       "https://images.unsplash.com/photo-1541807084-5c52b6b3adef?w=150&h=150&fit=crop",
-  //        "https://images.unsplash.com/photo-1541807084-5c52b6b3adef?w=150&h=150&fit=crop"
-  //     ]
-  //   },
-  //    {
-  //     id: 1,
-  //     title: "iPhone 14 Pro",
-  //     description: "Smartphone Apple avec écran Dynamic Island",
-  //     stock: 25,
-  //     price: 1299.99,
-  //     images: [
-  //       "https://images.unsplash.com/photo-1592899677977-9c10ca588bbd?w=150&h=150&fit=crop",
-  //       "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=150&h=150&fit=crop"
-  //     ]
-  //   },
-  //   {
-  //     id: 2,
-  //     title: "MacBook Air M2",
-  //     description: "Ordinateur portable ultra-fin avec puce M2",
-  //     stock: 12,
-  //     price: 1499.99,
-  //     images: [
-  //       "https://images.unsplash.com/photo-1541807084-5c52b6b3adef?w=150&h=150&fit=crop"
-  //     ]
-  //   }
-  // ]);
   const dispatch = useDispatch();
   const { products, loading, error } = useSelector((state) => state.products);
   useEffect(() => {
@@ -63,20 +16,27 @@ const Products = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [productToDelete, setProductToDelete] = useState(null);
 
-  const handleDelete = (id) => {
-    // setProducts(products.filter((product) => product.id !== id));
-    // setShowDeleteModal(false);
-  };
+ 
 
   const confirmDelete = (product) => {
     setProductToDelete(product);
     setShowDeleteModal(true);
   };
 
-  const handleViewImages = (product) => {
-    setSelectedProduct(product);
-    setShowImageModal(true);
+   const handleDelete = async (id) => {
+    try {
+      console.log("deleting", id);
+      await dispatch(deleteproduct(id)); 
+      setShowDeleteModal(false);
+    } catch (err) {
+      console.error("Erreur lors de la suppression :", err);
+    }
   };
+  
+const handleViewImages = (product) => {
+  setSelectedProduct(product); 
+  setShowImageModal(true);     
+};
 
 
 
@@ -156,9 +116,7 @@ const Products = () => {
                   </button>
                 </td>
                 <td>
-                  <button className="btn-edit">
-                    <FaEdit size={16} color="#A0522D" />
-                  </button>
+                 
                   <button
                     className="btn-delete"
                     onClick={() => confirmDelete(product)}
@@ -188,7 +146,7 @@ const Products = () => {
             <div className="modal-images">
               {selectedProduct.images.length > 0 ? (
                 selectedProduct.images.map((img, index) => (
-                  <img src={`${import.meta.env.VITE_API_URL}${img}`} alt={selectedProduct.title} />
+                  <img src={`${img}`} alt={selectedProduct.title} />
 
                 ))
               ) : (
@@ -218,7 +176,7 @@ const Products = () => {
 
               <button
                 className="btn-confirm"
-                onClick={() => handleDelete(productToDelete.id)}
+                onClick={() => handleDelete(productToDelete._id)}
               >
                 Supprimer
               </button>

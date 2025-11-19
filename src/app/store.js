@@ -11,6 +11,7 @@ import cartReducer from "../features/cartSlice"
         users:userReducer,
         categories:categoryReducer,
         cart: cartReducer,
+
     }
 });
 
