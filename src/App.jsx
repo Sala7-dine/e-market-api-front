@@ -17,6 +17,7 @@ import Categories from './pages/admin/Categories.jsx';
 import Profile from './pages/Profile.jsx';
 import Products from './pages/admin/Products.jsx';
 import Cart from "./pages/Cart.jsx";
+import Reviews from './pages/admin/Reviews.jsx';
 
 
 function App() {
@@ -40,6 +41,7 @@ function App() {
                             <Route path="users" element={<UserList />} />
                                <Route path="categories" element={<Categories />} />
                                 <Route path="products" element={<Products />} />
+                                   <Route path="reviews" element={<Reviews />} />
                                
                     
                            
