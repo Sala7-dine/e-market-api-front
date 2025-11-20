@@ -200,7 +200,7 @@ const Home = () => {
                                 <Link to={`/product/${product._id}`} className="block">
                                     <div className="aspect-[3/4] bg-slate-100 w-full overflow-hidden">
                                         <img
-                                            src={product.images?.[0] || "https://readymadeui.com/images/fashion-img-1.webp"}
+                                            src={product.images?.[0]?.startsWith('http') ? product.images[0] : `https://res.cloudinary.com/dbrrmsoit/image/upload/${product.images?.[0]}` || "https://readymadeui.com/images/fashion-img-1.webp"}
                                             alt={product.title}
                                             className="w-full h-full object-cover object-top hover:scale-110 transition-all duration-700"/>
                                     </div>
