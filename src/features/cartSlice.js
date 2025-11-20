@@ -73,7 +73,15 @@ const cartSlice = createSlice({
       })
       .addCase(addToCart.fulfilled, (state, action) => {
         state.loading = false;
-        state.cart = action.payload;
+        // Ensure cart is always an array
+        if (Array.isArray(action.payload)) {
+          state.cart = action.payload;
+        } else if (action.payload?.items && Array.isArray(action.payload.items)) {
+          state.cart = action.payload.items;
+        } else {
+          // Refresh cart data after adding
+          state.cart = state.cart || [];
+        }
         state.error = false;
       })
       .addCase(addToCart.rejected, (state, action) => {
@@ -130,5 +138,10 @@ const cartSlice = createSlice({
 
 export default cartSlice.reducer;
 
-export const selectCartCount = (state) =>
-  state.cart.cart?.products?.reduce((sum, item) => sum + item.quantity, 0) || 0;
+export const selectCartCount = (state) => {
+  const cart = state.cart.cart;
+  if (Array.isArray(cart)) {
+    return cart.reduce((sum, item) => sum + item.quantity, 0);
+  }
+  return 0;
+};

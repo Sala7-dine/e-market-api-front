@@ -13,7 +13,7 @@ const Header = () => {
   const dispatch = useDispatch();
   const cartCount = useSelector(selectCartCount);
   const {cart} = useSelector((state) => state.cart);
-  const cartItems = cart || [];
+  const cartItems = Array.isArray(cart) ? cart : [];
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
