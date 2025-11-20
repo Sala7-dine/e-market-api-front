@@ -1,11 +1,49 @@
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { createProduct, selectProductsLoading, selectProductsError, fetchProducts } from "../../features/productSlice";
+import {
+  createProduct,
+  selectProductsLoading,
+  selectProductsError,
+  fetchProducts,
+} from "../../features/productSlice";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import axios from "../../config/axios";
 
 const AddProductModal = ({ isOpen, onClose, categories = [] }) => {
+  const queryClient = useQueryClient();
   const dispatch = useDispatch();
-  const loading = useSelector(selectProductsLoading);
-  const error = useSelector(selectProductsError);
+  // const loading = useSelector(selectProductsLoading);
+  // const error = useSelector(selectProductsError);
+  const createProductApi = async () => {
+    const res = await axios.post("/products/create", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return res.data;
+  };
+
+  const {
+    mutate: creatProduct,
+    isLoading,
+    isError,
+    error,
+  } = useMutation({
+    mutationKey: ["products"],
+    mutationFn: createProductApi,
+    onSuccess: () => {
+      queryClient.invalidateQueries(["products"]);
+      onClose();
+      setFormData({
+        title: "",
+        description: "",
+        prix: "",
+        stock: "",
+        categories: [],
+      });
+      setImages([]);
+    },
+  });
 
   const [formData, setFormData] = useState({
     title: "",
@@ -18,8 +56,11 @@ const AddProductModal = ({ isOpen, onClose, categories = [] }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    if (name === 'categories') {
-      const selectedOptions = Array.from(e.target.selectedOptions, option => option.value);
+    if (name === "categories") {
+      const selectedOptions = Array.from(
+        e.target.selectedOptions,
+        (option) => option.value
+      );
       setFormData({ ...formData, [name]: selectedOptions });
     } else {
       setFormData({ ...formData, [name]: value });
@@ -28,30 +69,31 @@ const AddProductModal = ({ isOpen, onClose, categories = [] }) => {
 
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
-    setImages(prevImages => [...prevImages, ...files]);
+    setImages((prevImages) => [...prevImages, ...files]);
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     const formDataToSend = new FormData();
-    formDataToSend.append('title', formData.title);
-    formDataToSend.append('description', formData.description);
-    formDataToSend.append('prix', formData.prix);
-    formDataToSend.append('stock', formData.stock);
+    formDataToSend.append("title", formData.title);
+    formDataToSend.append("description", formData.description);
+    formDataToSend.append("prix", formData.prix);
+    formDataToSend.append("stock", formData.stock);
     formData.categories.forEach((categoryId) => {
-      formDataToSend.append('categories[]', categoryId);
+      formDataToSend.append("categories[]", categoryId);
     });
     images.forEach((image) => {
-      formDataToSend.append('images', image);
+      formDataToSend.append("images", image);
     });
-    dispatch(createProduct(formDataToSend)).then((result) => {
-      if (result.meta.requestStatus === 'fulfilled') {
-        dispatch(fetchProducts());
-        onClose();
-        setFormData({ title: "", description: "", prix: "", stock: "", categories: [] });
-        setImages([]);
-      }
-    });
+    // dispatch(createProduct(formDataToSend)).then((result) => {
+    //   if (result.meta.requestStatus === 'fulfilled') {
+    //     dispatch(fetchProducts());
+    //     onClose();
+    //     setFormData({ title: "", description: "", prix: "", stock: "", categories: [] });
+    //     setImages([]);
+    //   }
+    // });
+    creatProduct(formDataToSend);
   };
 
   if (!isOpen) return null;
@@ -66,8 +108,18 @@ const AddProductModal = ({ isOpen, onClose, categories = [] }) => {
             onClick={onClose}
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
           >
-            <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            <svg
+              className="w-6 h-6 text-gray-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </button>
         </div>
@@ -76,7 +128,9 @@ const AddProductModal = ({ isOpen, onClose, categories = [] }) => {
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           {error && (
             <div className="text-red-600 text-sm">
-              {typeof error === 'object' ? JSON.stringify(error, null, 2) : error}
+              {typeof error === "object"
+                ? JSON.stringify(error, null, 2)
+                : error}
             </div>
           )}
 
@@ -174,21 +228,33 @@ const AddProductModal = ({ isOpen, onClose, categories = [] }) => {
               Product Images
             </label>
             <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-500 transition-colors cursor-pointer">
-            <input
-              type="file"
-              multiple
-              accept="image/*"
-              onChange={handleImageChange}
-              className="hidden"
-              id="image-upload"
-              name="images"
-            />
+              <input
+                type="file"
+                multiple
+                accept="image/*"
+                onChange={handleImageChange}
+                className="hidden"
+                id="image-upload"
+                name="images"
+              />
               <label htmlFor="image-upload" className="cursor-pointer">
-                <svg className="w-12 h-12 text-gray-400 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                <svg
+                  className="w-12 h-12 text-gray-400 mx-auto mb-3"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                  />
                 </svg>
                 <p className="text-sm text-gray-600">Click to upload images</p>
-                <p className="text-xs text-gray-500 mt-1">PNG, JPG, WEBP up to 10MB</p>
+                <p className="text-xs text-gray-500 mt-1">
+                  PNG, JPG, WEBP up to 10MB
+                </p>
               </label>
             </div>
 
@@ -204,11 +270,23 @@ const AddProductModal = ({ isOpen, onClose, categories = [] }) => {
                     />
                     <button
                       type="button"
-                      onClick={() => setImages(images.filter((_, i) => i !== index))}
+                      onClick={() =>
+                        setImages(images.filter((_, i) => i !== index))
+                      }
                       className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
                     >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M6 18L18 6M6 6l12 12"
+                        />
                       </svg>
                     </button>
                   </div>
@@ -228,10 +306,10 @@ const AddProductModal = ({ isOpen, onClose, categories = [] }) => {
             </button>
             <button
               type="submit"
-              disabled={loading}
+              disabled={isLoading}
               className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50"
             >
-              {loading ? "Adding..." : "Add Product"}
+              {isLoading ? "Adding..." : "Add Product"}
             </button>
           </div>
         </form>

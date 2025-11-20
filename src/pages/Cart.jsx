@@ -1,26 +1,53 @@
-import { useEffect } from 'react';
-import { addToCart, getCart, removeFromCart, updateProductQuantity} from '../features/cartSlice';
-import { useDispatch, useSelector } from 'react-redux';
-import { Trash2, ShoppingBag } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect } from "react";
+import {
+  addToCart,
+  getCart,
+  removeFromCart,
+  updateProductQuantity,
+} from "../features/cartSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { Trash2, ShoppingBag } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import axios from "../config/axios";
 
 export default function Cart() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
   //on recupere le panier et l'état depuis le store
-  const {cart} = useSelector((state) => state.cart);
-  const loading = useSelector((state) => state.loading);
+  // const {cart} = useSelector((state) => state.cart);
+  // const loading = useSelector((state) => state.loading);
+  const fetchCartApi = async () => {
+    console.log("inside fetchCartApi");
+    const res = await axios.get("/carts/getcarts");
+    console.log("ressssssssssss", res.data.data[0].items);
+
+    return res.data.data[0].items;
+  };
+
+  const {
+    data: cart,
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
+    queryKey: ["cart"],
+    queryFn: fetchCartApi,
+  });
   const cartItems = cart || [];
 
-  useEffect(()=>{
-    dispatch(getCart());
-  }, [dispatch]);
+  // useEffect(() => {
+  //   dispatch(getCart());
+  // }, [dispatch]);
 
-  // console.log("cart:", cart);
+  console.log("cart:", cart);
   // Calcul du total
 
-  const subtotal = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+  const subtotal = cartItems.reduce(
+    (acc, item) => acc + item.price * item.quantity,
+    0
+  );
   const taxRate = 0.08; // 8% de taxe
   const estimatedTax = subtotal * taxRate;
   const total = subtotal + estimatedTax;
@@ -28,16 +55,25 @@ export default function Cart() {
   //mette à jours la quantité
   const updateQuantity = (productId, quantity) => {
     console.log("inside updateQuantity");
+    console.log("productId", productId);
+    console.log("quantity", quantity);
+
     if (quantity < 1) return;
-     dispatch(updateProductQuantity({ productId, quantity}))
-      .then(() => dispatch(getCart())); // rafraîchir le panier
+    dispatch(updateProductQuantity({ productId, quantity })).then(() =>
+      dispatch(getCart())
+    );
   };
 
   // Supprimer un article
   const removeItem = (productId) => {
-    console.log("id",productId);
-    dispatch(removeFromCart({productId}));
+    console.log("id", productId);
+    dispatch(removeFromCart({ productId }));
   };
+
+  console.log(
+    "hadi rah cart : ",
+    cartItems.length > 0 ? cartItems[0]?.productId?._id : "Cart is empty"
+  );
 
   return (
     <div className="min-h-screen bg-[#F5F0EC] py-8 px-4">
@@ -47,38 +83,41 @@ export default function Cart() {
           <h1 className="text-4xl font-serif text-gray-800 mb-2">
             Your Shopping Cart
           </h1>
-          <p className="text-gray-500">
-            Review your items before checkout
-          </p>
+          <p className="text-gray-500">Review your items before checkout</p>
         </div>
 
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Liste des articles */}
           <div className="flex-1 space-y-4">
-            {loading ? (
-               <p className="text-center text-gray-500">Loading cart...</p>
+            {isLoading ? (
+              <p className="text-center text-gray-500">Loading cart...</p>
             ) : cartItems.length === 0 ? (
               <div className="bg-white rounded-2xl shadow-sm p-12 text-center">
                 <ShoppingBag className="w-16 h-16 text-gray-300 mx-auto mb-4" />
                 <p className="text-gray-500 text-lg">Your cart is empty</p>
               </div>
             ) : (
-              cartItems.map((item) => (
+              cartItems.map((item, index) => (
                 <div
-                  key={item.productId}
+                  key={index}
                   className="bg-white rounded-2xl shadow-sm p-6 flex items-center gap-6"
                 >
                   {/* Image du produit */}
                   <img
-                    src={item.image}
-                    alt={item.title}
+                    src={
+                      item.productId?.images?.[0]?.startsWith("http")
+                        ? item.productId.images[0]
+                        : `https://res.cloudinary.com/dbrrmsoit/image/upload/${item.productId?.images?.[0]}` ||
+                          "https://via.placeholder.com/150"
+                    }
+                    alt={item.productId?.title || "Product"}
                     className="w-28 h-28 rounded-xl object-cover"
                   />
 
                   {/* Informations du produit */}
                   <div className="flex-1">
                     <h3 className="text-lg font-serif text-gray-800 mb-1">
-                      {item.title}
+                      {item.productId?.title || "Unknown Product"}
                     </h3>
                     <p className="text-sm text-gray-500 mb-3">
                       {item.categories}
@@ -95,9 +134,12 @@ export default function Cart() {
                         Quantity:
                       </span>
                       <button
-                        onClick={() => updateQuantity(item.productId, item.quantity - 1)}
+                        onClick={() =>
+                          updateQuantity(item.productId?._id, item.quantity - 1)
+                        }
                         className="w-8 h-8 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
                         aria-label="Decrease quantity"
+                        disabled={!item.productId?._id}
                       >
                         −
                       </button>
@@ -105,9 +147,12 @@ export default function Cart() {
                         {item.quantity}
                       </span>
                       <button
-                        onClick={() => updateQuantity(item.productId, item.quantity + 1)}
+                        onClick={() =>
+                          updateQuantity(item.productId?._id, item.quantity + 1)
+                        }
                         className="w-8 h-8 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
                         aria-label="Increase quantity"
+                        disabled={!item.productId?._id}
                       >
                         +
                       </button>
@@ -115,9 +160,10 @@ export default function Cart() {
 
                     {/* Bouton supprimer */}
                     <button
-                      onClick={() => removeItem(item.productId)}
+                      onClick={() => removeItem(item.productId?._id)}
                       className="p-2 text-gray-400 hover:text-red-500 transition-colors"
                       aria-label="Remove item"
+                      disabled={!item.productId?._id}
                     >
                       <Trash2 className="w-5 h-5" />
                     </button>
@@ -161,7 +207,10 @@ export default function Cart() {
               </button>
 
               {/* Bouton continuer les achats */}
-              <button onClick={()=>navigate("/")} className="w-full border border-gray-300 text-gray-700 py-4 rounded-full font-medium hover:bg-gray-50 transition-colors">
+              <button
+                onClick={() => navigate("/")}
+                className="w-full border border-gray-300 text-gray-700 py-4 rounded-full font-medium hover:bg-gray-50 transition-colors"
+              >
                 Continue Shopping
               </button>
 
