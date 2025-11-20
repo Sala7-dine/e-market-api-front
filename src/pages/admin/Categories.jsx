@@ -115,7 +115,7 @@ const Categories = () => {
 
       </div>
 
-      {/* ----- MODAL ADD CATEGORY ----- */}
+      {/* ----- MODAL ADD / UPDATE CATEGORY ----- */}
       {showModal && (
         <div className="modal-overlay">
 

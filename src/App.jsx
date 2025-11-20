@@ -11,8 +11,11 @@ import UserList from './pages/admin/UserList.jsx';
 import SellerDashboard from './pages/seller/SellerDashboard.jsx';
 import AdminLayout from './pages/admin/AdminLayout.jsx';
 import Categories from './pages/admin/Categories.jsx';
+import Review from './pages/admin/Review.jsx'
+
 
 import Profile from './pages/Profile.jsx';
+import Products from './pages/admin/Products.jsx';
 import Cart from "./pages/Cart.jsx";
 
 function App() {
@@ -35,6 +38,9 @@ function App() {
                         <Route path="/admin" element={<AdminLayout />}>
                             <Route path="users" element={<UserList />} />
                                <Route path="categories" element={<Categories />} />
+                                <Route path="products" element={<Products />} />
+                                 <Route path="reviews" element={<Review />} />
+                    
                            
                         </Route>
                     </Routes>

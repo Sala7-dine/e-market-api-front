@@ -1,6 +1,10 @@
 const Review = () => {
     return (  
-        <></>
+        <>
+         salam reviews 
+         
+         
+         </>
     );
 }
  

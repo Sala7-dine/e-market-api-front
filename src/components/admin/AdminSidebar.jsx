@@ -11,6 +11,7 @@ const AdminSidebar = () => {
     { name: "Dashboard Overview", icon: <FaTachometerAlt />, link: "/admin/dashboard" },
     { name: "Gestion Utilisateurs", icon: <FaUsers />, link: "/admin/users" },
       { name: "Gestion Categories", icon: <FaTh />, link: "/admin/categories" },
+          { name: "Gestion produits", icon: <FaTh />, link: "/admin/products" },
     { name: "Stories", icon: <FaBook />, link: "/admin/stories" },
     { name: "Modération Avis", icon: <FaCommentDots />, link: "/admin/reviews" },
     { name: "Paramètres", icon: <FaCog />, link: "/admin/settings" },
