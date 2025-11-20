@@ -143,16 +143,25 @@ const handleViewImages = (product) => {
               ×
             </button>
 
-            <div className="modal-images">
-              {selectedProduct.images.length > 0 ? (
-                selectedProduct.images.map((img, index) => (
-                  <img src={`${img}`} alt={selectedProduct.title} />
+           <div className="modal-images">
+  {selectedProduct.images?.length > 0 ? (
+    selectedProduct.images.map((img, index) => (
+      <img
+        key={index}
+        src={
+          img?.startsWith("http")
+            ? img
+            : `https://res.cloudinary.com/dbrrmsoit/image/upload/${img}`
+        }
+        alt={selectedProduct.title}
+        className="modal-image-item"
+      />
+    ))
+  ) : (
+    <p>Aucune image disponible</p>
+  )}
+</div>
 
-                ))
-              ) : (
-                <p>Aucune image disponible</p>
-              )}
-            </div>
           </div>
         </div>
       )}
