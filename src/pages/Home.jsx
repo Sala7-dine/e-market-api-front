@@ -224,7 +224,7 @@ const Home = () => {
                                                 </button>
                                                 <button onClick={()=> handleAddToCart(product) }
                                                 type="button" title="Add to cart"
-                                                        className="bg-transparent outline-0 border-0 cursor-pointer">
+²                                                        className="bg-transparent outline-0 border-0 cursor-pointer">
                                                     <svg xmlns="http://www.w3.org/2000/svg"
                                                          className="fill-slate-800 w-5 h-5 inline-block"
                                                          viewBox="0 0 512 512">
