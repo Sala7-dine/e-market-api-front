@@ -57,7 +57,7 @@ const ProductDetail = () => {
                     {/* Product Image */}
                     <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
                         <img 
-                            src={product.images?.[0] || "https://via.placeholder.com/500"} 
+                            src={product.images?.[0]?.startsWith('http') ? product.images[0] : `https://res.cloudinary.com/dbrrmsoit/image/upload/${product.images?.[0]}` || "https://via.placeholder.com/500"} 
                             alt={product.title}
                             className="w-full h-full object-cover"
                         />

@@ -14,7 +14,9 @@ export default function Cart() {
   const cartItems = cart || [];
 
   useEffect(()=>{
-    dispatch(getCart());
+
+      dispatch(getCart());
+
   }, [dispatch]);
 
   // console.log("cart:", cart);
@@ -27,17 +29,26 @@ export default function Cart() {
 
   //mette à jours la quantité
   const updateQuantity = (productId, quantity) => {
+
     console.log("inside updateQuantity");
+    console.log("productId", productId);
+    console.log("quantity", quantity);
+
     if (quantity < 1) return;
      dispatch(updateProductQuantity({ productId, quantity}))
-      .then(() => dispatch(getCart())); // rafraîchir le panier
+      .then(() => dispatch(getCart()));
+
   };
 
   // Supprimer un article
   const removeItem = (productId) => {
+
     console.log("id",productId);
     dispatch(removeFromCart({productId}));
+
   };
+
+  console.log( "hadi rah cart : ", cartItems.length > 0 ? cartItems[0]?.productId?._id : "Cart is empty" );
 
   return (
     <div className="min-h-screen bg-[#F5F0EC] py-8 px-4">
@@ -63,22 +74,22 @@ export default function Cart() {
                 <p className="text-gray-500 text-lg">Your cart is empty</p>
               </div>
             ) : (
-              cartItems.map((item) => (
+              cartItems.map((item , index) => (
                 <div
-                  key={item.productId}
+                  key={index}
                   className="bg-white rounded-2xl shadow-sm p-6 flex items-center gap-6"
                 >
                   {/* Image du produit */}
                   <img
-                    src={item.image}
-                    alt={item.title}
+                    src={item.productId?.images?.[0]?.startsWith('http') ? item.productId.images[0] : `https://res.cloudinary.com/dbrrmsoit/image/upload/${item.productId?.images?.[0]}` || "https://via.placeholder.com/150"}
+                    alt={item.productId?.title || 'Product'}
                     className="w-28 h-28 rounded-xl object-cover"
                   />
 
                   {/* Informations du produit */}
                   <div className="flex-1">
                     <h3 className="text-lg font-serif text-gray-800 mb-1">
-                      {item.title}
+                      {item.productId?.title || 'Unknown Product'}
                     </h3>
                     <p className="text-sm text-gray-500 mb-3">
                       {item.categories}
@@ -95,9 +106,10 @@ export default function Cart() {
                         Quantity:
                       </span>
                       <button
-                        onClick={() => updateQuantity(item.productId, item.quantity - 1)}
+                        onClick={() => updateQuantity(item.productId?._id , item.quantity - 1)}
                         className="w-8 h-8 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
                         aria-label="Decrease quantity"
+                        disabled={!item.productId?._id}
                       >
                         −
                       </button>
@@ -105,9 +117,10 @@ export default function Cart() {
                         {item.quantity}
                       </span>
                       <button
-                        onClick={() => updateQuantity(item.productId, item.quantity + 1)}
+                        onClick={() => updateQuantity(item.productId?._id, item.quantity + 1)}
                         className="w-8 h-8 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
                         aria-label="Increase quantity"
+                        disabled={!item.productId?._id}
                       >
                         +
                       </button>
@@ -115,9 +128,10 @@ export default function Cart() {
 
                     {/* Bouton supprimer */}
                     <button
-                      onClick={() => removeItem(item.productId)}
+                      onClick={() => removeItem(item.productId?._id)}
                       className="p-2 text-gray-400 hover:text-red-500 transition-colors"
                       aria-label="Remove item"
+                      disabled={!item.productId?._id}
                     >
                       <Trash2 className="w-5 h-5" />
                     </button>
