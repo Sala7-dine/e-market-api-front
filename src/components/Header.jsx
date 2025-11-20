@@ -17,13 +17,13 @@ const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
-  const { isAuthenticated, logout } = useAuth();
+  const { isAuthenticated, logout, user } = useAuth();
 
   useEffect(() => {
     if (isAuthenticated()) {
       dispatch(getCart());
     }
-  }, [dispatch, isAuthenticated]);
+  }, [dispatch, isAuthenticated , cart , logout]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -95,7 +95,7 @@ const Header = () => {
               <div className="relative group">
                 <span className="flex items-center gap-3 text-black hover:text-gray-700 transition cursor-pointer">
                   <i className="la la-shopping-cart text-3xl"></i>
-                  <span className="text-lg">{cartItems.length} Items</span>
+                  {isAuthenticated() && <span className="text-sm">{cartItems.length} Items</span>}
                 </span>
                 
                 <div className="absolute right-0 top-full mt-4 w-[420px] bg-gradient-to-br from-white via-gray-50 to-gray-100 rounded-2xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 backdrop-blur-sm">
@@ -114,7 +114,7 @@ const Header = () => {
                       <>
                         <div className="max-h-80 overflow-y-auto space-y-4">
                           {cartItems.map((item, index) => (
-                            <div key={index} className="flex items-center gap-4 p-4 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow">
+                            <div key={item.productId?._id || index} className="flex items-center gap-4 p-4 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow">
                               <img 
                                 src={item.productId?.images?.[0]?.startsWith('http') ? item.productId.images[0] : `https://res.cloudinary.com/dbrrmsoit/image/upload/${item.productId?.images?.[0]}` || "https://via.placeholder.com/60"}
                                 alt={item.productId?.title || 'Product'}
@@ -128,7 +128,8 @@ const Header = () => {
                                     type="button"
                                     onClick={(e) => {
                                       e.preventDefault();
-                                      dispatch(updateProductQuantity({ productId: item.productId?._id, quantity: item.quantity - 1 }));
+                                      dispatch(updateProductQuantity({ productId: item.productId?._id, quantity: item.quantity - 1 }))
+                                        .then(() => dispatch(getCart()));
                                     }}
                                     disabled={item.quantity <= 1}
                                     className="w-8 h-8 flex items-center justify-center bg-gray-100 hover:bg-[#FF6B6B] hover:text-white rounded-full text-sm font-bold disabled:opacity-50 disabled:hover:bg-gray-100 disabled:hover:text-gray-600 transition-all"
@@ -140,7 +141,8 @@ const Header = () => {
                                     type="button"
                                     onClick={(e) => {
                                       e.preventDefault();
-                                      dispatch(updateProductQuantity({ productId: item.productId?._id, quantity: item.quantity + 1 }));
+                                      dispatch(updateProductQuantity({ productId: item.productId?._id, quantity: item.quantity + 1 }))
+                                        .then(() => dispatch(getCart()));
                                     }}
                                     className="w-8 h-8 flex items-center justify-center bg-gray-100 hover:bg-[#FF6B6B] hover:text-white rounded-full text-sm font-bold transition-all"
                                   >
@@ -152,7 +154,8 @@ const Header = () => {
                                 type="button"
                                 onClick={(e) => {
                                   e.preventDefault();
-                                  dispatch(removeFromCart({ productId: item.productId?._id }));
+                                  dispatch(removeFromCart({ productId: item.productId?._id }))
+                                    .then(() => dispatch(getCart()));
                                 }}
                                 className="text-gray-400 hover:text-red-500 p-2 hover:bg-red-50 rounded-full transition-all"
                               >
@@ -194,6 +197,24 @@ const Header = () => {
                       <i className="la la-user mr-2"></i>
                       Profile
                     </Link>
+                    {user?.role === 'seller' && (
+                      <Link
+                        to="/seller/dashboard"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                      >
+                        <i className="la la-tachometer-alt mr-2"></i>
+                        Dashboard
+                      </Link>
+                    )}
+                    {user?.role === 'admin' && (
+                      <Link
+                        to="/admin"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                      >
+                        <i className="la la-cogs mr-2"></i>
+                        Admin Dashboard
+                      </Link>
+                    )}
                     <Link
                       to="/"
                       onClick={logout}
@@ -209,10 +230,6 @@ const Header = () => {
           ) : (
             <div className="hidden md:flex text-black gap-6 items-center">
               <div className="relative group">
-                <span className="flex items-center gap-3 text-black hover:text-gray-700 transition cursor-pointer">
-                  <i className="la la-shopping-cart text-3xl"></i>
-                  <span className=" text-lg">{cartCount} Items</span>
-                </span>
                 
                 <div className="absolute right-0 top-full mt-4 w-96 bg-gradient-to-br from-white via-gray-50 to-gray-100 rounded-2xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 backdrop-blur-sm">
                   <div className="p-6">

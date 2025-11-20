@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import axios from "../config/axios";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { useDispatch } from "react-redux";
-import { addToCart } from "../features/cartSlice";
+import { addToCart, getCart } from "../features/cartSlice";
+import { useAuth } from "../contexts/AuthContext";
 import pro1 from '../assets/images/pro-1.webp';
 import pro2 from '../assets/images/pro-2.webp';
 import pro3 from '../assets/images/pro-3.webp';
@@ -12,11 +13,14 @@ import pro4 from '../assets/images/pro-4.webp';
 
 const ProductDetail = () => {
     const { id } = useParams();
+    const navigate = useNavigate();
+    const { isAuthenticated } = useAuth();
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
     const [quantity, setQuantity] = useState(1);
     const [selectedImage, setSelectedImage] = useState(0);
     const [activeTab, setActiveTab] = useState('comments');
+    const [isAddingToCart, setIsAddingToCart] = useState(false);
     const dispatch = useDispatch();
 
     useEffect(() => {
@@ -35,8 +39,18 @@ const ProductDetail = () => {
     }, [id]);
 
     const handleAddToCart = () => {
-        if (product) {
-            dispatch(addToCart({ productId: product._id, quantity }));
+        if (!isAuthenticated()) {
+            navigate('/login');
+            return;
+        }
+        
+        if (product && !isAddingToCart) {
+            setIsAddingToCart(true);
+            dispatch(addToCart({ productId: product._id, quantity }))
+                .then(() => dispatch(getCart()))
+                .finally(() => {
+                    setTimeout(() => setIsAddingToCart(false), 500);
+                });
         }
     };
 
@@ -83,12 +97,12 @@ const ProductDetail = () => {
     return (
         <>
             {/* Header Section */}
-            <section className="bg-white relative overflow-hidden">
+            <section className="bg-white relative overflow-visible z-10">
                 <Header />
             </section>
 
             {/* Product Detail Section */}
-            <section className="py-16 bg-white">
+            <section className="py-16 bg-white relative z-0">
                 <div className="container mx-auto px-6">
                     <Link to="/" className="text-[#FF6B6B] hover:underline mb-4 inline-block">
                         ← Back to Home
@@ -213,9 +227,24 @@ const ProductDetail = () => {
                             {product.stock > 0 ? (
                                 <button 
                                     onClick={handleAddToCart}
-                                    className="w-full max-w-xs px-6 py-3 text-sm bg-[#FF6B6B] text-white rounded-full font-medium hover:bg-[#ff5252] transition-colors duration-300 mb-4"
+                                    disabled={isAddingToCart}
+                                    className={`w-full max-w-xs px-6 py-3 text-sm rounded-full font-medium transition-all duration-200 mb-4 flex items-center justify-center gap-2 ${
+                                        isAddingToCart 
+                                            ? 'bg-green-500 text-white' 
+                                            : 'bg-[#FF6B6B] text-white hover:bg-[#ff5252]'
+                                    }`}
                                 >
-                                    Add to Cart
+                                    {isAddingToCart ? (
+                                        <>
+                                            <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                            </svg>
+                                            Added
+                                        </>
+                                    ) : (
+                                        'Add to Cart'
+                                    )}
                                 </button>
                             ) : (
                                 <button className="w-full max-w-xs px-6 py-3 text-sm border-2 border-gray-300 text-gray-600 rounded-full font-medium mb-4 cursor-not-allowed">

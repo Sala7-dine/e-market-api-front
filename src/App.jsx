@@ -17,6 +17,8 @@ import Review from './pages/admin/Review.jsx'
 import Profile from './pages/Profile.jsx';
 import Products from './pages/admin/Products.jsx';
 import Cart from "./pages/Cart.jsx";
+import Shop from "./pages/Shop.jsx";
+import Checkout from "./pages/Checkout.jsx";
 
 function App() {
 
@@ -28,6 +30,7 @@ function App() {
                 <AuthProvider>
                     <Routes>
                         <Route path="/" element={<Home />} />
+                        <Route path="/shop" element={<Shop />} />
                         <Route path="/login" element={<Login />} />
                         <Route path="/Register" element={<Register />} />
                         <Route path="/product/:id" element={<ProductDetail />} />
@@ -35,6 +38,7 @@ function App() {
                         <Route path="/seller/dashboard" element={<SellerDashboard />} />
                          <Route path="/profile" element={<Profile />} />
                          <Route path="/cart" element={<Cart />} />
+                         <Route path="/checkout" element={<Checkout />} />
                         <Route path="/admin" element={<AdminLayout />}>
                             <Route path="users" element={<UserList />} />
                                <Route path="categories" element={<Categories />} />

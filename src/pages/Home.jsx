@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "../config/axios.js";
 import Header from "../components/Header.jsx";
 import Footer from "../components/Footer.jsx";
@@ -8,13 +8,17 @@ import hm2 from '../assets/images/hm2.webp';
 import bannerBg from '../assets/images/banner-bg.webp';
 import ctaImage from '../assets/images/cta.jpg';
 import { useDispatch } from "react-redux";
-import { addToCart } from "../features/cartSlice.js";
+import { addToCart, getCart } from "../features/cartSlice.js";
+import { useAuth } from "../contexts/AuthContext";
 
 const Home = () => {
     const dispatch = useDispatch();
+    const navigate = useNavigate();
+    const { isAuthenticated } = useAuth();
     const [products, setProducts] = useState([]);
     const [currentSlide, setCurrentSlide] = useState(0);
     const [heroSlide, setHeroSlide] = useState(0);
+    const [addingToCart, setAddingToCart] = useState({});
 
     const heroImages = [hm1, hm2];
 
@@ -47,7 +51,21 @@ const Home = () => {
     };
 
     const handleAddToCart = (product) => {
-        dispatch(addToCart({ productId: product._id, quantity: 1 }));
+        if (!isAuthenticated()) {
+            navigate('/login');
+            return;
+        }
+        
+        if (addingToCart[product._id]) return;
+        
+        setAddingToCart(prev => ({ ...prev, [product._id]: true }));
+        dispatch(addToCart({ productId: product._id, quantity: 1 }))
+            .then(() => dispatch(getCart()))
+            .finally(() => {
+                setTimeout(() => {
+                    setAddingToCart(prev => ({ ...prev, [product._id]: false }));
+                }, 500);
+            });
     };
 
     return (
@@ -193,9 +211,12 @@ const Home = () => {
                                         </div>
                                         <button 
                                             onClick={() => handleAddToCart(product)}
-                                            className="text-[#FF6B6B] text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                                            disabled={addingToCart[product._id]}
+                                            className={`text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${
+                                                addingToCart[product._id] ? 'text-green-500' : 'text-[#FF6B6B]'
+                                            }`}
                                         >
-                                            + Add To Cart
+                                            {addingToCart[product._id] ? '✓ Added!' : '+ Add To Cart'}
                                         </button>
                                     </div>
                                 </div>
@@ -293,10 +314,12 @@ const Home = () => {
                                         </div>
                                         <button 
                                             onClick={() => handleAddToCart(product)}
-                                            className="text-[#FF6B6B] text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                                            disabled={product.stock === 0}
+                                            disabled={addingToCart[product._id] || product.stock === 0}
+                                            className={`text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${
+                                                addingToCart[product._id] ? 'text-green-500' : 'text-[#FF6B6B]'
+                                            }`}
                                         >
-                                            + Add To Cart
+                                            {addingToCart[product._id] ? '✓ Added!' : '+ Add To Cart'}
                                         </button>
                                     </div>
                                 </div>
