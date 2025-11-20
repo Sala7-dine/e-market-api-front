@@ -35,7 +35,7 @@ export const removeFromCart = createAsyncThunk(
   "cart/removeFromCart",
   async ({ productId }, { rejectWithValue }) => {
     try {
-      const res = await axios.delete(`carts/deleteProduct/${productId._id}`);
+      const res = await axios.delete(`carts/deleteProduct/${productId}`);
       console.log("res remove", productId);
       return productId;
     } catch (error) {
@@ -101,7 +101,7 @@ const cartSlice = createSlice({
         console.log("action.payload :", action.payload);
         if (state.cart) {
           state.cart = state.cart.filter(
-            (item) => item.productId !== action.payload
+            (item) => item.productId?._id !== action.payload
           );
         }
       })
@@ -113,8 +113,8 @@ const cartSlice = createSlice({
         state.loading = false;
         console.log("action.payload 2:", action.payload);
         const { productId, quantity } = action.payload;
-        if (state.cart && state.cart.items) {
-          const item = state.cart.items.find((i) => i.productId === productId);
+        if (state.cart) {
+          const item = state.cart.find((i) => i.productId?._id === productId);
           if (item) {
             item.quantity = quantity;
           }
