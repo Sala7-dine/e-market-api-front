@@ -1,4 +1,4 @@
-import '../../assets/styles/admin/Categories.css';
+// import '../../assets/styles/admin/Categories.css';
 import { FaTrash, FaSync } from 'react-icons/fa';
 import { useDispatch, useSelector } from 'react-redux';
 import { useEffect, useState } from 'react';
