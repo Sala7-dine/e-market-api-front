@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { FaEye, FaEdit, FaTrash, FaPlus } from "react-icons/fa";
-import "../../assets/styles/admin/Products.css";
+// import "../../assets/styles/admin/Products.css";
 import { fetchAllProducts ,deleteproduct} from "../../features/productSlice";
 import { useDispatch, useSelector } from "react-redux";
 
