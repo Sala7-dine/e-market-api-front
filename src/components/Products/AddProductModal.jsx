@@ -1,21 +1,14 @@
 import { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import {
-  createProduct,
-  selectProductsLoading,
-  selectProductsError,
-  fetchProducts,
-} from "../../features/productSlice";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "../../config/axios";
 
 const AddProductModal = ({ isOpen, onClose, categories = [] }) => {
   const queryClient = useQueryClient();
-  const dispatch = useDispatch();
+  // const dispatch = useDispatch();
   // const loading = useSelector(selectProductsLoading);
   // const error = useSelector(selectProductsError);
-  const createProductApi = async () => {
-    const res = await axios.post("/products/create", formData, {
+  const createProductApi = async (formDataToSend) => {
+    const res = await axios.post("/products/create", formDataToSend, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
@@ -85,14 +78,6 @@ const AddProductModal = ({ isOpen, onClose, categories = [] }) => {
     images.forEach((image) => {
       formDataToSend.append("images", image);
     });
-    // dispatch(createProduct(formDataToSend)).then((result) => {
-    //   if (result.meta.requestStatus === 'fulfilled') {
-    //     dispatch(fetchProducts());
-    //     onClose();
-    //     setFormData({ title: "", description: "", prix: "", stock: "", categories: [] });
-    //     setImages([]);
-    //   }
-    // });
     creatProduct(formDataToSend);
   };
 
