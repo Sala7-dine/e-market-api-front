@@ -35,7 +35,7 @@ export const removeFromCart = createAsyncThunk(
   "cart/removeFromCart",
   async ({ productId }, { rejectWithValue }) => {
     try {
-      const res = await axios.delete(`carts/deleteProduct/${productId._id}`);
+      const res = await axios.delete(`carts/deleteProduct/${productId}`);
       console.log("res remove", productId);
       return productId;
     } catch (error) {
@@ -73,7 +73,15 @@ const cartSlice = createSlice({
       })
       .addCase(addToCart.fulfilled, (state, action) => {
         state.loading = false;
-        state.cart = action.payload;
+        // Ensure cart is always an array
+        if (Array.isArray(action.payload)) {
+          state.cart = action.payload;
+        } else if (action.payload?.items && Array.isArray(action.payload.items)) {
+          state.cart = action.payload.items;
+        } else {
+          // Refresh cart data after adding
+          state.cart = state.cart || [];
+        }
         state.error = false;
       })
       .addCase(addToCart.rejected, (state, action) => {
@@ -101,7 +109,7 @@ const cartSlice = createSlice({
         console.log("action.payload :", action.payload);
         if (state.cart) {
           state.cart = state.cart.filter(
-            (item) => item.productId !== action.payload
+            (item) => item.productId?._id !== action.payload
           );
         }
       })
@@ -113,8 +121,8 @@ const cartSlice = createSlice({
         state.loading = false;
         console.log("action.payload 2:", action.payload);
         const { productId, quantity } = action.payload;
-        if (state.cart && state.cart.items) {
-          const item = state.cart.items.find((i) => i.productId === productId);
+        if (state.cart) {
+          const item = state.cart.find((i) => i.productId?._id === productId);
           if (item) {
             item.quantity = quantity;
           }
@@ -130,5 +138,10 @@ const cartSlice = createSlice({
 
 export default cartSlice.reducer;
 
-export const selectCartCount = (state) =>
-  state.cart.cart?.products?.reduce((sum, item) => sum + item.quantity, 0) || 0;
+export const selectCartCount = (state) => {
+  const cart = state.cart.cart;
+  if (Array.isArray(cart)) {
+    return cart.reduce((sum, item) => sum + item.quantity, 0);
+  }
+  return 0;
+};
