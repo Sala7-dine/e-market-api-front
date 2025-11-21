@@ -3,9 +3,10 @@ import axios from "../config/axios";
 
 export const createOrder = createAsyncThunk(
   "order/createOrder",
-  async (cartId, { rejectWithValue }) => {
+  async ({ cartId, couponCode }, { rejectWithValue }) => {
     try {
-      const res = await axios.post(`/orders/addOrder/${cartId}`);
+      const payload = couponCode ? { couponCode } : {};
+      const res = await axios.post(`/orders/addOrder/${cartId}`, payload);
       return res.data;
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);

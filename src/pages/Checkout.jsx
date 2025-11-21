@@ -372,6 +372,7 @@ const Checkout = () => {
                 onSuccess={handlePaymentSuccess}
                 cartId={cartId}
                 total={total}
+                couponCode={discountCode}
             />
 
             {/* Scroll to Top Button */}
