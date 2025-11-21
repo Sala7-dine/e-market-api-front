@@ -1,44 +1,54 @@
 import React, { useState, useEffect } from "react";
 import { FaEye, FaEdit, FaTrash, FaPlus } from "react-icons/fa";
-// import "../../assets/styles/admin/Products.css";
+import "../../assets/styles/admin/Products.css";
 import { fetchAllProducts ,deleteproduct} from "../../features/productSlice";
 import { useDispatch, useSelector } from "react-redux";
+import Pagination from "../../components/Pagination";
 
 const Products = () => {
   const dispatch = useDispatch();
-  const { products, loading, error } = useSelector((state) => state.products);
+  const { products, loading, error, currentPage, totalPages, limit } = useSelector((state) => state.products);
+
   useEffect(() => {
-    dispatch(fetchAllProducts());
-    console.log("hello")
-  }, [dispatch]);
+    console.log("currentPage", currentPage);
+    console.log("limit", limit);
+    console.log("dispatch", dispatch);
+    console.log("useeffect");
+    console.log("products before dispatch",products);
+    dispatch(fetchAllProducts({ page: currentPage, limit }));
+    console.log("products",products);
+    console.log("hello");
+  }, [dispatch, currentPage, limit]);
+  console.log("products outside useeffect",products);
+
+  const handleDelete = async (id) => {
+    try {
+      await dispatch(deleteproduct(id));
+      dispatch(fetchAllProducts({ page: currentPage, limit }));
+      setShowDeleteModal(false);
+    } catch (err) {
+      console.error("Erreur lors de la suppression :", err);
+    }
+  };
+
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [showImageModal, setShowImageModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [productToDelete, setProductToDelete] = useState(null);
-
- 
 
   const confirmDelete = (product) => {
     setProductToDelete(product);
     setShowDeleteModal(true);
   };
 
-   const handleDelete = async (id) => {
-    try {
-      console.log("deleting", id);
-      await dispatch(deleteproduct(id)); 
-      setShowDeleteModal(false);
-    } catch (err) {
-      console.error("Erreur lors de la suppression :", err);
-    }
+  const handleViewImages = (product) => {
+    setSelectedProduct(product); 
+    setShowImageModal(true);     
   };
-  
-const handleViewImages = (product) => {
-  setSelectedProduct(product); 
-  setShowImageModal(true);     
-};
 
+if (loading) return <p>Chargement...</p>;
 
+if (error) return <p>Erreur: {error}</p>;
 
   return (
     <div className="products-container">
@@ -52,12 +62,12 @@ const handleViewImages = (product) => {
       <div className="stat-product">
         <div className="stat-box">
           <h3>Total Produits</h3>
-          <p>{products.length}</p>
+          <p>jdfjfj</p>
         </div>
 
         <div className="stat-box">
           <h3>En stock</h3>
-          <p> {products.filter((product) => product.stock > 0).length} </p>
+          <p> 78 </p>
         </div>
 
         <div className="stat-box">
@@ -114,7 +124,7 @@ const handleViewImages = (product) => {
                     className="btn-view"
                     onClick={() => handleViewImages(product)}
                   >
-                    <FaEye size={16} color="#A0522D" />
+                    <FaEye size={16} color="#5a9ed1" />
                   </button>
                 </td>
                 <td>
@@ -123,13 +133,21 @@ const handleViewImages = (product) => {
                     className="btn-delete"
                     onClick={() => confirmDelete(product)}
                   >
-                    <FaTrash size={16} color="#A0522D" />
+                    <FaTrash size={16} color="#FF6F61" />
                   </button>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
+       <Pagination
+  currentPage={currentPage}
+  totalPages={totalPages}
+  onPageChange={(page) => dispatch(fetchAllProducts({ page, limit }))}
+  hasPrev={currentPage > 1}
+  hasNext={currentPage < totalPages}
+/>
+
       </div>
 
       {/* Modals */}

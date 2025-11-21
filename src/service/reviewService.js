@@ -1,14 +1,14 @@
 import axios from '../config/axios';
 
 const reviewService = {
-  // 📌 Récupérer toutes les reviews
-  AllReviews: async () => {
-    const res = await axios.get('/admin/reviews');
-    console.log("hello res",res.data.data);
-    return res.data.data;
+  // Récupérer toutes les reviews avec pagination
+  AllReviews: async (page = 1, limit = 5) => {
+    const res = await axios.get(`/admin/reviews?page=${page}&limit=${limit}`);
+    console.log("res",res)
+    return res.data; // { success, data, pagination }
   },
 
-  // Supprimer une review par productId et reviewId
+  // Supprimer une review
   deleteReview: async (productId, reviewId) => {
     const res = await axios.delete(`/admin/reviews/${productId}/${reviewId}`);
     return res.data;

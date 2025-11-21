@@ -1,27 +1,33 @@
 import React, { useState } from "react";
-import { FaCheck, FaEye, FaTrash } from "react-icons/fa";
-import "../../assets/styles/admin/UserList.css"; // tu gardes le même style
+import { FaTrash } from "react-icons/fa";
+import "../../assets/styles/admin/UserList.css";
 import Pagination from "../../components/Pagination";
-import { useReviews } from "../../hooks/useReviews";
-
-
-
+import { useReviews } from "../../hooks/useReview";
 
 const Reviews = () => {
+  const {
+    reviews,
+    isLoading,
+    deleteReview,
+    totalPages,
+    currentPage,
+    setPage,
+  } = useReviews();
 
-  const { reviews, isLoading, deleteReview } = useReviews();
-  console.log("revis compo",reviews)
-  const [showFull, setShowFull] = useState(null);
+  const [showFull, setShowFull] = useState({});
 
   const handleDelete = (productId, reviewId) => {
-    console.log("prot",productId);
-    console.group("review",reviewId)
     deleteReview.mutate({ productId, reviewId });
   };
 
-  if (isLoading) return <p>Chargement...</p>;
+  const toggleShowFull = (reviewId) => {
+    setShowFull(prev => ({
+      ...prev,
+      [reviewId]: !prev[reviewId]
+    }));
+  };
 
-  // console.log("reviews", reviews[0]);
+  if (isLoading) return <p>Chargement...</p>;
 
   return (
     <div className="user-list">
@@ -31,29 +37,28 @@ const Reviews = () => {
       {/* === STATS === */}
       <div className="stat-user">
         <div className="stat-item">
-          <h3>Avis Signalés</h3>
-          <p>3</p>
+          <h3>Total Avis</h3>
+          <p>{reviews.length}</p>
         </div>
         <div className="stat-item">
-          <h3>Total Signalements</h3>
-          <p>10</p>
+          <h3>Avis Positifs</h3>
+          <p>{reviews.filter(r => r.rating >= 4).length}</p>
         </div>
         <div className="stat-item">
-          <h3>Traités Aujourd'hui</h3>
-          <p>1</p>
+          <h3>Avis Négatifs</h3>
+          <p>{reviews.filter(r => r.rating <= 2).length}</p>
         </div>
       </div>
 
       {/* === TABLEAU === */}
       <div className="users-table-container">
-        <table className="categories-table">
+        <table className="users-table">
           <thead>
             <tr>
               <th>Auteur</th>
               <th>Produit</th>
               <th>Note</th>
               <th>Commentaire</th>
-            
               <th>Date</th>
               <th>Actions</th>
             </tr>
@@ -62,31 +67,31 @@ const Reviews = () => {
           <tbody>
             {reviews.map((review) => (
               <tr key={review._id}>
-
-                <td> { review ?  review.user.fullName : "Utilisateur inconnu"}</td>
-
-                <td>{review.productTitle}</td>
+                <td>{review?.user?.fullName || "Utilisateur inconnu"}</td>
+                <td>{review.productTitle || "Produit inconnu"}</td>
                 <td>{review.rating} ⭐</td>
-                 <td>
-        {showFull ? review.comment : review.comment.slice(0, 30) + "... "}
-        {review.comment.length > 30 && (
-          <span
-            style={{ color: "  #5b3d29;", cursor: "pointer", fontWeight: "600" }}
-            onClick={() => setShowFull(!showFull)}
-          >
-            {showFull ? "Voir moins" : "Voir more"}
-          </span>
-        )}
-      </td>
-              
+                <td>
+                  {showFull[review._id] 
+                    ? review.comment 
+                    : review.comment?.slice(0, 30) + (review.comment?.length > 30 ? "..." : "")
+                  }
+                  {review.comment?.length > 30 && (
+                    <span
+                      style={{ color: "#5b3d29", cursor: "pointer", fontWeight: "600", marginLeft: "5px" }}
+                      onClick={() => toggleShowFull(review._id)}
+                    >
+                      {showFull[review._id] ? "Voir moins" : "Voir plus"}
+                    </span>
+                  )}
+                </td>
                 <td>{new Date(review.createdAt).toLocaleDateString()}</td>
-
-                <td style={{ display: "flex", gap: "8px" }}>
-                  
-                <button className="btn-delete" onClick={() => handleDelete(review.productId, review._id)}>
-  <FaTrash color="#5b3d29" />
-</button>
-
+                <td>
+                  <button 
+                    className="btn-delete" 
+                    onClick={() => handleDelete(review.productId, review._id)}
+                  >
+                    <FaTrash color="#FF6F61" />
+                  </button>
                 </td>
               </tr>
             ))}
@@ -94,7 +99,14 @@ const Reviews = () => {
         </table>
       </div>
 
-     
+      {/* === Pagination === */}
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setPage}
+        hasNext={currentPage < totalPages}
+        hasPrev={currentPage > 1}
+      />
     </div>
   );
 };

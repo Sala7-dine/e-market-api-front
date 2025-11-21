@@ -74,7 +74,7 @@ const UserList = () => {
                   <td>
                     
                     <button className="btn-delete" onClick={()=> handleDelete(user._id)}>
-                      <FaTrash size={16} color="#A0522D" />
+                      <FaTrash size={16} color="#FF6F61" />
                       
                     </button>
 

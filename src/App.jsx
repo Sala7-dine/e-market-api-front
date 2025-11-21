@@ -11,7 +11,8 @@ import UserList from "./pages/admin/UserList.jsx";
 import SellerDashboard from "./pages/seller/SellerDashboard.jsx";
 import AdminLayout from "./pages/admin/AdminLayout.jsx";
 import Categories from "./pages/admin/Categories.jsx";
-import Review from "./pages/admin/Review.jsx";
+
+import Reviews from "./pages/admin/Reviews.jsx";
 
 import Profile from "./pages/Profile.jsx";
 import Products from "./pages/admin/Products.jsx";
