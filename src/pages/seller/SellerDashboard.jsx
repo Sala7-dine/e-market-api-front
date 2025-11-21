@@ -24,66 +24,44 @@ const SellerDashboard = () => {
   const dispatch = useDispatch();
   const categories = useSelector(selectCategories);
 
+  const [orderStatus, setOrderStatus] = useState("");
+  const [orderPage, setOrderPage] = useState(1);
+
   const fetchProductsFn = async () => {
     const res = await axios.get("/seller/products");
     return res.data.data;
   };
 
-  const [stats] = useState({
-    totalRevenue: 24580.5,
-    orders: 342,
-    products: 68,
-    visitors: 12543,
-  });
+  const fetchStatsFn = async () => {
+    const res = await axios.get("/seller/stats");
+    return res.data.data;
+  };
 
-  const [recentOrders] = useState([
-    {
-      id: "ORD-2501",
-      customer: "Sarah Johnson",
-      product: "Premium Cotton T-Shirt",
-      amount: 29.99,
-      status: "pending",
-      date: "Nov 12, 2025",
-    },
-    {
-      id: "ORD-2502",
-      customer: "Michael Chen",
-      product: "Designer Jeans",
-      amount: 79.99,
-      status: "processing",
-      date: "Nov 12, 2025",
-    },
-    {
-      id: "ORD-2503",
-      customer: "Emma Davis",
-      product: "Leather Jacket",
-      amount: 199.99,
-      status: "shipped",
-      date: "Nov 11, 2025",
-    },
-    {
-      id: "ORD-2504",
-      customer: "James Wilson",
-      product: "Cotton T-Shirt",
-      amount: 29.99,
-      status: "delivered",
-      date: "Nov 10, 2025",
-    },
-  ]);
+  const fetchOrdersFn = async () => {
+    const params = { page: orderPage, limit: 10 };
+    if (orderStatus) params.status = orderStatus;
+    const res = await axios.get("/seller/orders", { params });
+    return res.data;
+  };
 
-  const {
-    data: products,
-    isLoading,
-    isError,
-    error: errorApi,
-  } = useQuery({
+  const { data: products, isLoading, isError, error: errorApi } = useQuery({
     queryKey: ["products"],
     queryFn: fetchProductsFn,
   });
 
-  const productList = Array.isArray(products)
-    ? products
-    : products?.data ?? products?.list ?? [];
+  const { data: stats } = useQuery({
+    queryKey: ["seller-stats"],
+    queryFn: fetchStatsFn,
+  });
+
+  const { data: ordersData } = useQuery({
+    queryKey: ["seller-orders", orderPage, orderStatus],
+    queryFn: fetchOrdersFn,
+  });
+
+  const productList = Array.isArray(products) ? products : products?.data ?? products?.list ?? [];
+  const orders = ordersData?.data ?? [];
+  const pagination = ordersData?.pagination ?? {};
 
   useEffect(() => {
     dispatch(fetchCategories());
@@ -92,7 +70,7 @@ const SellerDashboard = () => {
   const getStatusColor = (status) => {
     const colors = {
       pending: "bg-[#FFF3EC] text-[#FF8A4D]",
-      processing: "bg-[#E9F5FF] text-[#4B9EFF]",
+      paid: "bg-[#E9F5FF] text-[#4B9EFF]",
       shipped: "bg-[#F6EFFE] text-[#9B6BFF]",
       delivered: "bg-[#ECFDF5] text-[#16A34A]",
       cancelled: "bg-[#FFEBEE] text-[#E53935]",
@@ -357,7 +335,7 @@ const SellerDashboard = () => {
                     Total Revenue
                   </h3>
                   <p className="text-3xl font-bold text-gray-900">
-                    ${stats.totalRevenue.toLocaleString()}
+                    ${(stats?.totalRevenue ?? 0).toLocaleString()}
                   </p>
                 </div>
 
@@ -386,7 +364,7 @@ const SellerDashboard = () => {
                     Total Orders
                   </h3>
                   <p className="text-3xl font-bold text-gray-900">
-                    {stats.orders}
+                    {stats?.totalOrders ?? 0}
                   </p>
                 </div>
 
@@ -415,7 +393,7 @@ const SellerDashboard = () => {
                     Total Products
                   </h3>
                   <p className="text-3xl font-bold text-gray-900">
-                    {stats.products}
+                    {stats?.totalProducts ?? 0}
                   </p>
                 </div>
 
@@ -441,10 +419,10 @@ const SellerDashboard = () => {
                     </span>
                   </div>
                   <h3 className="text-gray-600 text-sm font-medium mb-1">
-                    Visitors
+                    Items Sold
                   </h3>
                   <p className="text-3xl font-bold text-gray-900">
-                    {stats.visitors.toLocaleString()}
+                    {(stats?.totalItemsSold ?? 0).toLocaleString()}
                   </p>
                 </div>
               </div>
@@ -486,34 +464,27 @@ const SellerDashboard = () => {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
-                      {recentOrders.map((order) => (
-                        <tr
-                          key={order.id}
-                          className="hover:bg-white/50 transition-colors"
-                        >
+                      {orders.slice(0, 5).map((order) => (
+                        <tr key={order._id} className="hover:bg-white/50 transition-colors">
                           <td className="px-6 py-4 text-sm font-medium text-gray-900">
-                            {order.id}
+                            {order._id.slice(-8)}
                           </td>
                           <td className="px-6 py-4 text-sm text-gray-700">
-                            {order.customer}
+                            {order.user?.fullName ?? 'N/A'}
                           </td>
                           <td className="px-6 py-4 text-sm text-gray-700">
-                            {order.product}
+                            {order.items?.[0]?.productName ?? 'Multiple items'}
                           </td>
                           <td className="px-6 py-4 text-sm font-semibold text-gray-900">
-                            ${order.amount}
+                            ${order.orderTotal}
                           </td>
                           <td className="px-6 py-4">
-                            <span
-                              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(
-                                order.status
-                              )}`}
-                            >
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
                               {order.status}
                             </span>
                           </td>
                           <td className="px-6 py-4 text-sm text-gray-600">
-                            {order.date}
+                            {new Date(order.createdAt).toLocaleDateString()}
                           </td>
                         </tr>
                       ))}
@@ -656,12 +627,13 @@ const SellerDashboard = () => {
           {activeTab === "orders" && (
             <div className="space-y-6">
               <div className="flex items-center space-x-3">
-                <select className="border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-[#FF6B6B] focus:border-transparent">
-                  <option>All Status</option>
-                  <option>Pending</option>
-                  <option>Processing</option>
-                  <option>Shipped</option>
-                  <option>Delivered</option>
+                <select value={orderStatus} onChange={(e) => setOrderStatus(e.target.value)} className="border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-[#FF6B6B] focus:border-transparent">
+                  <option value="">All Status</option>
+                  <option value="pending">Pending</option>
+                  <option value="paid">Paid</option>
+                  <option value="shipped">Shipped</option>
+                  <option value="delivered">Delivered</option>
+                  <option value="cancelled">Cancelled</option>
                 </select>
                 <input
                   type="text"
@@ -699,34 +671,27 @@ const SellerDashboard = () => {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
-                      {recentOrders.map((order) => (
-                        <tr
-                          key={order.id}
-                          className="hover:bg-white/50 transition-colors"
-                        >
+                      {orders.map((order) => (
+                        <tr key={order._id} className="hover:bg-white/50 transition-colors">
                           <td className="px-6 py-4 text-sm font-medium text-gray-900">
-                            {order.id}
+                            {order._id.slice(-8)}
                           </td>
                           <td className="px-6 py-4 text-sm text-gray-700">
-                            {order.customer}
+                            {order.user?.fullName ?? 'N/A'}
                           </td>
                           <td className="px-6 py-4 text-sm text-gray-700">
-                            {order.product}
+                            {order.items?.[0]?.productName ?? 'Multiple items'}
                           </td>
                           <td className="px-6 py-4 text-sm font-semibold text-gray-900">
-                            ${order.amount}
+                            ${order.orderTotal}
                           </td>
                           <td className="px-6 py-4">
-                            <span
-                              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(
-                                order.status
-                              )}`}
-                            >
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
                               {order.status}
                             </span>
                           </td>
                           <td className="px-6 py-4 text-sm text-gray-600">
-                            {order.date}
+                            {new Date(order.createdAt).toLocaleDateString()}
                           </td>
                           <td className="px-6 py-4">
                             <button className="text-[#8B7355] hover:text-[#6B5335] text-sm font-medium">
@@ -738,6 +703,19 @@ const SellerDashboard = () => {
                     </tbody>
                   </table>
                 </div>
+                {pagination.totalPages > 1 && (
+                  <div className="p-4 border-t border-gray-200 flex items-center justify-between">
+                    <button onClick={() => setOrderPage(p => Math.max(1, p - 1))} disabled={orderPage === 1} className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50">
+                      Previous
+                    </button>
+                    <span className="text-sm text-gray-600">
+                      Page {pagination.currentPage} of {pagination.totalPages}
+                    </span>
+                    <button onClick={() => setOrderPage(p => Math.min(pagination.totalPages, p + 1))} disabled={orderPage === pagination.totalPages} className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50">
+                      Next
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           )}
