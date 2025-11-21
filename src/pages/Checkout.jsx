@@ -3,18 +3,21 @@ import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
-import { getCart } from "../features/cartSlice";
+import { getCart, selectCartId } from "../features/cartSlice";
 import { useAuth } from "../contexts/AuthContext";
+import PaymentModal from "../components/PaymentModal";
 
 const Checkout = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const { isAuthenticated, user } = useAuth();
     const { cart } = useSelector((state) => state.cart);
+    const cartId = useSelector(selectCartId);
     const cartItems = Array.isArray(cart) ? cart : [];
 
     const [deliveryMethod, setDeliveryMethod] = useState("delivery");
     const [discountCode, setDiscountCode] = useState("");
+    const [showPaymentModal, setShowPaymentModal] = useState(false);
     const [formData, setFormData] = useState({
         fullName: user?.name || "",
         email: user?.email || "",
@@ -32,7 +35,8 @@ const Checkout = () => {
             return;
         }
         dispatch(getCart());
-    }, [dispatch, isAuthenticated, navigate]);
+
+    }, [dispatch, isAuthenticated, navigate ]);
 
     const handleInputChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -59,8 +63,12 @@ const Checkout = () => {
             alert("Please agree to the terms and conditions");
             return;
         }
-        // Handle payment/order submission
-        console.log("Order submitted:", { formData, cartItems, total });
+        setShowPaymentModal(true);
+    };
+
+    const handlePaymentSuccess = () => {
+        dispatch(getCart());
+        setShowPaymentModal(false);
     };
 
     const getImageUrl = (imageUrl) => {
@@ -357,6 +365,14 @@ const Checkout = () => {
             </section>
 
             <Footer />
+
+            <PaymentModal 
+                isOpen={showPaymentModal}
+                onClose={() => setShowPaymentModal(false)}
+                onSuccess={handlePaymentSuccess}
+                cartId={cartId}
+                total={total}
+            />
 
             {/* Scroll to Top Button */}
             <button
