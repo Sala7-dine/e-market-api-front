@@ -2,18 +2,25 @@ import { useState, useEffect } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from '../config/axios';
 
-const PaymentModal = ({ isOpen, onClose, onSuccess, cartId, total }) => {
+const PaymentModal = ({ isOpen, onClose, onSuccess, cartId, total, couponCode }) => {
   const queryClient = useQueryClient();
-  const [paymentStep, setPaymentStep] = useState('payment'); // payment, processing, success
+  const [paymentStep, setPaymentStep] = useState('payment'); // payment, processing, success, error
+  const [errorMessage, setErrorMessage] = useState('');
   
   const createOrderMutation = useMutation({
-    mutationFn: async (cartId) => {
-      const res = await axios.post(`/orders/addOrder/${cartId}`);
+    mutationFn: async ({ cartId, couponCode }) => {
+      const payload = couponCode ? { couponCode } : {};
+      const res = await axios.post(`/orders/addOrder/${cartId}`, payload);
       return res.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['cart']);
       queryClient.refetchQueries(['cart']);
+    },
+    onError: (error) => {
+      const message = error.response?.data?.message || 'Payment failed';
+      setErrorMessage(message);
+      setPaymentStep('error');
     }
   });
 
@@ -21,20 +28,21 @@ const PaymentModal = ({ isOpen, onClose, onSuccess, cartId, total }) => {
     setPaymentStep('processing');
     
     try {
-      await createOrderMutation.mutateAsync(cartId);
+      await createOrderMutation.mutateAsync({ cartId, couponCode });
       
       // Simulate payment processing
       setTimeout(() => {
         setPaymentStep('success');
       }, 2000);
     } catch (error) {
-      setPaymentStep('payment');
+      // Error is handled by onError callback
       console.error('Payment failed:', error);
     }
   };
 
   const handleClose = () => {
     setPaymentStep('payment');
+    setErrorMessage('');
     onClose();
   };
 
@@ -77,7 +85,7 @@ const PaymentModal = ({ isOpen, onClose, onSuccess, cartId, total }) => {
             <button
               onClick={handlePayment}
               disabled={createOrderMutation.isPending}
-              className="w-full bg-[#FF6B6B] text-white py-3 rounded-full font-medium hover:bg-[#ff5252] transition-colors disabled:opacity-50"
+              className="w-full bg-[#FF6B6B] text-white py-3 rounded-full font-medium hover:bg-[#ff5252] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Pay Now
             </button>
@@ -102,6 +110,33 @@ const PaymentModal = ({ isOpen, onClose, onSuccess, cartId, total }) => {
             <h2 className="text-xl font-semibold text-green-600 mb-2">Payment Successful!</h2>
             <p className="text-gray-600">Your order has been placed successfully</p>
           </div>
+        )}
+
+        {paymentStep === 'error' && (
+          <>
+            <button 
+              onClick={handleClose}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+            >
+              ✕
+            </button>
+            
+            <div className="text-center py-8">
+              <div className="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+              </div>
+              <h2 className="text-xl font-semibold text-red-600 mb-2">Payment Failed</h2>
+              <p className="text-gray-600 mb-4">{errorMessage}</p>
+              <button
+                onClick={() => setPaymentStep('payment')}
+                className="bg-[#FF6B6B] text-white py-2 px-6 rounded-full font-medium hover:bg-[#ff5252] transition-colors"
+              >
+                Try Again
+              </button>
+            </div>
+          </>
         )}
       </div>
     </div>
