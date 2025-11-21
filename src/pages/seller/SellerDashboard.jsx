@@ -12,6 +12,8 @@ import ProductSkeletonLoader from "../../components/Products/ProductCardLoader.j
 import AddProductModal from "../../components/Products/AddProductModal.jsx";
 import EditProductModal from "../../components/Products/EditProductModal.jsx";
 import ViewProductModal from "../../components/Products/ViewProductModal.jsx";
+import { useQuery } from "@tanstack/react-query";
+import axios from "../../config/axios.js";
 
 const SellerDashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
@@ -23,10 +25,21 @@ const SellerDashboard = () => {
 
   const dispatch = useDispatch();
 
-  const products = useSelector(selectProducts);
+  // const products = useSelector(selectProducts);
   const categories = useSelector(selectCategories);
-  const loading = useSelector(selectProductsLoading);
-  const error = useSelector(selectProductsError);
+  // const loading = useSelector(selectProductsLoading);
+  // const error = useSelector(selectProductsError);
+  const fetchProducts = async () =>{
+    const res = await axios.get("/seller/products");
+    return res.data.data;
+  }
+
+  const {data: products, isLoading, isError, error: errorApi} = useQuery({
+    queryKey: ["products"],
+    queryFn: fetchProducts,
+  })
+
+  console.log("proddddd", products);
   
   // Make productList safe: accept array or object shapes (data / list)
   const productList = Array.isArray(products)
@@ -34,7 +47,7 @@ const SellerDashboard = () => {
     : products?.data ?? products?.list ?? [];
 
   useEffect(() => {
-    dispatch(fetchProducts());
+    // dispatch(fetchProducts());
     dispatch(fetchCategories());
   }, [dispatch]);
 
@@ -116,7 +129,7 @@ const SellerDashboard = () => {
 
   // console.log(error);
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex h-screen bg-gray-50">
         <div className="flex-1 flex items-center justify-center">
@@ -129,14 +142,14 @@ const SellerDashboard = () => {
     );
   }
 
-  if (error) {
-    console.error('Dashboard Error:', error);
+  if (isError) {
+    console.error('Dashboard Error:', errorApi);
     return <div className="text-red-600">Error: {typeof error === 'object' ? JSON.stringify(error, null, 2) : String(error)}</div>;
   }
 
   console.log(productList[0]?.images?.[0]);
   // console.log(products.images[0]);
-console.log(error);
+// console.log(error);
 
   return (
     <div className="flex h-screen bg-gray-50">
@@ -523,7 +536,7 @@ console.log(error);
                 </button>
               </div>
 
-              {loading ? (
+              {isLoading ? (
                 <ProductSkeletonLoader />
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
