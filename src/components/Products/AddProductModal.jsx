@@ -2,9 +2,6 @@ import { useState, useRef, useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "../../config/axios";
 
-// Styled AddProductModal — kept original logic but improved category selector (searchable multi-select with tags)
-// Palette aligned with Seller Dashboard (coral #FF6B6B, warm brown #8B7355)
-
 const AddProductModal = ({ isOpen, onClose, categories = [] }) => {
   const queryClient = useQueryClient();
 

@@ -7,7 +7,6 @@ import {
   fetchProducts,
 } from "../../features/productSlice";
 
-// Styled EditProductModal — preserves logic, improves category selector and visuals to match Seller Dashboard
 
 const MultiSelectCategoriesStyled = ({ categories = [], value = [], onChange }) => {
   const [open, setOpen] = useState(false);
