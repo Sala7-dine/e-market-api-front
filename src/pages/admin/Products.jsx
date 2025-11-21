@@ -80,6 +80,7 @@ const handleViewImages = (product) => {
         <table className="products-table">
           <thead>
             <tr>
+                <th>ID</th>
               <th>Produit</th>
               <th>Description</th>
               <th>Stock</th>
@@ -92,6 +93,7 @@ const handleViewImages = (product) => {
           <tbody>
             {products.map((product) => (
               <tr key={product._id}>
+                 <td>{product._id}</td>
                 <td>{product.title}</td>
                 <td className="desc">{product.description}</td>
                 <td>

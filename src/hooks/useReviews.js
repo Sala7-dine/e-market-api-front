@@ -20,7 +20,8 @@ export const useReviews = () => {
   const deleteReview = useMutation({
     mutationFn: ({ productId, reviewId }) =>
       reviewService.deleteReview(productId, reviewId),
-    onSuccess: (_, { reviewId }) => {
+    onSuccess: (_, { productId,reviewId }) => {
+      console.log("hllo succes");
       dispatch(removeReview(reviewId)); // supprime localement
       queryClient.invalidateQueries(["reviews"]);
     },

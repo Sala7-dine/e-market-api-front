@@ -14,6 +14,8 @@ const Reviews = () => {
   const [showFull, setShowFull] = useState(null);
 
   const handleDelete = (productId, reviewId) => {
+    console.log("prot",productId);
+    console.group("review",reviewId)
     deleteReview.mutate({ productId, reviewId });
   };
 
@@ -63,7 +65,7 @@ const Reviews = () => {
 
                 <td> { review ?  review.user.fullName : "Utilisateur inconnu"}</td>
 
-                <td>{review.product}</td>
+                <td>{review.productTitle}</td>
                 <td>{review.rating} ⭐</td>
                  <td>
         {showFull ? review.comment : review.comment.slice(0, 30) + "... "}
@@ -81,9 +83,10 @@ const Reviews = () => {
 
                 <td style={{ display: "flex", gap: "8px" }}>
                   
-                  <button className="btn-delete"  styleonClick={() => handleDelete(review._id)}>
-                    <FaTrash color="   #5b3d29;" />
-                  </button>
+                <button className="btn-delete" onClick={() => handleDelete(review.productId, review._id)}>
+  <FaTrash color="#5b3d29" />
+</button>
+
                 </td>
               </tr>
             ))}
