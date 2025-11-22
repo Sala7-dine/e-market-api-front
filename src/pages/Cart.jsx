@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   addToCart,
   getCart,
@@ -10,17 +10,27 @@ import { Trash2, ShoppingBag } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import fetchCartApi from "../service/cartService";
+import axios from "../config/axios";
+import PaymentModal from '../components/PaymentModal';
 
 export default function Cart() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
 
   //on recupere le panier et l'état depuis le store
   // const {cart} = useSelector((state) => state.cart);
   // const loading = useSelector((state) => state.loading);
+  const fetchCartApi = async () => {
+    console.log("inside fetchCartApi");
+    const res = await axios.get("/carts/getcarts");
+    console.log("ressssssssssss", res.data.data[0]);
+
+    return res.data.data[0];
+  };
 
   const {
-    data: cart,
+    data: cartData,
     isLoading,
     isError,
     error,
@@ -28,7 +38,8 @@ export default function Cart() {
     queryKey: ["cart"],
     queryFn: fetchCartApi,
   });
-  const cartItems = cart || [];
+  const cartItems = cartData?.items || [];
+  const cartId = cartData?._id;
 
   // useEffect(() => {
   //   dispatch(getCart());
@@ -192,6 +203,7 @@ export default function Cart() {
 
               {/* Bouton de paiement */}
               <button
+                onClick={() => setShowPaymentModal(true)}
                 disabled={cartItems.length === 0}
                 className="w-full bg-[#8A6B58] text-white py-4 rounded-full font-medium hover:bg-[#725744] transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-2 mb-4"
               >
@@ -215,6 +227,13 @@ export default function Cart() {
           </div>
         </div>
       </div>
+      
+      <PaymentModal 
+        isOpen={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        cartId={cartId}
+        total={total}
+      />
     </div>
   );
 }
