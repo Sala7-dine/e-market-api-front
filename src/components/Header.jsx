@@ -215,6 +215,15 @@ const Header = () => {
                         Admin Dashboard
                       </Link>
                     )}
+                    {user?.role === 'user' && (
+                      <Link
+                        to="/ordersHistory"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                      >
+                        <i className="la la-list-alt mr-2"></i>
+                        Commandes
+                      </Link>
+                    )}
                     <Link
                       to="/"
                       onClick={logout}

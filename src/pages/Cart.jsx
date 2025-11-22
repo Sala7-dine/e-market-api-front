@@ -9,7 +9,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Trash2, ShoppingBag } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import axios from "../config/axios";
+import fetchCartApi from "../service/cartService";
 
 export default function Cart() {
   const navigate = useNavigate();
@@ -18,13 +18,6 @@ export default function Cart() {
   //on recupere le panier et l'état depuis le store
   // const {cart} = useSelector((state) => state.cart);
   // const loading = useSelector((state) => state.loading);
-  const fetchCartApi = async () => {
-    console.log("inside fetchCartApi");
-    const res = await axios.get("/carts/getcarts");
-    console.log("ressssssssssss", res.data.data[0].items);
-
-    return res.data.data[0].items;
-  };
 
   const {
     data: cart,
