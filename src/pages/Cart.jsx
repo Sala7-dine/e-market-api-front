@@ -9,6 +9,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Trash2, ShoppingBag } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import fetchCartApi from "../service/cartService";
 import axios from "../config/axios";
 import PaymentModal from '../components/PaymentModal';
 
