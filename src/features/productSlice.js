@@ -61,53 +61,43 @@ export const createProduct = createAsyncThunk(
 );
 export const fetchAllProducts = createAsyncThunk(
   "products/fetchAllProducts",
-  async (_, { rejectWithValue }) => {
+  async ({ page = 1, limit = 10 }, { rejectWithValue }) => {
     try {
-      console.log("helllo merime el mecaniqy");
-      const res = await axios.get("/products");
-      console.log("all products ", res.data.data);
-      return res.data.data;
+      const res = await axios.get(`/products?page=${page}&limit=${limit}`);
+      return res.data;
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
     }
   }
 );
+
 
 
 export const updateProduct = createAsyncThunk(
   "products/updateProduct",
-  async ({ id, productData }, { rejectWithValue }) => {
+  async ({ page = 1, limit = 10 }, { rejectWithValue }) => {
     try {
-      const res = await axios.put(`/products/update/${id}`, productData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-      return res.data;
+      const res = await axios.get(`/products?page=${page}&limit=${limit}`);
+      return res.data; // on reçoit {data, totalPages, totalItems, currentPage}
     } catch (error) {
-      console.error('Full API Error (updateProduct):', error);
-      return rejectWithValue({
-        message: error.message,
-        status: error.response?.status,
-        data: error.response?.data,
-      });
+      return rejectWithValue(error.response?.data || error.message);
     }
   }
 );
-export const  deleteproduct= createAsyncThunk("products/deleteproduct",
- async(id,{rejectWithValue})=>{
-  try{
-    const response = await axios.delete(`/products/delete/${id}`);
-  console.log("res remove", response);
+export const deleteproduct = createAsyncThunk("products/deleteproduct",
+  async (id, { rejectWithValue }) => {
+    try {
+      const response = await axios.delete(`/products/delete/${id}`);
+      console.log("res remove", response);
       return id;
 
-  }
-  catch(error){
-    console.error('Full API Error (deleterproduct):', error);
+    }
+    catch (error) {
+      console.error('Full API Error (deleterproduct):', error);
       return rejectWithValue(error.response?.data || error.message);
 
+    }
   }
- }
 )
 
 // export const fetchProductById = createAsyncThunk(
@@ -125,7 +115,12 @@ export const  deleteproduct= createAsyncThunk("products/deleteproduct",
 const productSlice = createSlice({
   name: "products",
 
-  initialState: { products: [], categories: [], loading: false, error: null },
+  initialState: {
+    products: [], categories: [], loading: false, error: null, currentPage: 1,
+    totalPages: 1,
+    totalItems: 0,
+    limit: 10,
+  },
 
   reducers: {},
   extraReducers: (builder) => {
@@ -174,26 +169,38 @@ const productSlice = createSlice({
         state.loading = false;
         state.products.push(action.payload);
       })
-     
-   
+
+
       // FETCH ALL Products :
       .addCase(fetchAllProducts.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchAllProducts.fulfilled, (state, action) => {
-        state.loading = false;
-        state.products = action.payload;
-      })
+     .addCase(fetchAllProducts.fulfilled, (state, action) => {
+  state.loading = false;
+
+  // Liste des produits
+  state.products = action.payload.data;
+
+  // Pagination
+  state.currentPage = action.payload.pagination.currentPage;
+  state.totalPages = action.payload.pagination.totalPages;
+  state.totalItems = action.payload.pagination.totalProducts;
+  state.limit = action.payload.pagination.limit;
+})
+
+
       .addCase(fetchAllProducts.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
       // delete product :
-       .addCase(deleteproduct.fulfilled,(state,acton)=>{
-        state.products=state.products.filter((product)=>product._id!==acton.payload);
-
-       })
+      .addCase(deleteproduct.fulfilled, (state, action) => {
+        state.products = state.products.filter(
+          (product) => product._id !== action.payload
+        );
+        state.totalItems -= 1;
+      });
   },
 });
 

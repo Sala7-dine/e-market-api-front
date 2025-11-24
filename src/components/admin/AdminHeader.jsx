@@ -1,12 +1,14 @@
 import  '../../assets/styles/admin/header.css'
 import boy from '../../assets/images/boy.jpg';
 import { useAuth } from '../../contexts/AuthContext';
+import { FaBell } from 'react-icons/fa';
 
 
 
  const  AdminHeader = () => {
-    const {user,token}=useAuth();
-    console.log("token in header",token)
+    const {user,token,logout}=useAuth();
+    console.log("user",user)   ;
+     console.log("token in header",token)
     console.log("user ino header",user)
 
     
@@ -19,7 +21,7 @@ import { useAuth } from '../../contexts/AuthContext';
         className="search-input"
       />
       <div className="header-right">
-        <div className="notification">🔔</div>
+        <div className="notification"><FaBell color='#FF6F61' /></div>
         <div className="user-info">
           <img
             src={boy}
