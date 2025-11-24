@@ -26,12 +26,13 @@ const SellerDashboard = () => {
 
   const [orderStatus, setOrderStatus] = useState("");
   const [orderPage, setOrderPage] = useState(1);
+  const [productPage, setProductPage] = useState(1);
   const [editingOrderId, setEditingOrderId] = useState(null);
   const queryClient = useQueryClient();
 
-  const { data: products, isLoading, isError, error: errorApi } = useQuery({
-    queryKey: ["seller-products"],
-    queryFn: sellerService.getProducts,
+  const { data: productsData, isLoading, isError, error: errorApi } = useQuery({
+    queryKey: ["seller-products", productPage],
+    queryFn: () => sellerService.getProducts({ page: productPage, limit: 12 }),
   });
 
   const { data: stats } = useQuery({
@@ -57,9 +58,10 @@ const SellerDashboard = () => {
     updateStatus({ orderId, status: newStatus });
   };
 
-  const productList = Array.isArray(products) ? products : products?.data ?? products?.list ?? [];
+  const productList = productsData?.data ?? [];
+  const productPagination = productsData?.pagination ?? {};
   const orders = ordersData?.data ?? [];
-  const pagination = ordersData?.pagination ?? {};
+  const orderPagination = ordersData?.pagination ?? {};
 
   // Calculate revenue by month from orders
   const revenueByMonth = React.useMemo(() => {
@@ -488,7 +490,7 @@ const SellerDashboard = () => {
                     <h2 className="text-lg font-semibold text-gray-900">
                       Recent Orders
                     </h2>
-                    <button className="text-sm text-[#8B7355] hover:text-[#6B5335] font-medium">
+                    <button onClick={() => setActiveTab('orders')} className="text-sm text-[#8B7355] hover:text-[#6B5335] font-medium">
                       View all
                     </button>
                   </div>
@@ -681,6 +683,27 @@ const SellerDashboard = () => {
                   ))}
                 </div>
               )}
+              {productPagination.totalPages > 1 && (
+                <div className="flex items-center justify-center gap-2 mt-6">
+                  <button
+                    onClick={() => setProductPage(p => Math.max(1, p - 1))}
+                    disabled={productPage === 1}
+                    className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                  >
+                    Previous
+                  </button>
+                  <span className="text-sm text-gray-600">
+                    Page {productPagination.currentPage} of {productPagination.totalPages}
+                  </span>
+                  <button
+                    onClick={() => setProductPage(p => Math.min(productPagination.totalPages, p + 1))}
+                    disabled={productPage === productPagination.totalPages}
+                    className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                  >
+                    Next
+                  </button>
+                </div>
+              )}
             </div>
           )}
 
@@ -789,15 +812,15 @@ const SellerDashboard = () => {
                     </tbody>
                   </table>
                 </div>
-                {pagination.totalPages > 1 && (
+                {orderPagination.totalPages > 1 && (
                   <div className="p-4 border-t border-gray-200 flex items-center justify-between">
                     <button onClick={() => setOrderPage(p => Math.max(1, p - 1))} disabled={orderPage === 1} className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50">
                       Previous
                     </button>
                     <span className="text-sm text-gray-600">
-                      Page {pagination.currentPage} of {pagination.totalPages}
+                      Page {orderPagination.currentPage} of {orderPagination.totalPages}
                     </span>
-                    <button onClick={() => setOrderPage(p => Math.min(pagination.totalPages, p + 1))} disabled={orderPage === pagination.totalPages} className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50">
+                    <button onClick={() => setOrderPage(p => Math.min(orderPagination.totalPages, p + 1))} disabled={orderPage === orderPagination.totalPages} className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50">
                       Next
                     </button>
                   </div>
