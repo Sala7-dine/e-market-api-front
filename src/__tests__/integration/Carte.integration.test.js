@@ -5,7 +5,7 @@ import { configureStore } from '@reduxjs/toolkit';
 import { BrowserRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import axios from '../../config/axios';
-import cartReducer, { addToCart } from '../../features/cartSlice';
+import cartReducer, { addToCart, updateProductQuantity, removeFromCart } from '../../features/cartSlice';
 import Cart from '../../pages/Cart';
 
 // Mock axios
@@ -79,20 +79,7 @@ describe('UT-10: Ajouter produit dans panier - Integration Test', () => {
     });
   });
 
-  // test('should display added product in cart', async () => {
-  //   mockedAxios.get.mockResolvedValueOnce(mockCartResponse);
-
-  //   render(
-  //     <TestWrapper>
-  //       <Cart />
-  //     </TestWrapper>
-  //   );
-
-  //   await waitFor(() => {
-  //     expect(screen.getByText('Test Product')).toBeInTheDocument();
-  //     expect(screen.getByText('$29.99')).toBeInTheDocument();
-  //   });
-  // });
+  
 
   test('should handle add to cart API error', async () => {
     const store = configureStore({
@@ -110,5 +97,75 @@ describe('UT-10: Ajouter produit dans panier - Integration Test', () => {
 
     expect(result.type).toBe('cart/addToCart/rejected');
     expect(result.payload).toEqual({ message: 'Product not found' });
+  });
+
+  test('should update product quantity successfully', async () => {
+    mockedAxios.put.mockResolvedValueOnce({ data: { success: true } });
+
+    const store = configureStore({
+      reducer: { cart: cartReducer }
+    });
+
+    const result = await store.dispatch(updateProductQuantity({
+      productId: 'product123',
+      quantity: 3
+    }));
+
+    expect(result.type).toBe('cart/updateProductQuantity/fulfilled');
+    expect(mockedAxios.put).toHaveBeenCalledWith('carts/updateCart/product123', {
+      quantity: 3
+    });
+    expect(result.payload).toEqual({ productId: 'product123', quantity: 3 });
+  });
+
+  test('should remove product from cart successfully', async () => {
+    mockedAxios.delete.mockResolvedValueOnce({ data: { success: true } });
+
+    const store = configureStore({
+      reducer: { cart: cartReducer }
+    });
+
+    const result = await store.dispatch(removeFromCart({
+      productId: 'product123'
+    }));
+
+    expect(result.type).toBe('cart/removeFromCart/fulfilled');
+    expect(mockedAxios.delete).toHaveBeenCalledWith('carts/deleteProduct/product123');
+    expect(result.payload).toBe('product123');
+  });
+
+  test('should handle update quantity API error', async () => {
+    const store = configureStore({
+      reducer: { cart: cartReducer }
+    });
+
+    mockedAxios.put.mockRejectedValueOnce({
+      response: { data: { message: 'Update failed' } }
+    });
+
+    const result = await store.dispatch(updateProductQuantity({
+      productId: 'product123',
+      quantity: 5
+    }));
+
+    expect(result.type).toBe('cart/updateProductQuantity/rejected');
+    expect(result.payload).toEqual({ message: 'Update failed' });
+  });
+
+  test('should handle remove product API error', async () => {
+    const store = configureStore({
+      reducer: { cart: cartReducer }
+    });
+
+    mockedAxios.delete.mockRejectedValueOnce({
+      response: { data: { message: 'Remove failed' } }
+    });
+
+    const result = await store.dispatch(removeFromCart({
+      productId: 'product123'
+    }));
+
+    expect(result.type).toBe('cart/removeFromCart/rejected');
+    expect(result.payload).toEqual({ message: 'Remove failed' });
   });
 });
