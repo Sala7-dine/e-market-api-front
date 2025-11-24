@@ -1,20 +1,17 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { Link } from "react-router-dom";
 import {
-  fetchProducts,
   fetchCategories,
-  selectProducts,
   selectCategories,
-  selectProductsError,
-  selectProductsLoading,
 } from "../../features/productSlice";
-import ProductSkeletonLoader from "../../components/Products/ProductCardLoader.jsx.jsx";
+import ProductSkeletonLoader from "../../components/Products/ProductCardLoader.jsx";
 import AddProductModal from "../../components/Products/AddProductModal.jsx";
 import EditProductModal from "../../components/Products/EditProductModal.jsx";
 import ViewProductModal from "../../components/Products/ViewProductModal.jsx";
-import { useQuery } from "@tanstack/react-query";
-import axios from "../../config/axios.js";
-
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "../../contexts/AuthContext.jsx";
+import { sellerService } from "../../service/sellerService.js";
 const SellerDashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -23,83 +20,114 @@ const SellerDashboard = () => {
   const [isViewOpen, setIsViewOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
 
+  const { logout } = useAuth();
   const dispatch = useDispatch();
-
-  // const products = useSelector(selectProducts);
   const categories = useSelector(selectCategories);
-  // const loading = useSelector(selectProductsLoading);
-  // const error = useSelector(selectProductsError);
-  const fetchProducts = async () =>{
-    const res = await axios.get("/seller/products");
-    return res.data.data;
-  }
 
-  const {data: products, isLoading, isError, error: errorApi} = useQuery({
-    queryKey: ["products"],
-    queryFn: fetchProducts,
-  })
+  const [orderStatus, setOrderStatus] = useState("");
+  const [orderPage, setOrderPage] = useState(1);
+  const [editingOrderId, setEditingOrderId] = useState(null);
+  const queryClient = useQueryClient();
 
-  console.log("proddddd", products);
-  
-  // Make productList safe: accept array or object shapes (data / list)
-  const productList = Array.isArray(products)
-    ? products
-    : products?.data ?? products?.list ?? [];
+  const { data: products, isLoading, isError, error: errorApi } = useQuery({
+    queryKey: ["seller-products"],
+    queryFn: sellerService.getProducts,
+  });
+
+  const { data: stats } = useQuery({
+    queryKey: ["seller-stats"],
+    queryFn: sellerService.getStats,
+  });
+
+  const { data: ordersData } = useQuery({
+    queryKey: ["seller-orders", orderPage, orderStatus],
+    queryFn: () => sellerService.getOrders({ page: orderPage, limit: 10, status: orderStatus }),
+  });
+
+  const { mutate: updateStatus, isLoading: isUpdatingStatus } = useMutation({
+    mutationFn: sellerService.updateOrderStatus,
+    onSuccess: () => {
+      queryClient.invalidateQueries(["seller-orders"]);
+      queryClient.invalidateQueries(["seller-stats"]);
+      setEditingOrderId(null);
+    },
+  });
+
+  const handleStatusChange = (orderId, newStatus) => {
+    updateStatus({ orderId, status: newStatus });
+  };
+
+  const productList = Array.isArray(products) ? products : products?.data ?? products?.list ?? [];
+  const orders = ordersData?.data ?? [];
+  const pagination = ordersData?.pagination ?? {};
+
+  // Calculate revenue by month from orders
+  const revenueByMonth = React.useMemo(() => {
+    const monthlyData = {};
+    
+    orders.forEach(order => {
+      const date = new Date(order.createdAt);
+      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      const monthName = date.toLocaleDateString('en-US', { month: 'short' });
+      
+      if (!monthlyData[monthKey]) {
+        monthlyData[monthKey] = { month: monthName, revenue: 0 };
+      }
+      
+      monthlyData[monthKey].revenue += order.orderTotal || 0;
+    });
+    
+    return Object.values(monthlyData).slice(-6);
+  }, [orders]);
+
+  // Calculate best sellers from orders
+  const bestSellers = React.useMemo(() => {
+    const productSales = {};
+    
+    orders.forEach(order => {
+      order.items?.forEach(item => {
+        const productId = item.productId?._id || item.productId;
+        const productTitle = item.productId?.title || item.productName;
+        
+        if (!productSales[productId]) {
+          productSales[productId] = {
+            id: productId,
+            title: productTitle,
+            quantity: 0,
+            revenue: 0
+          };
+        }
+        
+        productSales[productId].quantity += item.quantity;
+        productSales[productId].revenue += item.total || (item.price * item.quantity);
+      });
+    });
+    
+    // Match with product list to get images
+    const salesWithImages = Object.values(productSales).map(sale => {
+      const product = productList.find(p => (p._id || p.id) === sale.id);
+      return {
+        ...sale,
+        images: product?.images || []
+      };
+    });
+    
+    return salesWithImages
+      .sort((a, b) => b.quantity - a.quantity)
+      .slice(0, 5);
+  }, [orders, productList]);
 
   useEffect(() => {
-    // dispatch(fetchProducts());
     dispatch(fetchCategories());
   }, [dispatch]);
 
-  const [stats] = useState({
-    totalRevenue: 24580.5,
-    orders: 342,
-    products: 68,
-    visitors: 12543,
-  });
-
-  const [recentOrders] = useState([
-    {
-      id: "ORD-2501",
-      customer: "Sarah Johnson",
-      product: "Premium Cotton T-Shirt",
-      amount: 29.99,
-      status: "pending",
-      date: "Nov 12, 2025",
-    },
-    {
-      id: "ORD-2502",
-      customer: "Michael Chen",
-      product: "Designer Jeans",
-      amount: 79.99,
-      status: "processing",
-      date: "Nov 12, 2025",
-    },
-    {
-      id: "ORD-2503",
-      customer: "Emma Davis",
-      product: "Leather Jacket",
-      amount: 199.99,
-      status: "shipped",
-      date: "Nov 11, 2025",
-    },
-    {
-      id: "ORD-2504",
-      customer: "James Wilson",
-      product: "Cotton T-Shirt",
-      amount: 29.99,
-      status: "delivered",
-      date: "Nov 10, 2025",
-    },
-  ]);
-
   const getStatusColor = (status) => {
     const colors = {
-      pending: "bg-yellow-100 text-yellow-800",
-      processing: "bg-blue-100 text-blue-800",
-      shipped: "bg-purple-100 text-purple-800",
-      delivered: "bg-green-100 text-green-800",
-      cancelled: "bg-red-100 text-red-800",
+      pending: "bg-[#FFF3EC] text-[#FF8A4D]",
+      paid: "bg-[#E9F5FF] text-[#4B9EFF]",
+      shipped: "bg-[#F6EFFE] text-[#9B6BFF]",
+      delivered: "bg-[#ECFDF5] text-[#16A34A]",
+      cancelled: "bg-[#FFEBEE] text-[#E53935]",
     };
     return colors[status] || "bg-gray-100 text-gray-800";
   };
@@ -113,7 +141,7 @@ const SellerDashboard = () => {
     {
       id: "products",
       label: "Products",
-      icon: "M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4",
+      icon: "M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10",
     },
     {
       id: "orders",
@@ -127,14 +155,12 @@ const SellerDashboard = () => {
     },
   ];
 
-  // console.log(error);
-
   if (isLoading) {
     return (
-      <div className="flex h-screen bg-gray-50">
+      <div className="flex h-screen bg-gradient-to-br from-[#E8EEF2] to-[#D5E5F0]">
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FF6B6B] mx-auto mb-4"></div>
             <p className="text-gray-600">Loading your dashboard...</p>
           </div>
         </div>
@@ -143,16 +169,19 @@ const SellerDashboard = () => {
   }
 
   if (isError) {
-    console.error('Dashboard Error:', errorApi);
-    return <div className="text-red-600">Error: {typeof error === 'object' ? JSON.stringify(error, null, 2) : String(error)}</div>;
+    console.error("Dashboard Error:", errorApi);
+    return (
+      <div className="text-red-600">
+        Error:{" "}
+        {typeof errorApi === "object"
+          ? JSON.stringify(errorApi, null, 2)
+          : String(errorApi)}
+      </div>
+    );
   }
 
-  console.log(productList[0]?.images?.[0]);
-  // console.log(products.images[0]);
-// console.log(error);
-
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-[#ffffff]">
       {/* Sidebar */}
       <aside
         className={`bg-white border-r border-gray-200 transition-all duration-300 ${
@@ -164,7 +193,7 @@ const SellerDashboard = () => {
           <div className="flex items-center justify-between p-6 border-b border-gray-200">
             {sidebarOpen ? (
               <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+                <div className="w-8 h-8 bg-gradient-to-br from-[#FF6B6B] to-[#8B7355] rounded-lg flex items-center justify-center">
                   <span className="text-white font-bold text-sm">S</span>
                 </div>
                 <span className="text-xl font-bold text-gray-900">
@@ -172,7 +201,7 @@ const SellerDashboard = () => {
                 </span>
               </div>
             ) : (
-              <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center mx-auto">
+              <div className="w-8 h-8 bg-gradient-to-br from-[#FF6B6B] to-[#8B7355] rounded-lg flex items-center justify-center mx-auto">
                 <span className="text-white font-bold text-sm">S</span>
               </div>
             )}
@@ -184,14 +213,14 @@ const SellerDashboard = () => {
               <button
                 key={item.id}
                 onClick={() => setActiveTab(item.id)}
-                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all ${
+                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all text-left ${
                   activeTab === item.id
-                    ? "bg-blue-50 text-blue-600"
-                    : "text-gray-700 hover:bg-gray-50"
+                    ? "bg-[#FFEDED] text-[#FF6B6B]"
+                    : "text-gray-700 hover:bg-white/50"
                 }`}
               >
                 <svg
-                  className="w-5 h-5 flex-shrink-0"
+                  className="w-5 h-5 flex-shrink-0 text-gray-600"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -210,27 +239,48 @@ const SellerDashboard = () => {
             ))}
           </nav>
 
-          {/* User Profile */}
-          <div className="p-4 border-t border-gray-200">
-            <div
-              className={`flex items-center ${
-                sidebarOpen ? "space-x-3" : "justify-center"
-              }`}
+          {/* Navigation Links */}
+          <div className="p-4 border-t border-gray-200 space-y-2">
+            <Link
+              to="/"
+              className="w-full flex items-center space-x-3 px-4 py-2 rounded-lg text-gray-700 hover:bg-white/50 transition-colors"
             >
-              <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-semibold flex-shrink-0">
-                JD
-              </div>
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+                />
+              </svg>
+              {sidebarOpen && <span className="text-sm font-medium">Home</span>}
+            </Link>
+            <button
+              onClick={logout}
+              className="w-full flex items-center space-x-3 px-4 py-2 rounded-lg text-[#E03D3D] hover:bg-[#FFEDED] transition-colors"
+            >
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                />
+              </svg>
               {sidebarOpen && (
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900 truncate">
-                    John Doe
-                  </p>
-                  <p className="text-xs text-gray-500 truncate">
-                    john@example.com
-                  </p>
-                </div>
+                <span className="text-sm font-medium">Logout</span>
               )}
-            </div>
+            </button>
           </div>
         </div>
       </aside>
@@ -238,15 +288,15 @@ const SellerDashboard = () => {
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
-        <header className="bg-white border-b border-gray-200 px-8 py-4">
+        <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200 px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <button
                 onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                className="p-2 hover:bg-white/60 rounded-lg transition-colors"
               >
                 <svg
-                  className="w-6 h-6 text-gray-600"
+                  className="w-6 h-6 text-gray-700"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -269,7 +319,7 @@ const SellerDashboard = () => {
               </div>
             </div>
             <div className="flex items-center space-x-3">
-              <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors relative">
+              <button className="p-2 hover:bg-white/60 rounded-lg transition-colors relative">
                 <svg
                   className="w-6 h-6 text-gray-600"
                   fill="none"
@@ -283,8 +333,26 @@ const SellerDashboard = () => {
                     d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
                   />
                 </svg>
-                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+                <span className="absolute top-1 right-1 w-2 h-2 bg-[#FF6B6B] rounded-full"></span>
               </button>
+              <Link
+                to="/profile"
+                className="p-2 hover:bg-white/60 rounded-lg transition-colors"
+              >
+                <svg
+                  className="w-6 h-6 text-gray-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                  />
+                </svg>
+              </Link>
             </div>
           </div>
         </header>
@@ -298,9 +366,9 @@ const SellerDashboard = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <div className="bg-white rounded-xl p-6 border border-gray-200 hover:shadow-lg transition-shadow">
                   <div className="flex items-center justify-between mb-4">
-                    <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                    <div className="w-12 h-12 bg-[#FFF0F0] rounded-xl flex items-center justify-center">
                       <svg
-                        className="w-6 h-6 text-green-600"
+                        className="w-6 h-6 text-[#FF6B6B]"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -313,7 +381,7 @@ const SellerDashboard = () => {
                         />
                       </svg>
                     </div>
-                    <span className="text-xs font-semibold text-green-600 bg-green-100 px-2 py-1 rounded-full">
+                    <span className="text-xs font-semibold text-[#FF6B6B] bg-[#FFF3F3] px-2 py-1 rounded-full">
                       +12.5%
                     </span>
                   </div>
@@ -321,15 +389,15 @@ const SellerDashboard = () => {
                     Total Revenue
                   </h3>
                   <p className="text-3xl font-bold text-gray-900">
-                    ${stats.totalRevenue.toLocaleString()}
+                    ${(stats?.totalRevenue ?? 0).toLocaleString()}
                   </p>
                 </div>
 
                 <div className="bg-white rounded-xl p-6 border border-gray-200 hover:shadow-lg transition-shadow">
                   <div className="flex items-center justify-between mb-4">
-                    <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                    <div className="w-12 h-12 bg-[#F0FAFF] rounded-xl flex items-center justify-center">
                       <svg
-                        className="w-6 h-6 text-blue-600"
+                        className="w-6 h-6 text-[#8B7355]"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -342,7 +410,7 @@ const SellerDashboard = () => {
                         />
                       </svg>
                     </div>
-                    <span className="text-xs font-semibold text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
+                    <span className="text-xs font-semibold text-[#8B7355] bg-[#FFF8F2] px-2 py-1 rounded-full">
                       +8.2%
                     </span>
                   </div>
@@ -350,15 +418,15 @@ const SellerDashboard = () => {
                     Total Orders
                   </h3>
                   <p className="text-3xl font-bold text-gray-900">
-                    {stats.orders}
+                    {stats?.totalOrders ?? 0}
                   </p>
                 </div>
 
                 <div className="bg-white rounded-xl p-6 border border-gray-200 hover:shadow-lg transition-shadow">
                   <div className="flex items-center justify-between mb-4">
-                    <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
+                    <div className="w-12 h-12 bg-[#F9F5FF] rounded-xl flex items-center justify-center">
                       <svg
-                        className="w-6 h-6 text-purple-600"
+                        className="w-6 h-6 text-[#9B6BFF]"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -371,7 +439,7 @@ const SellerDashboard = () => {
                         />
                       </svg>
                     </div>
-                    <span className="text-xs font-semibold text-purple-600 bg-purple-100 px-2 py-1 rounded-full">
+                    <span className="text-xs font-semibold text-[#8B7355] bg-[#FFF8F2] px-2 py-1 rounded-full">
                       +3
                     </span>
                   </div>
@@ -379,15 +447,15 @@ const SellerDashboard = () => {
                     Total Products
                   </h3>
                   <p className="text-3xl font-bold text-gray-900">
-                    {stats.products}
+                    {stats?.totalProducts ?? 0}
                   </p>
                 </div>
 
                 <div className="bg-white rounded-xl p-6 border border-gray-200 hover:shadow-lg transition-shadow">
                   <div className="flex items-center justify-between mb-4">
-                    <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
+                    <div className="w-12 h-12 bg-[#fff7f0] rounded-xl flex items-center justify-center">
                       <svg
-                        className="w-6 h-6 text-orange-600"
+                        className="w-6 h-6 text-[#E67A3D]"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -400,15 +468,15 @@ const SellerDashboard = () => {
                         />
                       </svg>
                     </div>
-                    <span className="text-xs font-semibold text-orange-600 bg-orange-100 px-2 py-1 rounded-full">
+                    <span className="text-xs font-semibold text-[#E67A3D] bg-[#FFF7F0] px-2 py-1 rounded-full">
                       +24%
                     </span>
                   </div>
                   <h3 className="text-gray-600 text-sm font-medium mb-1">
-                    Visitors
+                    Items Sold
                   </h3>
                   <p className="text-3xl font-bold text-gray-900">
-                    {stats.visitors.toLocaleString()}
+                    {(stats?.totalItemsSold ?? 0).toLocaleString()}
                   </p>
                 </div>
               </div>
@@ -420,14 +488,14 @@ const SellerDashboard = () => {
                     <h2 className="text-lg font-semibold text-gray-900">
                       Recent Orders
                     </h2>
-                    <button className="text-sm text-blue-600 hover:text-blue-700 font-medium">
+                    <button className="text-sm text-[#8B7355] hover:text-[#6B5335] font-medium">
                       View all
                     </button>
                   </div>
                 </div>
                 <div className="overflow-x-auto">
                   <table className="w-full">
-                    <thead className="bg-gray-50">
+                    <thead className="bg-[#FFF7F6]">
                       <tr>
                         <th className="text-left px-6 py-3 text-xs font-semibold text-gray-600 uppercase">
                           Order ID
@@ -450,34 +518,34 @@ const SellerDashboard = () => {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
-                      {recentOrders.map((order) => (
-                        <tr
-                          key={order.id}
-                          className="hover:bg-gray-50 transition-colors"
-                        >
+                      {orders.slice(0, 5).map((order) => (
+                        <tr key={order._id} className="hover:bg-white/50 transition-colors">
                           <td className="px-6 py-4 text-sm font-medium text-gray-900">
-                            {order.id}
+                            {order._id.slice(-8)}
                           </td>
                           <td className="px-6 py-4 text-sm text-gray-700">
-                            {order.customer}
-                          </td>
-                          <td className="px-6 py-4 text-sm text-gray-700">
-                            {order.product}
-                          </td>
-                          <td className="px-6 py-4 text-sm font-semibold text-gray-900">
-                            ${order.amount}
+                            {order.user?.fullName ?? 'N/A'}
                           </td>
                           <td className="px-6 py-4">
-                            <span
-                              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(
-                                order.status
-                              )}`}
-                            >
+                            <div className="text-sm text-gray-700">
+                              {order.items?.map((item, idx) => (
+                                <div key={idx} className="flex items-center gap-2">
+                                  <span>{item.productId?.title || item.productName}</span>
+                                  <span className="text-gray-500">×{item.quantity}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 text-sm font-semibold text-gray-900">
+                            ${order.orderTotal}
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
                               {order.status}
                             </span>
                           </td>
                           <td className="px-6 py-4 text-sm text-gray-600">
-                            {order.date}
+                            {new Date(order.createdAt).toLocaleDateString()}
                           </td>
                         </tr>
                       ))}
@@ -496,7 +564,7 @@ const SellerDashboard = () => {
                   <input
                     type="text"
                     placeholder="Search products..."
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FF6B6B] focus:border-transparent"
                   />
                   <svg
                     className="absolute left-3 top-2.5 w-5 h-5 text-gray-400"
@@ -517,7 +585,7 @@ const SellerDashboard = () => {
                     setSelectedProduct(null);
                     setIsAddOpen(true);
                   }}
-                  className="ml-4 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
+                  className="ml-4 bg-[#FF6B6B] text-white px-6 py-2 rounded-lg hover:bg-[#E05555] transition-colors flex items-center space-x-2"
                 >
                   <svg
                     className="w-5 h-5"
@@ -540,7 +608,7 @@ const SellerDashboard = () => {
                 <ProductSkeletonLoader />
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                  {products.map((product) => (
+                  {productList.map((product) => (
                     <div
                       key={product._id ?? product.id}
                       className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow"
@@ -549,11 +617,15 @@ const SellerDashboard = () => {
                         {product.images && product.images.length > 0 && (
                           <img
                             src={
-                              product.images[0].startsWith('http')
+                              product.images[0].startsWith("http")
                                 ? product.images[0]
-                                : product.images[0].startsWith('e-market-dh-03e9602f6d1a.herokuapp.com')
+                                : product.images[0].startsWith(
+                                    "e-market-dh-03e9602f6d1a.herokuapp.com"
+                                  )
                                 ? `https://${product.images[0]}`
-                                : `https://e-market-dh-03e9602f6d1a.herokuapp.com${product.images[0].startsWith('/') ? '' : '/'}${product.images[0]}`
+                                : `https://e-market-dh-03e9602f6d1a.herokuapp.com${
+                                    product.images[0].startsWith("/") ? "" : "/"
+                                  }${product.images[0]}`
                             }
                             alt={product.title}
                             className="w-full h-full object-cover hover:scale-110 transition-transform duration-500"
@@ -576,7 +648,7 @@ const SellerDashboard = () => {
                             <span
                               className={`font-semibold ${
                                 (product.stock ?? 0) < 20
-                                  ? "text-red-600"
+                                  ? "text-[#FF6B6B]"
                                   : "text-gray-900"
                               }`}
                             >
@@ -590,7 +662,7 @@ const SellerDashboard = () => {
                               setSelectedProduct(product);
                               setIsEditOpen(true);
                             }}
-                            className="flex-1 bg-gray-100 text-gray-700 py-2 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
+                            className="flex-1 bg-[#FFF6F6] text-[#8B7355] py-2 rounded-lg hover:bg-[#FFF2F2] transition-colors text-sm font-medium"
                           >
                             Edit
                           </button>
@@ -599,7 +671,7 @@ const SellerDashboard = () => {
                               setSelectedProduct(product);
                               setIsViewOpen(true);
                             }}
-                            className="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                            className="flex-1 bg-[#FF6B6B] text-white py-2 rounded-lg hover:bg-[#E05555] transition-colors text-sm font-medium"
                           >
                             View
                           </button>
@@ -616,24 +688,25 @@ const SellerDashboard = () => {
           {activeTab === "orders" && (
             <div className="space-y-6">
               <div className="flex items-center space-x-3">
-                <select className="border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                  <option>All Status</option>
-                  <option>Pending</option>
-                  <option>Processing</option>
-                  <option>Shipped</option>
-                  <option>Delivered</option>
+                <select value={orderStatus} onChange={(e) => setOrderStatus(e.target.value)} className="border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-[#FF6B6B] focus:border-transparent">
+                  <option value="">All Status</option>
+                  <option value="pending">Pending</option>
+                  <option value="paid">Paid</option>
+                  <option value="shipped">Shipped</option>
+                  <option value="delivered">Delivered</option>
+                  <option value="cancelled">Cancelled</option>
                 </select>
                 <input
                   type="text"
                   placeholder="Search orders..."
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FF6B6B] focus:border-transparent"
                 />
               </div>
 
               <div className="bg-white rounded-xl border border-gray-200">
                 <div className="overflow-x-auto">
                   <table className="w-full">
-                    <thead className="bg-gray-50">
+                    <thead className="bg-[#FFF7F6]">
                       <tr>
                         <th className="text-left px-6 py-4 text-xs font-semibold text-gray-600 uppercase">
                           Order ID
@@ -659,38 +732,56 @@ const SellerDashboard = () => {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
-                      {recentOrders.map((order) => (
-                        <tr
-                          key={order.id}
-                          className="hover:bg-gray-50 transition-colors"
-                        >
+                      {orders.map((order) => (
+                        <tr key={order._id} className="hover:bg-white/50 transition-colors">
                           <td className="px-6 py-4 text-sm font-medium text-gray-900">
-                            {order.id}
+                            {order._id.slice(-8)}
                           </td>
                           <td className="px-6 py-4 text-sm text-gray-700">
-                            {order.customer}
+                            {order.user?.fullName ?? 'N/A'}
                           </td>
-                          <td className="px-6 py-4 text-sm text-gray-700">
-                            {order.product}
+                          <td className="px-6 py-4">
+                            <div className="text-sm text-gray-700 space-y-1">
+                              {order.items?.map((item, idx) => (
+                                <div key={idx} className="flex items-center gap-2">
+                                  <span>{item.productId?.title || item.productName}</span>
+                                  <span className="text-gray-500">×{item.quantity}</span>
+                                </div>
+                              ))}
+                            </div>
                           </td>
                           <td className="px-6 py-4 text-sm font-semibold text-gray-900">
-                            ${order.amount}
+                            ${order.orderTotal}
                           </td>
                           <td className="px-6 py-4">
-                            <span
-                              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(
-                                order.status
-                              )}`}
-                            >
-                              {order.status}
-                            </span>
+                            {editingOrderId === order._id ? (
+                              <select
+                                value={order.status}
+                                onChange={(e) => handleStatusChange(order._id, e.target.value)}
+                                disabled={isUpdatingStatus}
+                                className="text-xs px-2 py-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FF6B6B]"
+                              >
+                                <option value="pending">Pending</option>
+                                <option value="paid">Paid</option>
+                                <option value="shipped">Shipped</option>
+                                <option value="delivered">Delivered</option>
+                                <option value="cancelled">Cancelled</option>
+                              </select>
+                            ) : (
+                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
+                                {order.status}
+                              </span>
+                            )}
                           </td>
                           <td className="px-6 py-4 text-sm text-gray-600">
-                            {order.date}
+                            {new Date(order.createdAt).toLocaleDateString()}
                           </td>
                           <td className="px-6 py-4">
-                            <button className="text-blue-600 hover:text-blue-700 text-sm font-medium">
-                              View
+                            <button
+                              onClick={() => setEditingOrderId(editingOrderId === order._id ? null : order._id)}
+                              className="text-[#8B7355] hover:text-[#6B5335] text-sm font-medium"
+                            >
+                              {editingOrderId === order._id ? 'Cancel' : 'Edit Status'}
                             </button>
                           </td>
                         </tr>
@@ -698,6 +789,19 @@ const SellerDashboard = () => {
                     </tbody>
                   </table>
                 </div>
+                {pagination.totalPages > 1 && (
+                  <div className="p-4 border-t border-gray-200 flex items-center justify-between">
+                    <button onClick={() => setOrderPage(p => Math.max(1, p - 1))} disabled={orderPage === 1} className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50">
+                      Previous
+                    </button>
+                    <span className="text-sm text-gray-600">
+                      Page {pagination.currentPage} of {pagination.totalPages}
+                    </span>
+                    <button onClick={() => setOrderPage(p => Math.min(pagination.totalPages, p + 1))} disabled={orderPage === pagination.totalPages} className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50">
+                      Next
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -708,58 +812,94 @@ const SellerDashboard = () => {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div className="bg-white rounded-xl border border-gray-200 p-6">
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                    Revenue Overview
+                    Revenue Overview (Last 6 Months)
                   </h3>
-                  <div className="h-64 flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg">
-                    <p className="text-gray-500">Chart visualization area</p>
-                  </div>
+                  {revenueByMonth.length === 0 ? (
+                    <div className="h-64 flex items-center justify-center text-gray-500">
+                      No revenue data available
+                    </div>
+                  ) : (
+                    <div className="h-64 flex items-end justify-between gap-4 px-4">
+                      {revenueByMonth.map((data, idx) => {
+                        const maxRevenue = Math.max(...revenueByMonth.map(d => d.revenue));
+                        const height = maxRevenue > 0 ? (data.revenue / maxRevenue) * 100 : 0;
+                        
+                        return (
+                          <div key={idx} className="flex-1 flex flex-col items-center gap-2">
+                            <div className="text-xs font-semibold text-[#FF6B6B]">
+                              ${(data.revenue / 1000).toFixed(1)}k
+                            </div>
+                            <div
+                              className="w-full bg-gradient-to-t from-[#FF6B6B] to-[#FF8A8A] rounded-t-lg transition-all duration-500 hover:opacity-80 cursor-pointer"
+                              style={{ height: `${height}%`, minHeight: '20px' }}
+                              title={`$${data.revenue.toLocaleString()}`}
+                            />
+                            <div className="text-xs font-medium text-gray-600">
+                              {data.month}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
 
                 <div className="bg-white rounded-xl border border-gray-200 p-6">
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                    Best Sellers
+                    Top Selling Products
                   </h3>
-                  <div className="space-y-4">
-                    {productList.slice(0, 3).map((product) => (
-                      <div
-                        key={product._id ?? product.id}
-                        className="flex items-center justify-between pb-4 border-b border-gray-100 last:border-0"
-                      >
-                        <div className="flex items-center space-x-3">
-                          <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
-                            <img
-                              src={
-                                product.images && product.images.length > 0
-                                  ? (product.images[0].startsWith('http')
+                  {bestSellers.length === 0 ? (
+                    <div className="h-64 flex items-center justify-center text-gray-500">
+                      No sales data available
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {bestSellers.map((product, idx) => (
+                                    console.log(product),
+
+                        <div
+                          key={product._id}
+                          className="flex items-center justify-between pb-4 border-b border-gray-100 last:border-0"
+                        >
+                          <div className="flex items-center space-x-3">
+                            <div className="w-10 h-10 bg-[#FFF3F3] text-[#FF6B6B] rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0">
+                              #{idx + 1}
+                            </div>
+                            <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+                              {product.images && product.images.length > 0 ? (
+                                <img
+                                  src={
+                                    product.images[0].startsWith("http")
                                       ? product.images[0]
-                                      : product.images[0].startsWith('e-market-dh-03e9602f6d1a.herokuapp.com')
+                                      : product.images[0].startsWith("e-market-dh-03e9602f6d1a.herokuapp.com")
                                       ? `https://${product.images[0]}`
-                                      : `https://e-market-dh-03e9602f6d1a.herokuapp.com${product.images[0].startsWith('/') ? '' : '/'}${product.images[0]}`)
-                                  : product.image || ''
-                              }
-                              alt={product.title ?? product.name}
-                              className="w-full h-full object-cover"
-                            />
+                                      : `https://e-market-dh-03e9602f6d1a.herokuapp.com${product.images[0].startsWith("/") ? "" : "/"}${product.images[0]}`
+                                  }
+                                  alt={product.title}
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
+                                  No img
+                                </div>
+                              )}
+                            </div>
+                            <div>
+                              <p className="font-medium text-gray-900">
+                                {product.title}
+                              </p>
+                              <p className="text-sm text-gray-600">
+                                {product.quantity} units sold
+                              </p>
+                            </div>
                           </div>
-                          <div>
-                            <p className="font-medium text-gray-900">
-                              {product.title ?? product.name}
-                            </p>
-                            <p className="text-sm text-gray-600">
-                              {product.sold ?? 0} sold
-                            </p>
-                          </div>
+                          <span className="font-semibold text-[#FF6B6B]">
+                            ${product.revenue.toLocaleString()}
+                          </span>
                         </div>
-                        <span className="font-semibold text-gray-900">
-                          $
-                          {(
-                            (product.prix ?? product.price ?? 0) *
-                            (product.sold ?? 0)
-                          ).toLocaleString()}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
