@@ -12,7 +12,8 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "test:unit": "jest --testPathPatterns=unit",
-    "test:integration": "jest --testPathPatterns=integration"
+    "test:integration": "jest --testPathPatterns=integration",
+      "test:cart": "jest --testPathPatterns=AddToCart.integration.test.js"
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.10.1",
