@@ -169,13 +169,13 @@ const Header = () => {
                             <span className="text-lg font-medium text-gray-600">Total:</span>
                             <span className="text-lg font-bold text-[#FF6B6B]">${cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0).toFixed(2)}</span>
                           </div>
-                          <button 
-                            type="button"
+                          <Link
+                            to="/checkout"
                             className="w-full bg-gradient-to-r from-[#FF6B6B] to-[#FF5252] text-white py-2 px-2 rounded-xl  text-lg hover:from-[#FF5252] hover:to-[#FF6B6B] transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
                           >
                             <i className="la la-credit-card mr-2"></i>
                             Checkout
-                          </button>
+                          </Link>
                         </div>
                       </>
                     )}
@@ -213,6 +213,15 @@ const Header = () => {
                       >
                         <i className="la la-cogs mr-2"></i>
                         Admin Dashboard
+                      </Link>
+                    )}
+                    {user?.role === 'user' && (
+                      <Link
+                        to="/ordersHistory"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                      >
+                        <i className="la la-list-alt mr-2"></i>
+                        Commandes
                       </Link>
                     )}
                     <Link
