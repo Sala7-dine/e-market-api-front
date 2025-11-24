@@ -1,17 +1,26 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import {
-  fetchCategories,
-  selectCategories,
-} from "../../features/productSlice";
-import ProductSkeletonLoader from "../../components/Products/ProductCardLoader.jsx";
-import AddProductModal from "../../components/Products/AddProductModal.jsx";
-import EditProductModal from "../../components/Products/EditProductModal.jsx";
-import ViewProductModal from "../../components/Products/ViewProductModal.jsx";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useAuth } from "../../contexts/AuthContext.jsx";
-import { sellerService } from "../../service/sellerService.js";
+import { fetchCategories, selectCategories } from "../../features/productSlice";
+import AddProductModal from "../../components/Products/AddProductModal";
+import EditProductModal from "../../components/Products/EditProductModal";
+import ViewProductModal from "../../components/Products/ViewProductModal";
+import { useAuth } from "../../contexts/AuthContext";
+import { useSellerData } from "./hooks/useSellerData";
+import { calculateRevenueByMonth, calculateBestSellers } from "./utils/analytics";
+import Sidebar from "./components/Sidebar";
+import OverviewTab from "./tabs/OverviewTab";
+import ProductsTab from "./tabs/ProductsTab";
+import OrdersTab from "./tabs/OrdersTab";
+import AnalyticsTab from "./tabs/AnalyticsTab";
+
+const TAB_LABELS = {
+  overview: "Overview",
+  products: "Products",
+  orders: "Orders",
+  analytics: "Analytics",
+};
+
 const SellerDashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -19,143 +28,34 @@ const SellerDashboard = () => {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isViewOpen, setIsViewOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [orderStatus, setOrderStatus] = useState("");
+  const [orderPage, setOrderPage] = useState(1);
+  const [productPage, setProductPage] = useState(1);
 
   const { logout } = useAuth();
   const dispatch = useDispatch();
   const categories = useSelector(selectCategories);
 
-  const [orderStatus, setOrderStatus] = useState("");
-  const [orderPage, setOrderPage] = useState(1);
-  const [editingOrderId, setEditingOrderId] = useState(null);
-  const queryClient = useQueryClient();
+  const {
+    products,
+    productPagination,
+    isLoadingProducts,
+    productsError,
+    stats,
+    orders,
+    orderPagination,
+    updateStatus,
+    isUpdatingStatus,
+  } = useSellerData(productPage, orderPage, orderStatus);
 
-  const { data: products, isLoading, isError, error: errorApi } = useQuery({
-    queryKey: ["seller-products"],
-    queryFn: sellerService.getProducts,
-  });
-
-  const { data: stats } = useQuery({
-    queryKey: ["seller-stats"],
-    queryFn: sellerService.getStats,
-  });
-
-  const { data: ordersData } = useQuery({
-    queryKey: ["seller-orders", orderPage, orderStatus],
-    queryFn: () => sellerService.getOrders({ page: orderPage, limit: 10, status: orderStatus }),
-  });
-
-  const { mutate: updateStatus, isLoading: isUpdatingStatus } = useMutation({
-    mutationFn: sellerService.updateOrderStatus,
-    onSuccess: () => {
-      queryClient.invalidateQueries(["seller-orders"]);
-      queryClient.invalidateQueries(["seller-stats"]);
-      setEditingOrderId(null);
-    },
-  });
-
-  const handleStatusChange = (orderId, newStatus) => {
-    updateStatus({ orderId, status: newStatus });
-  };
-
-  const productList = Array.isArray(products) ? products : products?.data ?? products?.list ?? [];
-  const orders = ordersData?.data ?? [];
-  const pagination = ordersData?.pagination ?? {};
-
-  // Calculate revenue by month from orders
-  const revenueByMonth = React.useMemo(() => {
-    const monthlyData = {};
-    
-    orders.forEach(order => {
-      const date = new Date(order.createdAt);
-      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-      const monthName = date.toLocaleDateString('en-US', { month: 'short' });
-      
-      if (!monthlyData[monthKey]) {
-        monthlyData[monthKey] = { month: monthName, revenue: 0 };
-      }
-      
-      monthlyData[monthKey].revenue += order.orderTotal || 0;
-    });
-    
-    return Object.values(monthlyData).slice(-6);
-  }, [orders]);
-
-  // Calculate best sellers from orders
-  const bestSellers = React.useMemo(() => {
-    const productSales = {};
-    
-    orders.forEach(order => {
-      order.items?.forEach(item => {
-        const productId = item.productId?._id || item.productId;
-        const productTitle = item.productId?.title || item.productName;
-        
-        if (!productSales[productId]) {
-          productSales[productId] = {
-            id: productId,
-            title: productTitle,
-            quantity: 0,
-            revenue: 0
-          };
-        }
-        
-        productSales[productId].quantity += item.quantity;
-        productSales[productId].revenue += item.total || (item.price * item.quantity);
-      });
-    });
-    
-    // Match with product list to get images
-    const salesWithImages = Object.values(productSales).map(sale => {
-      const product = productList.find(p => (p._id || p.id) === sale.id);
-      return {
-        ...sale,
-        images: product?.images || []
-      };
-    });
-    
-    return salesWithImages
-      .sort((a, b) => b.quantity - a.quantity)
-      .slice(0, 5);
-  }, [orders, productList]);
+  const revenueByMonth = useMemo(() => calculateRevenueByMonth(orders), [orders]);
+  const bestSellers = useMemo(() => calculateBestSellers(orders, products), [orders, products]);
 
   useEffect(() => {
     dispatch(fetchCategories());
   }, [dispatch]);
 
-  const getStatusColor = (status) => {
-    const colors = {
-      pending: "bg-[#FFF3EC] text-[#FF8A4D]",
-      paid: "bg-[#E9F5FF] text-[#4B9EFF]",
-      shipped: "bg-[#F6EFFE] text-[#9B6BFF]",
-      delivered: "bg-[#ECFDF5] text-[#16A34A]",
-      cancelled: "bg-[#FFEBEE] text-[#E53935]",
-    };
-    return colors[status] || "bg-gray-100 text-gray-800";
-  };
-
-  const navItems = [
-    {
-      id: "overview",
-      label: "Overview",
-      icon: "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6",
-    },
-    {
-      id: "products",
-      label: "Products",
-      icon: "M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10",
-    },
-    {
-      id: "orders",
-      label: "Orders",
-      icon: "M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z",
-    },
-    {
-      id: "analytics",
-      label: "Analytics",
-      icon: "M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z",
-    },
-  ];
-
-  if (isLoading) {
+  if (isLoadingProducts) {
     return (
       <div className="flex h-screen bg-gradient-to-br from-[#E8EEF2] to-[#D5E5F0]">
         <div className="flex-1 flex items-center justify-center">
@@ -168,189 +68,43 @@ const SellerDashboard = () => {
     );
   }
 
-  if (isError) {
-    console.error("Dashboard Error:", errorApi);
+  if (productsError) {
     return (
       <div className="text-red-600">
-        Error:{" "}
-        {typeof errorApi === "object"
-          ? JSON.stringify(errorApi, null, 2)
-          : String(errorApi)}
+        Error: {typeof productsError === "object" ? JSON.stringify(productsError, null, 2) : String(productsError)}
       </div>
     );
   }
 
   return (
     <div className="flex h-screen bg-[#ffffff]">
-      {/* Sidebar */}
-      <aside
-        className={`bg-white border-r border-gray-200 transition-all duration-300 ${
-          sidebarOpen ? "w-64" : "w-20"
-        }`}
-      >
-        <div className="flex flex-col h-full">
-          {/* Logo */}
-          <div className="flex items-center justify-between p-6 border-b border-gray-200">
-            {sidebarOpen ? (
-              <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-gradient-to-br from-[#FF6B6B] to-[#8B7355] rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">S</span>
-                </div>
-                <span className="text-xl font-bold text-gray-900">
-                  SellerHub
-                </span>
-              </div>
-            ) : (
-              <div className="w-8 h-8 bg-gradient-to-br from-[#FF6B6B] to-[#8B7355] rounded-lg flex items-center justify-center mx-auto">
-                <span className="text-white font-bold text-sm">S</span>
-              </div>
-            )}
-          </div>
+      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} isOpen={sidebarOpen} logout={logout} />
 
-          {/* Navigation */}
-          <nav className="flex-1 p-4 space-y-1">
-            {navItems.map((item) => (
-              <button
-                key={item.id}
-                onClick={() => setActiveTab(item.id)}
-                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all text-left ${
-                  activeTab === item.id
-                    ? "bg-[#FFEDED] text-[#FF6B6B]"
-                    : "text-gray-700 hover:bg-white/50"
-                }`}
-              >
-                <svg
-                  className="w-5 h-5 flex-shrink-0 text-gray-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d={item.icon}
-                  />
-                </svg>
-                {sidebarOpen && (
-                  <span className="font-medium">{item.label}</span>
-                )}
-              </button>
-            ))}
-          </nav>
-
-          {/* Navigation Links */}
-          <div className="p-4 border-t border-gray-200 space-y-2">
-            <Link
-              to="/"
-              className="w-full flex items-center space-x-3 px-4 py-2 rounded-lg text-gray-700 hover:bg-white/50 transition-colors"
-            >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
-                />
-              </svg>
-              {sidebarOpen && <span className="text-sm font-medium">Home</span>}
-            </Link>
-            <button
-              onClick={logout}
-              className="w-full flex items-center space-x-3 px-4 py-2 rounded-lg text-[#E03D3D] hover:bg-[#FFEDED] transition-colors"
-            >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                />
-              </svg>
-              {sidebarOpen && (
-                <span className="text-sm font-medium">Logout</span>
-              )}
-            </button>
-          </div>
-        </div>
-      </aside>
-
-      {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
         <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200 px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <button
-                onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="p-2 hover:bg-white/60 rounded-lg transition-colors"
-              >
-                <svg
-                  className="w-6 h-6 text-gray-700"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 6h16M4 12h16M4 18h16"
-                  />
+              <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-2 hover:bg-white/60 rounded-lg transition-colors">
+                <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
               </button>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">
-                  {navItems.find((item) => item.id === activeTab)?.label}
-                </h1>
-                <p className="text-sm text-gray-500">
-                  Welcome back! Here's what's happening today.
-                </p>
+                <h1 className="text-2xl font-bold text-gray-900">{TAB_LABELS[activeTab]}</h1>
+                <p className="text-sm text-gray-500">Welcome back! Here's what's happening today.</p>
               </div>
             </div>
             <div className="flex items-center space-x-3">
               <button className="p-2 hover:bg-white/60 rounded-lg transition-colors relative">
-                <svg
-                  className="w-6 h-6 text-gray-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
-                  />
+                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                 </svg>
                 <span className="absolute top-1 right-1 w-2 h-2 bg-[#FF6B6B] rounded-full"></span>
               </button>
-              <Link
-                to="/profile"
-                className="p-2 hover:bg-white/60 rounded-lg transition-colors"
-              >
-                <svg
-                  className="w-6 h-6 text-gray-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                  />
+              <Link to="/profile" className="p-2 hover:bg-white/60 rounded-lg transition-colors">
+                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
               </Link>
             </div>
@@ -359,560 +113,49 @@ const SellerDashboard = () => {
 
         {/* Content Area */}
         <main className="flex-1 overflow-y-auto p-8">
-          {/* Overview Tab */}
-          {activeTab === "overview" && (
-            <div className="space-y-6">
-              {/* Stats Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div className="bg-white rounded-xl p-6 border border-gray-200 hover:shadow-lg transition-shadow">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="w-12 h-12 bg-[#FFF0F0] rounded-xl flex items-center justify-center">
-                      <svg
-                        className="w-6 h-6 text-[#FF6B6B]"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                        />
-                      </svg>
-                    </div>
-                    <span className="text-xs font-semibold text-[#FF6B6B] bg-[#FFF3F3] px-2 py-1 rounded-full">
-                      +12.5%
-                    </span>
-                  </div>
-                  <h3 className="text-gray-600 text-sm font-medium mb-1">
-                    Total Revenue
-                  </h3>
-                  <p className="text-3xl font-bold text-gray-900">
-                    ${(stats?.totalRevenue ?? 0).toLocaleString()}
-                  </p>
-                </div>
-
-                <div className="bg-white rounded-xl p-6 border border-gray-200 hover:shadow-lg transition-shadow">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="w-12 h-12 bg-[#F0FAFF] rounded-xl flex items-center justify-center">
-                      <svg
-                        className="w-6 h-6 text-[#8B7355]"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
-                        />
-                      </svg>
-                    </div>
-                    <span className="text-xs font-semibold text-[#8B7355] bg-[#FFF8F2] px-2 py-1 rounded-full">
-                      +8.2%
-                    </span>
-                  </div>
-                  <h3 className="text-gray-600 text-sm font-medium mb-1">
-                    Total Orders
-                  </h3>
-                  <p className="text-3xl font-bold text-gray-900">
-                    {stats?.totalOrders ?? 0}
-                  </p>
-                </div>
-
-                <div className="bg-white rounded-xl p-6 border border-gray-200 hover:shadow-lg transition-shadow">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="w-12 h-12 bg-[#F9F5FF] rounded-xl flex items-center justify-center">
-                      <svg
-                        className="w-6 h-6 text-[#9B6BFF]"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
-                        />
-                      </svg>
-                    </div>
-                    <span className="text-xs font-semibold text-[#8B7355] bg-[#FFF8F2] px-2 py-1 rounded-full">
-                      +3
-                    </span>
-                  </div>
-                  <h3 className="text-gray-600 text-sm font-medium mb-1">
-                    Total Products
-                  </h3>
-                  <p className="text-3xl font-bold text-gray-900">
-                    {stats?.totalProducts ?? 0}
-                  </p>
-                </div>
-
-                <div className="bg-white rounded-xl p-6 border border-gray-200 hover:shadow-lg transition-shadow">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="w-12 h-12 bg-[#fff7f0] rounded-xl flex items-center justify-center">
-                      <svg
-                        className="w-6 h-6 text-[#E67A3D]"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-                        />
-                      </svg>
-                    </div>
-                    <span className="text-xs font-semibold text-[#E67A3D] bg-[#FFF7F0] px-2 py-1 rounded-full">
-                      +24%
-                    </span>
-                  </div>
-                  <h3 className="text-gray-600 text-sm font-medium mb-1">
-                    Items Sold
-                  </h3>
-                  <p className="text-3xl font-bold text-gray-900">
-                    {(stats?.totalItemsSold ?? 0).toLocaleString()}
-                  </p>
-                </div>
-              </div>
-
-              {/* Recent Orders */}
-              <div className="bg-white rounded-xl border border-gray-200">
-                <div className="p-6 border-b border-gray-200">
-                  <div className="flex items-center justify-between">
-                    <h2 className="text-lg font-semibold text-gray-900">
-                      Recent Orders
-                    </h2>
-                    <button className="text-sm text-[#8B7355] hover:text-[#6B5335] font-medium">
-                      View all
-                    </button>
-                  </div>
-                </div>
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead className="bg-[#FFF7F6]">
-                      <tr>
-                        <th className="text-left px-6 py-3 text-xs font-semibold text-gray-600 uppercase">
-                          Order ID
-                        </th>
-                        <th className="text-left px-6 py-3 text-xs font-semibold text-gray-600 uppercase">
-                          Customer
-                        </th>
-                        <th className="text-left px-6 py-3 text-xs font-semibold text-gray-600 uppercase">
-                          Product
-                        </th>
-                        <th className="text-left px-6 py-3 text-xs font-semibold text-gray-600 uppercase">
-                          Amount
-                        </th>
-                        <th className="text-left px-6 py-3 text-xs font-semibold text-gray-600 uppercase">
-                          Status
-                        </th>
-                        <th className="text-left px-6 py-3 text-xs font-semibold text-gray-600 uppercase">
-                          Date
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-200">
-                      {orders.slice(0, 5).map((order) => (
-                        <tr key={order._id} className="hover:bg-white/50 transition-colors">
-                          <td className="px-6 py-4 text-sm font-medium text-gray-900">
-                            {order._id.slice(-8)}
-                          </td>
-                          <td className="px-6 py-4 text-sm text-gray-700">
-                            {order.user?.fullName ?? 'N/A'}
-                          </td>
-                          <td className="px-6 py-4">
-                            <div className="text-sm text-gray-700">
-                              {order.items?.map((item, idx) => (
-                                <div key={idx} className="flex items-center gap-2">
-                                  <span>{item.productId?.title || item.productName}</span>
-                                  <span className="text-gray-500">×{item.quantity}</span>
-                                </div>
-                              ))}
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 text-sm font-semibold text-gray-900">
-                            ${order.orderTotal}
-                          </td>
-                          <td className="px-6 py-4">
-                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
-                              {order.status}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 text-sm text-gray-600">
-                            {new Date(order.createdAt).toLocaleDateString()}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Products Tab */}
+          {activeTab === "overview" && <OverviewTab stats={stats} orders={orders} setActiveTab={setActiveTab} />}
+          
           {activeTab === "products" && (
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <div className="relative flex-1 max-w-md">
-                  <input
-                    type="text"
-                    placeholder="Search products..."
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FF6B6B] focus:border-transparent"
-                  />
-                  <svg
-                    className="absolute left-3 top-2.5 w-5 h-5 text-gray-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                    />
-                  </svg>
-                </div>
-                <button
-                  onClick={() => {
-                    setSelectedProduct(null);
-                    setIsAddOpen(true);
-                  }}
-                  className="ml-4 bg-[#FF6B6B] text-white px-6 py-2 rounded-lg hover:bg-[#E05555] transition-colors flex items-center space-x-2"
-                >
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 4v16m8-8H4"
-                    />
-                  </svg>
-                  <span>Add Product</span>
-                </button>
-              </div>
-
-              {isLoading ? (
-                <ProductSkeletonLoader />
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                  {productList.map((product) => (
-                    <div
-                      key={product._id ?? product.id}
-                      className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow"
-                    >
-                      <div className="aspect-square bg-gray-100 overflow-hidden">
-                        {product.images && product.images.length > 0 && (
-                          <img
-                            src={
-                              product.images[0].startsWith("http")
-                                ? product.images[0]
-                                : product.images[0].startsWith(
-                                    "e-market-dh-03e9602f6d1a.herokuapp.com"
-                                  )
-                                ? `https://${product.images[0]}`
-                                : `https://e-market-dh-03e9602f6d1a.herokuapp.com${
-                                    product.images[0].startsWith("/") ? "" : "/"
-                                  }${product.images[0]}`
-                            }
-                            alt={product.title}
-                            className="w-full h-full object-cover hover:scale-110 transition-transform duration-500"
-                          />
-                        )}
-                      </div>
-                      <div className="p-4">
-                        <h3 className="font-semibold text-gray-900 mb-2 truncate">
-                          {product.title}
-                        </h3>
-                        <div className="space-y-2 mb-4">
-                          <div className="flex justify-between text-sm">
-                            <span className="text-gray-600">Price:</span>
-                            <span className="font-semibold text-gray-900">
-                              ${product.prix}
-                            </span>
-                          </div>
-                          <div className="flex justify-between text-sm">
-                            <span className="text-gray-600">Stock:</span>
-                            <span
-                              className={`font-semibold ${
-                                (product.stock ?? 0) < 20
-                                  ? "text-[#FF6B6B]"
-                                  : "text-gray-900"
-                              }`}
-                            >
-                              {product.stock ?? 0} units
-                            </span>
-                          </div>
-                        </div>
-                        <div className="flex space-x-2">
-                          <button
-                            onClick={() => {
-                              setSelectedProduct(product);
-                              setIsEditOpen(true);
-                            }}
-                            className="flex-1 bg-[#FFF6F6] text-[#8B7355] py-2 rounded-lg hover:bg-[#FFF2F2] transition-colors text-sm font-medium"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => {
-                              setSelectedProduct(product);
-                              setIsViewOpen(true);
-                            }}
-                            className="flex-1 bg-[#FF6B6B] text-white py-2 rounded-lg hover:bg-[#E05555] transition-colors text-sm font-medium"
-                          >
-                            View
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+            <ProductsTab
+              products={products}
+              isLoading={isLoadingProducts}
+              pagination={productPagination}
+              onPageChange={setProductPage}
+              onAddProduct={() => {
+                setSelectedProduct(null);
+                setIsAddOpen(true);
+              }}
+              onEditProduct={(product) => {
+                setSelectedProduct(product);
+                setIsEditOpen(true);
+              }}
+              onViewProduct={(product) => {
+                setSelectedProduct(product);
+                setIsViewOpen(true);
+              }}
+            />
           )}
-
-          {/* Orders Tab */}
+          
           {activeTab === "orders" && (
-            <div className="space-y-6">
-              <div className="flex items-center space-x-3">
-                <select value={orderStatus} onChange={(e) => setOrderStatus(e.target.value)} className="border border-gray-300 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-[#FF6B6B] focus:border-transparent">
-                  <option value="">All Status</option>
-                  <option value="pending">Pending</option>
-                  <option value="paid">Paid</option>
-                  <option value="shipped">Shipped</option>
-                  <option value="delivered">Delivered</option>
-                  <option value="cancelled">Cancelled</option>
-                </select>
-                <input
-                  type="text"
-                  placeholder="Search orders..."
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FF6B6B] focus:border-transparent"
-                />
-              </div>
-
-              <div className="bg-white rounded-xl border border-gray-200">
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead className="bg-[#FFF7F6]">
-                      <tr>
-                        <th className="text-left px-6 py-4 text-xs font-semibold text-gray-600 uppercase">
-                          Order ID
-                        </th>
-                        <th className="text-left px-6 py-4 text-xs font-semibold text-gray-600 uppercase">
-                          Customer
-                        </th>
-                        <th className="text-left px-6 py-4 text-xs font-semibold text-gray-600 uppercase">
-                          Product
-                        </th>
-                        <th className="text-left px-6 py-4 text-xs font-semibold text-gray-600 uppercase">
-                          Amount
-                        </th>
-                        <th className="text-left px-6 py-4 text-xs font-semibold text-gray-600 uppercase">
-                          Status
-                        </th>
-                        <th className="text-left px-6 py-4 text-xs font-semibold text-gray-600 uppercase">
-                          Date
-                        </th>
-                        <th className="text-left px-6 py-4 text-xs font-semibold text-gray-600 uppercase">
-                          Actions
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-200">
-                      {orders.map((order) => (
-                        <tr key={order._id} className="hover:bg-white/50 transition-colors">
-                          <td className="px-6 py-4 text-sm font-medium text-gray-900">
-                            {order._id.slice(-8)}
-                          </td>
-                          <td className="px-6 py-4 text-sm text-gray-700">
-                            {order.user?.fullName ?? 'N/A'}
-                          </td>
-                          <td className="px-6 py-4">
-                            <div className="text-sm text-gray-700 space-y-1">
-                              {order.items?.map((item, idx) => (
-                                <div key={idx} className="flex items-center gap-2">
-                                  <span>{item.productId?.title || item.productName}</span>
-                                  <span className="text-gray-500">×{item.quantity}</span>
-                                </div>
-                              ))}
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 text-sm font-semibold text-gray-900">
-                            ${order.orderTotal}
-                          </td>
-                          <td className="px-6 py-4">
-                            {editingOrderId === order._id ? (
-                              <select
-                                value={order.status}
-                                onChange={(e) => handleStatusChange(order._id, e.target.value)}
-                                disabled={isUpdatingStatus}
-                                className="text-xs px-2 py-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FF6B6B]"
-                              >
-                                <option value="pending">Pending</option>
-                                <option value="paid">Paid</option>
-                                <option value="shipped">Shipped</option>
-                                <option value="delivered">Delivered</option>
-                                <option value="cancelled">Cancelled</option>
-                              </select>
-                            ) : (
-                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
-                                {order.status}
-                              </span>
-                            )}
-                          </td>
-                          <td className="px-6 py-4 text-sm text-gray-600">
-                            {new Date(order.createdAt).toLocaleDateString()}
-                          </td>
-                          <td className="px-6 py-4">
-                            <button
-                              onClick={() => setEditingOrderId(editingOrderId === order._id ? null : order._id)}
-                              className="text-[#8B7355] hover:text-[#6B5335] text-sm font-medium"
-                            >
-                              {editingOrderId === order._id ? 'Cancel' : 'Edit Status'}
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-                {pagination.totalPages > 1 && (
-                  <div className="p-4 border-t border-gray-200 flex items-center justify-between">
-                    <button onClick={() => setOrderPage(p => Math.max(1, p - 1))} disabled={orderPage === 1} className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50">
-                      Previous
-                    </button>
-                    <span className="text-sm text-gray-600">
-                      Page {pagination.currentPage} of {pagination.totalPages}
-                    </span>
-                    <button onClick={() => setOrderPage(p => Math.min(pagination.totalPages, p + 1))} disabled={orderPage === pagination.totalPages} className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50">
-                      Next
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
+            <OrdersTab
+              orders={orders}
+              pagination={orderPagination}
+              onPageChange={setOrderPage}
+              onStatusChange={(orderId, status) => updateStatus({ orderId, status })}
+              isUpdatingStatus={isUpdatingStatus}
+              orderStatus={orderStatus}
+              setOrderStatus={setOrderStatus}
+            />
           )}
-
-          {/* Analytics Tab */}
+          
           {activeTab === "analytics" && (
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="bg-white rounded-xl border border-gray-200 p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                    Revenue Overview (Last 6 Months)
-                  </h3>
-                  {revenueByMonth.length === 0 ? (
-                    <div className="h-64 flex items-center justify-center text-gray-500">
-                      No revenue data available
-                    </div>
-                  ) : (
-                    <div className="h-64 flex items-end justify-between gap-4 px-4">
-                      {revenueByMonth.map((data, idx) => {
-                        const maxRevenue = Math.max(...revenueByMonth.map(d => d.revenue));
-                        const height = maxRevenue > 0 ? (data.revenue / maxRevenue) * 100 : 0;
-                        
-                        return (
-                          <div key={idx} className="flex-1 flex flex-col items-center gap-2">
-                            <div className="text-xs font-semibold text-[#FF6B6B]">
-                              ${(data.revenue / 1000).toFixed(1)}k
-                            </div>
-                            <div
-                              className="w-full bg-gradient-to-t from-[#FF6B6B] to-[#FF8A8A] rounded-t-lg transition-all duration-500 hover:opacity-80 cursor-pointer"
-                              style={{ height: `${height}%`, minHeight: '20px' }}
-                              title={`$${data.revenue.toLocaleString()}`}
-                            />
-                            <div className="text-xs font-medium text-gray-600">
-                              {data.month}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-
-                <div className="bg-white rounded-xl border border-gray-200 p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                    Top Selling Products
-                  </h3>
-                  {bestSellers.length === 0 ? (
-                    <div className="h-64 flex items-center justify-center text-gray-500">
-                      No sales data available
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      {bestSellers.map((product, idx) => (
-                                    console.log(product),
-
-                        <div
-                          key={product._id}
-                          className="flex items-center justify-between pb-4 border-b border-gray-100 last:border-0"
-                        >
-                          <div className="flex items-center space-x-3">
-                            <div className="w-10 h-10 bg-[#FFF3F3] text-[#FF6B6B] rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0">
-                              #{idx + 1}
-                            </div>
-                            <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
-                              {product.images && product.images.length > 0 ? (
-                                <img
-                                  src={
-                                    product.images[0].startsWith("http")
-                                      ? product.images[0]
-                                      : product.images[0].startsWith("e-market-dh-03e9602f6d1a.herokuapp.com")
-                                      ? `https://${product.images[0]}`
-                                      : `https://e-market-dh-03e9602f6d1a.herokuapp.com${product.images[0].startsWith("/") ? "" : "/"}${product.images[0]}`
-                                  }
-                                  alt={product.title}
-                                  className="w-full h-full object-cover"
-                                />
-                              ) : (
-                                <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
-                                  No img
-                                </div>
-                              )}
-                            </div>
-                            <div>
-                              <p className="font-medium text-gray-900">
-                                {product.title}
-                              </p>
-                              <p className="text-sm text-gray-600">
-                                {product.quantity} units sold
-                              </p>
-                            </div>
-                          </div>
-                          <span className="font-semibold text-[#FF6B6B]">
-                            ${product.revenue.toLocaleString()}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
+            <AnalyticsTab revenueByMonth={revenueByMonth} bestSellers={bestSellers} />
           )}
         </main>
       </div>
 
       {/* Modals */}
-      <AddProductModal
-        isOpen={isAddOpen}
-        onClose={() => setIsAddOpen(false)}
-        categories={categories}
-      />
+      <AddProductModal isOpen={isAddOpen} onClose={() => setIsAddOpen(false)} categories={categories} />
       <EditProductModal
         isOpen={isEditOpen}
         onClose={() => {
