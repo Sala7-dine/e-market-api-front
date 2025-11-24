@@ -12,8 +12,8 @@ import SellerDashboard from "./pages/seller/SellerDashboard.jsx";
 import AdminLayout from "./pages/admin/AdminLayout.jsx";
 import Categories from "./pages/admin/Categories.jsx";
 
+// import Reviews from "./pages/admin/Reviews.jsx";
 import Reviews from "./pages/admin/Reviews.jsx";
-import Review from "./pages/admin/Review.jsx";
 import OrdersHistory from "./pages/OrdersHistory.jsx"
 
 import Profile from "./pages/Profile.jsx";
@@ -49,7 +49,7 @@ function App() {
                 <Route path="users" element={<UserList />} />
                 <Route path="categories" element={<Categories />} />
                 <Route path="products" element={<Products />} />
-                <Route path="reviews" element={<Review />} />
+                <Route path="reviews" element={<Reviews />} />
               </Route>
             </Routes>
           </AuthProvider>
