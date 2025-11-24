@@ -1,9 +1,12 @@
 import React from 'react';
-import '../assets/styles/admin/Pagination.css'; 
+import '../assets/styles/admin/pagination.css'; 
 
 const Pagination = ({ currentPage, totalPages, onPageChange, hasNext, hasPrev }) => {
+  const current = Number(currentPage);
+  const total = Number(totalPages);
+  
   const handlePageClick = (page) => {
-    if (page !== currentPage && page >= 1 && page <= totalPages) {
+    if (page !== current && page >= 1 && page <= total) {
       onPageChange(page);
     }
   };
@@ -11,8 +14,8 @@ const Pagination = ({ currentPage, totalPages, onPageChange, hasNext, hasPrev })
   const renderPageNumbers = () => {
     const pages = [];
     const maxVisiblePages = 5;
-    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
-    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+    let startPage = Math.max(1, current - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(total, startPage + maxVisiblePages - 1);
 
     if (endPage - startPage + 1 < maxVisiblePages) {
       startPage = Math.max(1, endPage - maxVisiblePages + 1);
@@ -23,7 +26,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange, hasNext, hasPrev })
         <button
           key={i}
           onClick={() => handlePageClick(i)}
-          className={`pagination-btn ${i === currentPage ? 'active' : ''}`}
+          className={`pagination-btn ${i === current ? 'active' : ''}`}
         >
           {i}
         </button>
@@ -36,7 +39,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange, hasNext, hasPrev })
   return (
     <div className="pagination">
       <button
-        onClick={() => handlePageClick(currentPage - 1)}
+        onClick={() => handlePageClick(current - 1)}
         disabled={!hasPrev}
         className="pagination-btn"
       >
@@ -46,7 +49,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange, hasNext, hasPrev })
       {renderPageNumbers()}
       
       <button
-        onClick={() => handlePageClick(currentPage + 1)}
+        onClick={() => handlePageClick(current + 1)}
         disabled={!hasNext}
         className="pagination-btn"
       >
