@@ -6,7 +6,7 @@ import { FaBell } from 'react-icons/fa';
 
 
  const  AdminHeader = () => {
-    const {user,token}=useAuth();
+    const {user,token,logout}=useAuth();
     console.log("user",user)   ;
      console.log("token in header",token)
     console.log("user ino header",user)
