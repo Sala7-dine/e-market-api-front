@@ -13,9 +13,8 @@ import AdminLayout from "./pages/admin/AdminLayout.jsx";
 import Categories from "./pages/admin/Categories.jsx";
 
 // import Reviews from "./pages/admin/Reviews.jsx";
-import Reviews from "./pages/admin/Reviews.jsx";
-import OrdersHistory from "./pages/OrdersHistory.jsx"
-import Review from "./pages/admin/Reviews.jsx";
+import Review from "./pages/admin/Review.jsx";
+import OrdersHistory from "./pages/OrdersHistory.jsx";
 
 import Profile from "./pages/Profile.jsx";
 import Products from "./pages/admin/Products.jsx";
