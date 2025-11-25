@@ -17,16 +17,21 @@ const OrderHistory = () => {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("Toutes les commandes");
 
+  const [openOrderId, setOpenOrderId] = useState(null);
+
+  const toggleOrder = (id) => {
+    setOpenOrderId(openOrderId === id ? null : id);
+  };
+
   useEffect(() => {
     dispatch(getUserOrders({ page: currentPage, limit: 5 }));
   }, [dispatch, currentPage]);
 
-  console.log("Redux orders:", orders);
-  console.log("Type of orders:", typeof orders);
-  console.log("Is array?:", Array.isArray(orders));
-  console.log("Orders length:", orders?.length);
+  // console.log("Redux orders:", orders);
+  // console.log("Type of orders:", typeof orders);
+  // console.log("Is array?:", Array.isArray(orders));
+  // console.log("Orders length:", orders?.length);
 
-  
   const filteredOrders = (orders || [])
     .filter((o) => o._id.toLowerCase().includes(search.toLowerCase()))
     .filter((o) =>
@@ -151,10 +156,61 @@ const OrderHistory = () => {
                       {order.status}
                     </span>
 
-                    <button className="bg-[#FF6B6B] text-white px-4 py-2 rounded-lg text-sm hover:bg-[#FF6B6B]">
-                      Voir la commande →
+                    <button
+                      onClick={() => toggleOrder(order._id)}
+                      className="bg-[#FF6B6B] text-white px-4 py-2 rounded-lg text-sm hover:bg-[#FF6B6B]"
+                    >
+                      {openOrderId === order._id
+                        ? "Fermer ↑"
+                        : "Voir la commande →"}
                     </button>
                   </div>
+
+                  {openOrderId === order._id && (
+                    <div className="mt-4 bg-white rounded-xl shadow-md p-4 border border-gray-200">
+                      <div className="max-h-80 overflow-y-auto space-y-4">
+                        {order.items.map((item, idx) => (
+                          <div
+                            key={idx}
+                            className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl shadow-sm"
+                          >
+                            <img
+                              src={
+                                item.productId?.images?.[0]?.startsWith("http")
+                                  ? item.productId.images[0]
+                                  : `https://res.cloudinary.com/dbrrmsoit/image/upload/${item.productId?.images?.[0]}`
+                              }
+                              className="w-20 h-20 object-cover rounded-lg"
+                            />
+
+                            <div className="flex-1">
+                              <h4 className="text-base text-gray-800">
+                                {item.productId?.title}
+                              </h4>
+                              <p className="text-lg font-bold text-[#FF6B6B]">
+                                {item.price} €
+                              </p>
+
+                              <div className="text-sm text-gray-600 mt-2">
+                                Quantité : {item.quantity}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="mt-6 pt-4 border-t">
+                        <div className="flex justify-between items-center">
+                          <span className="text-lg font-medium text-gray-700">
+                            Total :
+                          </span>
+                          <span className="text-lg font-bold text-[#FF6B6B]">
+                            {order.totalPrice} €
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
 
