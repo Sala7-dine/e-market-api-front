@@ -3,42 +3,51 @@ import { FaEye, FaEdit, FaTrash, FaPlus } from "react-icons/fa";
 import "../../assets/styles/admin/Products.css";
 import { fetchAllProducts ,deleteproduct} from "../../features/productSlice";
 import { useDispatch, useSelector } from "react-redux";
+import Pagination from "../../components/Pagination";
 
 const Products = () => {
   const dispatch = useDispatch();
-  const { products, loading, error } = useSelector((state) => state.products);
+  const { products, loading, error, currentPage, totalPages, limit } = useSelector((state) => state.products);
+ 
+
+
   useEffect(() => {
-    dispatch(fetchAllProducts());
-    console.log("hello")
-  }, [dispatch]);
+    console.log("currentPage", currentPage);
+    
+   
+    dispatch(fetchAllProducts({ page: currentPage, limit }));
+  
+  }, [dispatch, currentPage, limit]);
+  
+
+  const handleDelete = async (id) => {
+    try {
+      await dispatch(deleteproduct(id));
+      dispatch(fetchAllProducts({ page: currentPage, limit }));
+      setShowDeleteModal(false);
+    } catch (err) {
+      console.error("Erreur lors de la suppression :", err);
+    }
+  };
+
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [showImageModal, setShowImageModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [productToDelete, setProductToDelete] = useState(null);
-
- 
 
   const confirmDelete = (product) => {
     setProductToDelete(product);
     setShowDeleteModal(true);
   };
 
-   const handleDelete = async (id) => {
-    try {
-      console.log("deleting", id);
-      await dispatch(deleteproduct(id)); 
-      setShowDeleteModal(false);
-    } catch (err) {
-      console.error("Erreur lors de la suppression :", err);
-    }
+  const handleViewImages = (product) => {
+    setSelectedProduct(product); 
+    setShowImageModal(true);     
   };
-  
-const handleViewImages = (product) => {
-  setSelectedProduct(product); 
-  setShowImageModal(true);     
-};
 
+if (loading) return <p>Chargement...</p>;
 
+if (error) return <p>Erreur: {error}</p>;
 
   return (
     <div className="products-container">
@@ -47,39 +56,13 @@ const handleViewImages = (product) => {
         <h2>Gestion des Produits</h2>
         <p>Gérez votre inventaire de produits</p>
       </div>
-
-      {/* Stats */}
-      <div className="stat-product">
-        <div className="stat-box">
-          <h3>Total Produits</h3>
-          <p>{products.length}</p>
-        </div>
-
-        <div className="stat-box">
-          <h3>En stock</h3>
-          <p> {products.filter((product) => product.stock > 0).length} </p>
-        </div>
-
-        <div className="stat-box">
-          <h3>Rupture</h3>
-          <p>10</p>
-        </div>
-
-        <div className="stat-box">
-          <h3>Valeur du stock</h3>
-          <p>
-            10
-            €
-          </p>
-        </div>
-      </div>
-
       {/* Table */}
       <div className="products-table-container">
 
         <table className="products-table">
           <thead>
             <tr>
+                <th>ID</th>
               <th>Produit</th>
               <th>Description</th>
               <th>Stock</th>
@@ -92,6 +75,7 @@ const handleViewImages = (product) => {
           <tbody>
             {products.map((product) => (
               <tr key={product._id}>
+                 <td>{product._id}</td>
                 <td>{product.title}</td>
                 <td className="desc">{product.description}</td>
                 <td>
@@ -112,7 +96,7 @@ const handleViewImages = (product) => {
                     className="btn-view"
                     onClick={() => handleViewImages(product)}
                   >
-                    <FaEye size={16} color="#A0522D" />
+                    <FaEye size={16} color="#5a9ed1" />
                   </button>
                 </td>
                 <td>
@@ -121,13 +105,21 @@ const handleViewImages = (product) => {
                     className="btn-delete"
                     onClick={() => confirmDelete(product)}
                   >
-                    <FaTrash size={16} color="#A0522D" />
+                    <FaTrash size={16} color="#FF6F61" />
                   </button>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
+       <Pagination
+  currentPage={currentPage}
+  totalPages={totalPages}
+  onPageChange={(page) => dispatch(fetchAllProducts({ page, limit }))}
+  hasPrev={currentPage > 1}
+  hasNext={currentPage < totalPages}
+/>
+
       </div>
 
       {/* Modals */}
@@ -143,16 +135,25 @@ const handleViewImages = (product) => {
               ×
             </button>
 
-            <div className="modal-images">
-              {selectedProduct.images.length > 0 ? (
-                selectedProduct.images.map((img, index) => (
-                  <img src={`${img}`} alt={selectedProduct.title} />
+           <div className="modal-images">
+  {selectedProduct.images?.length > 0 ? (
+    selectedProduct.images.map((img, index) => (
+      <img
+        key={index}
+        src={
+          img?.startsWith("http")
+            ? img
+            : `https://res.cloudinary.com/dbrrmsoit/image/upload/${img}`
+        }
+        alt={selectedProduct.title}
+        className="modal-image-item"
+      />
+    ))
+  ) : (
+    <p>Aucune image disponible</p>
+  )}
+</div>
 
-                ))
-              ) : (
-                <p>Aucune image disponible</p>
-              )}
-            </div>
           </div>
         </div>
       )}

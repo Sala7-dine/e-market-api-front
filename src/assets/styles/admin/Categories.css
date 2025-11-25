@@ -19,9 +19,10 @@
     align-items: center;
     width:20%;
     
+    
 }
 .btn-add button{
-    background-color: #6B4B3E;
+     background-color: #FF6F61;
     color:#FFFFFF;
   border-radius: 20px;
   padding:0.6rem;
@@ -86,7 +87,7 @@
 }
 
 .categories-table tbody tr:hover {
-  background-color: #F5F1EB;
+ background: #EAF2F8;
 }
 
 /* Styles pour le statut */
@@ -177,7 +178,8 @@
 
 .btn-cancel {
   padding: 0.6rem 1rem;
-  background: #aaa;
+  background: #5a9ed1;
+
   color: white;
   border-radius: 6px;
   border: none;
@@ -187,6 +189,8 @@
 .btn-save {
   padding: 0.6rem 1rem;
   background: #6B4B3E;
+  width:20%;
+  background-color:   #FF6F61;
   color: white;
   border-radius: 6px;
   border: none;

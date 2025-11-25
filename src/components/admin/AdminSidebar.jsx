@@ -1,20 +1,22 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { FaTachometerAlt, FaUsers, FaBook,FaTh, FaCommentDots, FaCog, FaBars, FaTimes } from 'react-icons/fa';
+import { FaTachometerAlt, FaUsers, FaBook,FaTh, FaCommentDots,FaShoppingBag, FaCog,FaTag, FaBars, FaTimes,FaSignOutAlt  } from 'react-icons/fa';
 import '../../assets/styles/admin/sidebar.css';
+import { useAuth } from "../../contexts/AuthContext";
 
 const AdminSidebar = () => {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
+  const {logout}=useAuth();
 
   const sidebarItems = [
-    { name: "Dashboard Overview", icon: <FaTachometerAlt />, link: "/admin/dashboard" },
+    { name: "Dashboard Overview", icon: <FaTachometerAlt />, link: "/admin/" },
     { name: "Gestion Utilisateurs", icon: <FaUsers />, link: "/admin/users" },
-      { name: "Gestion Categories", icon: <FaTh />, link: "/admin/categories" },
-          { name: "Gestion produits", icon: <FaTh />, link: "/admin/products" },
-    { name: "Stories", icon: <FaBook />, link: "/admin/stories" },
+      { name: "Gestion Categories", icon: <FaTag />, link: "/admin/categories" },
+          { name: "Gestion produits", icon: <FaShoppingBag />, link: "/admin/products" },
+
     { name: "Modération Avis", icon: <FaCommentDots />, link: "/admin/reviews" },
-    { name: "Paramètres", icon: <FaCog />, link: "/admin/settings" },
+  
   ];
 
   const toggleSidebar = () => {
@@ -40,7 +42,7 @@ const AdminSidebar = () => {
 
       <aside className={`admin-sidebar ${isOpen ? 'open' : ''}`}>
         <div className="sidebar-logo">
-          <h2>Zendora</h2>
+          <h2 className='text-xl font-bold tracking-tight'>Zendora</h2>
           <span>Admin Panel</span>
         </div>
 
@@ -55,8 +57,15 @@ const AdminSidebar = () => {
                 {item.name}
               </Link>
             </li>
+            
           ))}
+          <li className="logout-item" onClick={logout}>
+  <span className="icon"><FaSignOutAlt /></span>
+  Déconnexion
+</li>
+
         </ul>
+        
 
       
       </aside>

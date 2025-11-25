@@ -1,9 +1,9 @@
 import axios from "../config/axios";
 
 export const sellerService = {
-  getProducts: async () => {
-    const res = await axios.get("/seller/products");
-    return res.data.data;
+  getProducts: async ({ page = 1, limit = 12 } = {}) => {
+    const res = await axios.get("/seller/products", { params: { page, limit } });
+    return res.data;
   },
 
   getStats: async () => {

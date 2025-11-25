@@ -19,8 +19,10 @@ export const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
 
+    const getToken = () => Cookie.get('accessToken');
+
     const isAuthenticated = () => {
-        const token = Cookie.get('accessToken');
+        const token = getToken();
         if (!token) return false;
 
         try {
@@ -67,7 +69,9 @@ export const AuthProvider = ({ children }) => {
 
     const getUser = async () => {
         try {
+            console.log("hello");
             const response = await axios.get('/users/me');
+            console.log("response user",response.data);
             setUser(response.data);
             return response.data;
         } catch (err) {
@@ -88,6 +92,7 @@ export const AuthProvider = ({ children }) => {
 
     const value = {
         user,
+        token: getToken(),
         loading,
         isAuthenticated,
         login,

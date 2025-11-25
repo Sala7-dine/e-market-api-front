@@ -99,10 +99,10 @@ const Categories = () => {
                   <td>
                     <div className='action-btn'>
                       <button className="btn-update"  onClick={()=>{handleUpdate(c._id,c.name,c.description) }}>
-                        <FaSync size={16} color="#A0522D" />
+                        <FaSync size={16} color="#5a9ed1" />
                       </button>
                       <button className="btn-delete" onClick={()=> handleDelete(c._id)} >
-                        <FaTrash size={16} color="#A0522D" />
+                        <FaTrash size={16} color="#FF6F61" />
                       </button>
                     </div>
                   </td>
