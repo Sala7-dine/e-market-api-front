@@ -5,10 +5,7 @@ export const addToCart = createAsyncThunk(
   "cart/addToCart",
   async ({ productId, quantity }, { rejectWithValue }) => {
     try {
-      console.log("productId", productId);
-      console.log("productQuantité", quantity);
       const res = await axios.post("/carts/addtocart", { productId, quantity });
-      console.log("res", res);
 
       return res.data;
     } catch (error) {
@@ -22,9 +19,8 @@ export const getCart = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const res = await axios.get("/carts/getcarts");
-      console.log("res get", res.data.data[0].items);
 
-      return res.data.data[0].items;
+      return res.data.data[0];
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
     }
@@ -36,7 +32,7 @@ export const removeFromCart = createAsyncThunk(
   async ({ productId }, { rejectWithValue }) => {
     try {
       const res = await axios.delete(`carts/deleteProduct/${productId}`);
-      console.log("res remove", productId);
+
       return productId;
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
@@ -48,7 +44,7 @@ export const updateProductQuantity = createAsyncThunk(
   "cart/updateProductQuantity",
   async ({ productId, quantity }, { rejectWithValue }) => {
     try {
-      console.log("inside update");
+
       const res = await axios.put(`carts/updateCart/${productId}`, {
         quantity,
       });
@@ -61,7 +57,7 @@ export const updateProductQuantity = createAsyncThunk(
 
 const cartSlice = createSlice({
   name: "cart",
-  initialState: { cart: null, loading: false, error: null },
+  initialState: { cart: null, cartId: null, loading: false, error: null },
   reducers: {},
 
   extraReducers: (builder) => {
@@ -96,7 +92,8 @@ const cartSlice = createSlice({
       })
       .addCase(getCart.fulfilled, (state, action) => {
         state.loading = false;
-        state.cart = action.payload;
+        state.cart = action.payload.items;
+        state.cartId = action.payload._id;
         state.error = false;
       })
       .addCase(getCart.rejected, (state, action) => {
@@ -145,3 +142,5 @@ export const selectCartCount = (state) => {
   }
   return 0;
 };
+
+export const selectCartId = (state) => state.cart.cartId;
