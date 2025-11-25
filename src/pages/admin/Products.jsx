@@ -8,18 +8,17 @@ import Pagination from "../../components/Pagination";
 const Products = () => {
   const dispatch = useDispatch();
   const { products, loading, error, currentPage, totalPages, limit } = useSelector((state) => state.products);
+ 
+
 
   useEffect(() => {
     console.log("currentPage", currentPage);
-    console.log("limit", limit);
-    console.log("dispatch", dispatch);
-    console.log("useeffect");
-    console.log("products before dispatch",products);
+    
+   
     dispatch(fetchAllProducts({ page: currentPage, limit }));
-    console.log("products",products);
-    console.log("hello");
+  
   }, [dispatch, currentPage, limit]);
-  console.log("products outside useeffect",products);
+  
 
   const handleDelete = async (id) => {
     try {
@@ -57,33 +56,6 @@ if (error) return <p>Erreur: {error}</p>;
         <h2>Gestion des Produits</h2>
         <p>Gérez votre inventaire de produits</p>
       </div>
-
-      {/* Stats */}
-      <div className="stat-product">
-        <div className="stat-box">
-          <h3>Total Produits</h3>
-          <p>jdfjfj</p>
-        </div>
-
-        <div className="stat-box">
-          <h3>En stock</h3>
-          <p> 78 </p>
-        </div>
-
-        <div className="stat-box">
-          <h3>Rupture</h3>
-          <p>10</p>
-        </div>
-
-        <div className="stat-box">
-          <h3>Valeur du stock</h3>
-          <p>
-            10
-            €
-          </p>
-        </div>
-      </div>
-
       {/* Table */}
       <div className="products-table-container">
 

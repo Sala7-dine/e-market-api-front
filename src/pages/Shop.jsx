@@ -292,7 +292,7 @@ const Shop = () => {
                                                     <button
                                                         onClick={() => handleAddToCart(product)}
                                                         disabled={addingToCart[product._id]}
-                                                        className={`text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${
+                                                        className={`text-sm font-medium opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity duration-300 ${
                                                             addingToCart[product._id] ? 'text-green-500' : 'text-[#FF6B6B]'
                                                         }`}
                                                     >

@@ -16,9 +16,12 @@ export const createOrder = createAsyncThunk(
 
 export const getUserOrders = createAsyncThunk(
   "order/getUserOrders",
-  async (_, { rejectWithValue }) => {
+  async ({ page = 1, limit = 5 }, { rejectWithValue }) => {
     try {
-      const res = await axios.get("/orders/getOrder");
+      const res = await axios.get(
+        `/orders/getOrder?page=${page}&limit=${limit}`
+      );
+      console.log("RESPONSE DATA:", res.data);
       return res.data;
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
@@ -28,16 +31,19 @@ export const getUserOrders = createAsyncThunk(
 
 const orderSlice = createSlice({
   name: "order",
-  initialState: { 
-    orders: [], 
+  initialState: {
+    orders: [],
     currentOrder: null,
-    loading: false, 
-    error: null 
+    loading: false,
+    error: null,
+    page: 1,
+    totalPages: 1,
+    totalItems: 0,
   },
   reducers: {
     clearCurrentOrder: (state) => {
       state.currentOrder = null;
-    }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -55,8 +61,30 @@ const orderSlice = createSlice({
         state.error = action.payload;
       })
       .addCase(getUserOrders.fulfilled, (state, action) => {
-        state.orders = action.payload;
+        state.orders = action.payload.orders;
+        console.log("sttttttate", state.orders);
+        state.page = action.payload.page;
+        state.totalPages = action.payload.totalPages;
+        state.totalItems = action.payload.totalItems;
       });
+
+      // .addCase(getUserOrders.fulfilled, (state, action) => {
+      //   console.log("payloooooad", action.payload);
+
+      //   if (Array.isArray(action.payload)) {
+      //     state.orders = action.payload;
+      //     state.page = 1;
+      //     state.totalPages = 1;
+      //     state.totalItems = action.payload.length;
+      //   }
+      //   // Si le payload est l'objet complet
+      //   else {
+      //     state.orders = action.payload.orders || [];
+      //     state.page = action.payload.page || 1;
+      //     state.totalPages = action.payload.totalPages || 1;
+      //     state.totalItems = action.payload.totalItems || 0;
+      //   }
+      // });
   },
 });
 

@@ -13,9 +13,8 @@ import AdminLayout from "./pages/admin/AdminLayout.jsx";
 import Categories from "./pages/admin/Categories.jsx";
 
 import Reviews from "./pages/admin/Reviews.jsx";
-// import Review from "./pages/admin/Review.jsx";
+//import Review from "./pages/admin/Reviews.jsx";
 import OrdersHistory from "./pages/OrdersHistory.jsx";
-
 import Profile from "./pages/Profile.jsx";
 import Products from "./pages/admin/Products.jsx";
 import Cart from "./pages/Cart.jsx";
@@ -25,6 +24,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import NotFound from "./pages/NotFound.jsx";
 import Forbidden from "./pages/Forbidden.jsx";
+import Dashboard from "./pages/admin/Dashboard.jsx";
 
 const queryClient = new QueryClient();
 
@@ -53,6 +53,8 @@ function App() {
               </Route>
               <Route element={<ProtectedRoute roles={["admin"]} />}>
                 <Route path="/admin" element={<AdminLayout />}>
+                
+                  <Route path="" element={<Dashboard />} />
                   <Route path="users" element={<UserList />} />
                   <Route path="categories" element={<Categories />} />
                   <Route path="products" element={<Products />} />
