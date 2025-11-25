@@ -32,23 +32,7 @@ const Reviews = () => {
   return (
     <div className="user-list">
       <h2>Modération des Avis</h2>
-      <p>Gérez les avis signalés et assurez la qualité du contenu</p>
-
-      {/* === STATS === */}
-      <div className="stat-user">
-        <div className="stat-item">
-          <h3>Total Avis</h3>
-          <p>{reviews.length}</p>
-        </div>
-        <div className="stat-item">
-          <h3>Avis Positifs</h3>
-          <p>{reviews.filter(r => r.rating >= 4).length}</p>
-        </div>
-        <div className="stat-item">
-          <h3>Avis Négatifs</h3>
-          <p>{reviews.filter(r => r.rating <= 2).length}</p>
-        </div>
-      </div>
+      <p>Gérez les avis  et assurez la qualité du contenu</p>
 
       {/* === TABLEAU === */}
       <div className="users-table-container">

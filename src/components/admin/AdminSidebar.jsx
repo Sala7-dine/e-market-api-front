@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { FaTachometerAlt, FaUsers, FaBook,FaTh, FaCommentDots, FaCog, FaBars, FaTimes,FaSignOutAlt  } from 'react-icons/fa';
+import { FaTachometerAlt, FaUsers, FaBook,FaTh, FaCommentDots,FaShoppingBag, FaCog,FaTag, FaBars, FaTimes,FaSignOutAlt  } from 'react-icons/fa';
 import '../../assets/styles/admin/sidebar.css';
 import { useAuth } from "../../contexts/AuthContext";
 
@@ -12,11 +12,11 @@ const AdminSidebar = () => {
   const sidebarItems = [
     { name: "Dashboard Overview", icon: <FaTachometerAlt />, link: "/admin/" },
     { name: "Gestion Utilisateurs", icon: <FaUsers />, link: "/admin/users" },
-      { name: "Gestion Categories", icon: <FaTh />, link: "/admin/categories" },
-          { name: "Gestion produits", icon: <FaTh />, link: "/admin/products" },
+      { name: "Gestion Categories", icon: <FaTag />, link: "/admin/categories" },
+          { name: "Gestion produits", icon: <FaShoppingBag />, link: "/admin/products" },
 
     { name: "Modération Avis", icon: <FaCommentDots />, link: "/admin/reviews" },
-    { name: "Paramètres", icon: <FaCog />, link: "/admin/settings" },
+  
   ];
 
   const toggleSidebar = () => {
