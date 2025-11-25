@@ -7,6 +7,7 @@ import Footer from "../components/Footer.jsx";
 export default function Profile() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('account');
 
   // form state
   const [fullName, setFullName] = useState("");
@@ -99,115 +100,140 @@ export default function Profile() {
 
   return (
     <>
-      <Header />
-      <div className="min-h-screen bg-[#F5F0EC] py-12 px-4 flex justify-center">
-        <div className="bg-white w-full max-w-5xl p-10 rounded-xl shadow-md border border-gray-200">
-          {/* Title */}
-          <h1 className="text-3xl font-semibold text-gray-800 mb-2">
-            My Profile
-          </h1>
-          <p className="text-gray-500 mb-8">
-            Manage your account information and preferences
-          </p>
+      {/* Hero Section with Header */}
+      <section className="bg-gradient-to-br from-[#E8EEF2] to-[#D5E5F0] relative overflow-visible z-10">
+        <Header />
+        
+
+        {/* Decorative Elements */}
+        <div className="absolute top-10 right-20 w-40 h-40 bg-white/30 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-10 left-20 w-60 h-60 bg-blue-200/20 rounded-full blur-3xl"></div>
+      </section>
+
+      {/* Profile Content */}
+      <div className="min-h-screen bg-white py-12 px-4 relative z-0">
+        <div className="container mx-auto max-w-6xl">
+          
+          {/* Tabs Navigation */}
+          <div className="flex items-center justify-center gap-8 mb-12 border-b border-gray-200">
+            {['account', 'security', 'settings'].map((tab) => (
+              <button 
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`px-4 pb-4 transition-colors duration-300 capitalize ${
+                  activeTab === tab 
+                    ? 'text-gray-900 border-b-2 border-gray-900 font-medium' 
+                    : 'text-gray-400 hover:text-gray-900'
+                }`}
+              >
+                {tab === 'account' ? 'Informations du compte' : tab === 'security' ? 'Sécurité' : 'Paramètres'}
+              </button>
+            ))}
+          </div>
 
           <form onSubmit={handleSubmit}>
-            <div className="flex flex-col md:flex-row gap-12">
-              {/* Left Side - Profile Image */}
-              <div className="flex flex-col items-center md:items-start">
-                <div className="relative">
-                  <img
-                    src={
-                      previewImage && previewImage !== ""
-                        ? previewImage
-                        : "https://via.placeholder.com/160"
-                    }
-                    className="w-48 h-48 rounded-full object-cover border-4 border-gray-100 shadow-lg"
-                    alt="profile"
-                  />
-                </div>
+            {/* Tab Content */}
+            <div className="max-w-4xl mx-auto">
+              
+              {/* Account Tab */}
+              {activeTab === 'account' && (
+                <div className="py-4">
+                  <div className="flex flex-col md:flex-row gap-12">
+                    {/* Left Side - Profile Image */}
+                    <div className="flex flex-col items-center md:items-start">
+                      <div className="relative">
+                        <img
+                          src={
+                            previewImage && previewImage !== ""
+                              ? previewImage
+                              : "https://via.placeholder.com/160"
+                          }
+                          className="w-48 h-48 rounded-full object-cover border-4 border-gray-100 shadow-lg"
+                          alt="profile"
+                        />
+                      </div>
 
-                <label className="mt-6 cursor-pointer flex items-center justify-center gap-2 border border-gray-300 px-6 py-2.5 rounded-full shadow-sm bg-white hover:bg-gray-50 transition-colors">
-                  <Camera className="w-4 h-4 text-gray-600" />
-                  <span className="text-gray-700 font-medium">
-                    Change Photo
-                  </span>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={handleImageChange}
-                  />
-                </label>
-              </div>
-
-              {/* Right Side - Form Fields */}
-              <div className="flex-1">
-                {/* Account Information */}
-                <div className="mb-8">
-                  <h2 className="text-lg font-semibold text-gray-800 mb-5">
-                    Account Information
-                  </h2>
-
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                        Full Name
+                      <label className="mt-6 cursor-pointer flex items-center justify-center gap-2 border border-gray-300 px-6 py-2.5 rounded-full shadow-sm bg-white hover:bg-gray-50 transition-colors">
+                        <Camera className="w-4 h-4 text-gray-600" />
+                        <span className="text-gray-700 font-medium">
+                          Changer la photo
+                        </span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={handleImageChange}
+                        />
                       </label>
-                      <input
-                        type="text"
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8A6B58] focus:border-transparent outline-none transition-all bg-gray-50"
-                        value={fullName}
-                        onChange={(e) => setFullName(e.target.value)}
-                      />
                     </div>
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                        Email
-                      </label>
-                      <input
-                        type="email"
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8A6B58] focus:border-transparent outline-none transition-all bg-gray-50"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                      />
-                    </div>
+                    {/* Right Side - Form Fields */}
+                    <div className="flex-1">
+                      <h2 className="text-2xl font-semibold text-gray-800 mb-6">
+                        Informations personnelles
+                      </h2>
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                        Role
-                      </label>
-                      <input
-                        type="text"
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed text-gray-600"
-                        value={role}
-                        disabled
-                      />
-                      <p className="text-xs text-gray-500 mt-1.5">
-                        Only administrators can change user roles
-                      </p>
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                            Nom complet
+                          </label>
+                          <input
+                            type="text"
+                            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FF6B6B] focus:border-transparent outline-none transition-all bg-gray-50"
+                            value={fullName}
+                            onChange={(e) => setFullName(e.target.value)}
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                            Email
+                          </label>
+                          <input
+                            type="email"
+                            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FF6B6B] focus:border-transparent outline-none transition-all bg-gray-50"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                            Rôle
+                          </label>
+                          <input
+                            type="text"
+                            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed text-gray-600"
+                            value={role}
+                            disabled
+                          />
+                          <p className="text-xs text-gray-500 mt-1.5">
+                            Seuls les administrateurs peuvent modifier les rôles
+                          </p>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
+              )}
 
-                {/* Divider */}
-                <hr className="my-8 border-gray-200" />
-
-                {/* Change Password */}
-                <div>
-                  <h2 className="text-lg font-semibold text-gray-800 mb-5">
-                    Change Password
+              {/* Security Tab */}
+              {activeTab === 'security' && (
+                <div className="py-4">
+                  <h2 className="text-2xl font-semibold text-gray-800 mb-6">
+                    Changer le mot de passe
                   </h2>
 
-                  <div className="space-y-4">
+                  <div className="max-w-2xl space-y-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                        Current Password
+                        Mot de passe actuel
                       </label>
                       <input
                         type="password"
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8A6B58] focus:border-transparent outline-none transition-all bg-gray-50"
-                        placeholder="Enter current password"
+                        className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FF6B6B] focus:border-transparent outline-none transition-all bg-gray-50"
+                        placeholder="Entrez votre mot de passe actuel"
                         value={currentPassword}
                         onChange={(e) => setCurrentPassword(e.target.value)}
                       />
@@ -215,12 +241,12 @@ export default function Profile() {
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                        New Password
+                        Nouveau mot de passe
                       </label>
                       <input
                         type="password"
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8A6B58] focus:border-transparent outline-none transition-all bg-gray-50"
-                        placeholder="Enter new password"
+                        className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FF6B6B] focus:border-transparent outline-none transition-all bg-gray-50"
+                        placeholder="Entrez votre nouveau mot de passe"
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
                       />
@@ -228,25 +254,38 @@ export default function Profile() {
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                        Confirm New Password
+                        Confirmer le mot de passe
                       </label>
                       <input
                         type="password"
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8A6B58] focus:border-transparent outline-none transition-all bg-gray-50"
-                        placeholder="Confirm new password"
+                        className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FF6B6B] focus:border-transparent outline-none transition-all bg-gray-50"
+                        placeholder="Confirmez votre nouveau mot de passe"
                         value={confirmNewPassword}
                         onChange={(e) => setConfirmNewPassword(e.target.value)}
                       />
                     </div>
                   </div>
                 </div>
-              </div>
+              )}
+
+              {/* Settings Tab */}
+              {activeTab === 'settings' && (
+                <div className="py-4">
+                  <h2 className="text-2xl font-semibold text-gray-800 mb-6">
+                    Paramètres du compte
+                  </h2>
+                  <p className="text-gray-600 leading-relaxed">
+                    Les paramètres supplémentaires seront disponibles prochainement.
+                  </p>
+                </div>
+              )}
+
             </div>
 
             {/* Status Message */}
             {message && (
               <div
-                className={`mt-6 p-4 rounded-lg text-center ${
+                className={`mt-8 p-4 rounded-lg text-center max-w-2xl mx-auto ${
                   message.includes("successfully")
                     ? "bg-green-50 text-green-700 border border-green-200"
                     : "bg-red-50 text-red-700 border border-red-200"
@@ -260,15 +299,15 @@ export default function Profile() {
             <div className="flex justify-center mt-8">
               <button
                 type="submit"
-                className="px-10 py-3 bg-[#8A6B58] text-white rounded-full shadow-md hover:bg-[#725744] transition-colors font-medium"
+                className="px-10 py-3 bg-[#FF6B6B] text-white rounded-full hover:bg-[#ff5252] transition-colors font-medium"
               >
-                Save Changes
+                Enregistrer les modifications
               </button>
             </div>
           </form>
         </div>
       </div>
-      <Footer />
+ 
     </>
   );
 }
