@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import React from 'react';
+
 import {
   addToCart,
   getCart,
@@ -45,7 +47,7 @@ export default function Cart() {
   //   dispatch(getCart());
   // }, [dispatch]);
 
-  console.log("cart:", cart);
+
   // Calcul du total
 
   const subtotal = cartItems.reduce(
