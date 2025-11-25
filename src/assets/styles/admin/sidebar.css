@@ -125,6 +125,36 @@
   background-color: rgba(0, 0, 0, 0.5);
   z-index: 998;
 }
+/* Style pour Logout comme les autres items */
+.logout-item {
+ 
+
+  border-radius: 12px;
+  cursor: pointer;
+  color: #333;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+ 
+}
+
+/* Hover identique */
+.logout-item:hover {
+  background-color: #FF6F61;
+  color: #FFFFFF;
+  box-shadow: 0px 4px 12px rgba(255, 111, 97, 0.4);
+ 
+}
+
+/* Icône Logout */
+.logout-item .icon {
+  font-size: 18px;
+  min-width: 18px;
+}
+
 
 /* Responsive Tablet */
 @media (max-width: 1024px) {
