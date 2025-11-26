@@ -52,7 +52,7 @@ const TestWrapper = ({ children }) => {
   );
 };
 
-describe('UT-10: Ajouter produit dans panier - Integration Test', () => {
+describe('Ajouter produit dans panier - Integration Test', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
