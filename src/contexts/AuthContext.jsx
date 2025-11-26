@@ -1,3 +1,4 @@
+// eslint-disable-next-line no-unused-vars
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Cookie from "js-cookie";
