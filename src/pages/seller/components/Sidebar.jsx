@@ -38,7 +38,7 @@ const Sidebar = ({ activeTab, setActiveTab, isOpen, logout }) => {
               <div className="w-8 h-8 bg-gradient-to-br from-[#FF6B6B] to-[#8B7355] rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-sm">S</span>
               </div>
-              <span className="text-xl font-bold text-gray-900">SellerHub</span>
+              <span className="text-xl font-bold text-gray-900">ZENDORA</span>
             </div>
           ) : (
             <div className="w-8 h-8 bg-gradient-to-br from-[#FF6B6B] to-[#8B7355] rounded-lg flex items-center justify-center mx-auto">
