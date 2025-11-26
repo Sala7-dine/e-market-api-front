@@ -57,7 +57,7 @@ describe('Ajouter produit dans panier - Integration Test', () => {
     jest.clearAllMocks();
   });
 
-  test('should add product to cart successfully', async () => {
+  it('should add product to cart successfully', async () => {
     // Mock API responses
     mockedAxios.post.mockResolvedValueOnce({ data: mockCartResponse.data.data[0] });
     mockedAxios.get.mockResolvedValueOnce(mockCartResponse);
@@ -81,7 +81,7 @@ describe('Ajouter produit dans panier - Integration Test', () => {
 
   
 
-  test('should handle add to cart API error', async () => {
+  it('should handle add to cart API error', async () => {
     const store = configureStore({
       reducer: { cart: cartReducer }
     });
@@ -99,7 +99,7 @@ describe('Ajouter produit dans panier - Integration Test', () => {
     expect(result.payload).toEqual({ message: 'Product not found' });
   });
 
-  test('should update product quantity successfully', async () => {
+  it('should update product quantity successfully', async () => {
     mockedAxios.put.mockResolvedValueOnce({ data: { success: true } });
 
     const store = configureStore({
@@ -118,7 +118,7 @@ describe('Ajouter produit dans panier - Integration Test', () => {
     expect(result.payload).toEqual({ productId: 'product123', quantity: 3 });
   });
 
-  test('should remove product from cart successfully', async () => {
+  it('should remove product from cart successfully', async () => {
     mockedAxios.delete.mockResolvedValueOnce({ data: { success: true } });
 
     const store = configureStore({
@@ -134,7 +134,7 @@ describe('Ajouter produit dans panier - Integration Test', () => {
     expect(result.payload).toBe('product123');
   });
 
-  test('should handle update quantity API error', async () => {
+  it('should handle update quantity API error', async () => {
     const store = configureStore({
       reducer: { cart: cartReducer }
     });
@@ -152,7 +152,7 @@ describe('Ajouter produit dans panier - Integration Test', () => {
     expect(result.payload).toEqual({ message: 'Update failed' });
   });
 
-  test('should handle remove product API error', async () => {
+  it('should handle remove product API error', async () => {
     const store = configureStore({
       reducer: { cart: cartReducer }
     });
