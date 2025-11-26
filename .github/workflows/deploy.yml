@@ -22,14 +22,9 @@ jobs:
       - name: Build Vite App
         run: npm run build
 
-      - name: Login to Heroku
-        uses: heroku/actions/login@v2
-        with:
-          email: ${{ secrets.HEROKU_EMAIL }}
-          api_key: ${{ secrets.HEROKU_API_KEY }}
-
       - name: Deploy to Heroku
-        uses: heroku/actions/deploy@v2
+        uses: akhileshns/heroku-deploy@v3.12.14
         with:
-          app_name: ${{ secrets.HEROKU_APP_NAME }}
-          branch: main
+          heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
+          heroku_app_name: ${{ secrets.HEROKU_APP_NAME }}
+          heroku_email: ${{ secrets.HEROKU_EMAIL }}
