@@ -1,0 +1,219 @@
+.container-category {
+  display: flex;
+  justify-content: center;
+
+  flex-direction: column;
+  gap: 2rem;
+}
+.content-btn {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.btn-add {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 20%;
+}
+.btn-add button {
+  background-color: #ff6f61;
+  color: #ffffff;
+  border-radius: 20px;
+  padding: 0.6rem;
+}
+.content h2 {
+  font-family: "Playfair Display";
+  font-style: normal;
+  font-weight: 500;
+  font-size: 24px;
+  line-height: 36px;
+  display: flex;
+  align-items: center;
+  color: #2c2825;
+  margin: 0;
+}
+
+.content p {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 400;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  color: #6b6560;
+  margin: 0;
+}
+
+/* Styles pour le tableau */
+.categories-table-container {
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  width: 100%;
+  overflow-x: auto;
+}
+
+.categories-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 600px;
+}
+
+.categories-table th,
+.categories-table td {
+  padding: 15px;
+  text-align: left;
+  border-bottom: 1px solid #ecf0f1;
+}
+
+.categories-table th {
+  background-color: white;
+  color: white;
+  font-weight: 600;
+  font-style: normal;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 20px;
+  color: #2c2825;
+}
+
+.categories-table tbody tr:hover {
+  background: #eaf2f8;
+}
+
+/* Styles pour le statut */
+.status {
+  padding: 5px 10px;
+  border-radius: 15px;
+  font-size: 12px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.status.active {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.status.blocked {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+.action-btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: row;
+}
+
+/* Styles pour les boutons d'action */
+.btn-delete,
+.btn-update {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.btn-delete:hover {
+  background-color: #f8f9fa;
+}
+/* ----- MODAL ----- */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+}
+
+.modal-box {
+  background: white;
+  width: 90%;
+  max-width: 450px;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.modal-box h3 {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 1.2rem;
+  color: #2c2825;
+}
+
+/* Inputs */
+.modal-box input,
+.modal-box textarea {
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #c7c3c0;
+  margin-bottom: 1rem;
+  font-size: 14px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+.btn-cancel {
+  padding: 0.6rem 1rem;
+  background: #5a9ed1;
+
+  color: white;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-save {
+  padding: 0.6rem 1rem;
+  background: #6b4b3e;
+  width: 20%;
+  background-color: #ff6f61;
+  color: white;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+}
+
+/* ----- RESPONSIVE ----- */
+@media (max-width: 768px) {
+  .content-btn {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.2rem;
+  }
+
+  .btn-add {
+    width: 100%;
+  }
+
+  .btn-add button {
+    width: 100%;
+  }
+
+  .categories-table {
+    min-width: 500px;
+  }
+}
+
+@media (max-width: 480px) {
+  .modal-box {
+    padding: 1.4rem;
+  }
+}

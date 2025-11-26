@@ -1,244 +1,300 @@
-import {useState , useRef} from "react";
-import {Link, useNavigate} from "react-router-dom";
-import axios from "axios";
+// eslint-disable-next-line no-unused-vars
+import React from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext.jsx";
+import { registerSchema } from "../../validation/authValidation";
+import bgImage from "../../assets/images/bg.jpg";
+import { useState } from "react";
+
 const Register = () => {
+  const navigate = useNavigate();
+  const { register } = useAuth();
+  const [data, setData] = useState({
+    fullName: "",
+    email: "",
+    password: "",
+    cpassword: "",
+  });
+  const [errors, setErrors] = useState({});
+  const [apiError, setApiError] = useState("");
 
-    const navigate = useNavigate();
-    const [data , setData] = useState({
-        fullName : "",
-        email : "",
-        password : "",
-        cpassword : ""
-    });
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setErrors({});
+    setApiError("");
 
-    const nameRef = useRef(null);
-    const emailRef = useRef(null);
-    const passwordRef = useRef(null);
-    const cpasswordRef = useRef(null);
+    try {
+      // Validation avec Yup
+      await registerSchema.validate(data, { abortEarly: false });
 
-    // const handleRegister = () => {
-    //     console.log(fullName);
-    // }
+      // Si validation OK, tentative d'inscription
+      const newData = {
+        fullName: data.fullName,
+        email: data.email,
+        password: data.password,
+      };
 
-    const handilFocus = () => {
-        emailRef.current.style.display = "none";
-        passwordRef.current.style.display = "none";
-        cpasswordRef.current.style.display = "none";
-        nameRef.current.style.display = "none";
-
-    }
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-
-        if(!data.fullName) {
-            nameRef.current.style.display = "block";
-            return;
-        }
-
-        if(!data.email) {
-            emailRef.current.style.display = "block";
-            return;
-        }
-
-        if(!data.password ) {
-            passwordRef.current.style.display = "block";
-            return;
-        }
-
-        if(!data.cpassword) {
-            cpasswordRef.current.style.display = "block";
-            return;
-        }
-
-        if(data.password !== data.cpassword) {
-            passwordRef.current.style.display = "block";
-            cpasswordRef.current.style.display = "block";
-            return;
-        }
-
-        let newData = {
-            fullName : data.fullName,
-            email : data.email,
-            password : data.password
-        }
-
-        await axios.post('https://e-market-dh-03e9602f6d1a.herokuapp.com/api/auth/register' , newData)
-            .then((response) => {
-                console.log(response.data);
-            }).catch((err)=>{
-                console.log(err.response.data);
+      await register(newData);
+      navigate("/login");
+    } catch (error) {
+      if (error.name === "ValidationError") {
+        // Erreurs de validation Yup
+        const validationErrors = {};
+        error.inner.forEach((err) => {
+          validationErrors[err.path] = err.message;
         });
-
-        return navigate("/");
+        setErrors(validationErrors);
+      } else {
+        // Erreurs de l'API
+        setApiError(error.response?.data?.error || "Échec de l'inscription");
+      }
     }
+  };
 
-    return (
+  return (
+    <div className="min-h-screen flex">
+      {/* Left Side - Image Background */}
+      <div
+        className="hidden lg:flex lg:w-1/2 relative bg-cover bg-center overflow-hidden"
+        style={{ backgroundImage: `url(${bgImage})` }}
+      >
+        {/* Gradient Overlay */}
+        <div className="absolute inset-0 bg-gray-700 opacity-30"></div>
 
-        // <div className="min-h-screen flex flex-col items-center justify-center py-6 px-4">
-        //
-        //     <form onSubmit={handleSubmit}>
-        //         <div className="grid sm:grid-cols-2 gap-8">
-        //             <div>
-        //                 <label className="text-slate-900 text-sm font-medium mb-2 block">Full Name</label>
-        //                 <input name="fullName" type="text" onFocus={handilFocus}
-        //                        className="bg-slate-100 w-full text-slate-900 text-sm px-4 py-3 rounded-md focus:bg-transparent outline-blue-500 transition-all"
-        //                        placeholder="Enter name..."
-        //                        value={data.fullName}
-        //                        onChange={(e) => setData({...data, fullName : e.target.value})}
-        //                 />
-        //                 <span className="text-red-500 text-sm hidden" ref={nameRef}>invalid name</span>
-        //             </div>
-        //             <div>
-        //                 <label className="text-slate-900 text-sm font-medium mb-2 block">Email</label>
-        //                 <input name="email" type="email" onFocus={handilFocus}
-        //                        className="bg-slate-100 w-full text-slate-900 text-sm px-4 py-3 rounded-md focus:bg-transparent outline-blue-500 transition-all"
-        //                        placeholder="Enter your email..."
-        //                        value={data.email}
-        //                        onChange = { (e) => setData({...data , email : e.target.value}) }
-        //                 />
-        //                 <span className="text-red-500 text-sm hidden" ref={emailRef}>invalid email</span>
-        //
-        //             </div>
-        //             <div>
-        //                 <label className="text-slate-900 text-sm font-medium mb-2 block">Password</label>
-        //                 <input name="password" type="password" onFocus={handilFocus}
-        //                        className="bg-slate-100 w-full text-slate-900 text-sm px-4 py-3 rounded-md focus:bg-transparent outline-blue-500 transition-all"
-        //                        placeholder="Enter password"
-        //                        value={data.password}
-        //                        onChange = { (e) => setData({...data , password : e.target.value})}
-        //                 />
-        //                 <span className="text-red-500 text-sm hidden" ref={passwordRef}>invalid password</span>
-        //
-        //             </div>
-        //             <div>
-        //                 <label className="text-slate-900 text-sm font-medium mb-2 block">Confirm Password</label>
-        //                 <input name="cpassword" type="password" onFocus={handilFocus}
-        //                        className="bg-slate-100 w-full text-slate-900 text-sm px-4 py-3 rounded-md focus:bg-transparent outline-blue-500 transition-all"
-        //                        placeholder="Enter confirm password"
-        //                        value={data.cpassword}
-        //                        onChange = {(e) => setData({...data , cpassword : e.target.value})}
-        //                 />
-        //                 <span className="text-red-500 text-sm hidden" ref={cpasswordRef}>invalid password</span>
-        //             </div>
-        //         </div>
-        //
-        //         <div className="mt-12">
-        //             <button type="submit"
-        //                     className="mx-auto block min-w-32 py-3 px-6 text-sm font-medium tracking-wider rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none cursor-pointer">
-        //                 Sign up
-        //             </button>
-        //         </div>
-        //     </form>
-        //
-        // </div>
+        {/* Decorative Elements */}
+        <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-blue-400/20 to-transparent rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-80 h-80 bg-gradient-to-tr from-cyan-400/20 to-transparent rounded-full blur-3xl"></div>
+      </div>
 
+      {/* Right Side - Register Form */}
+      <div className="flex-1 flex items-center justify-center p-8 bg-white">
+        <div className="w-full max-w-md">
+          {/* Logo/Brand */}
+          <div className="text-center mb-8">
+            <Link to="/">
+              <h2 className="text-4xl font-bold text-black mb-2">E-Market</h2>
+            </Link>
+            <p className="text-gray-600">Create your account</p>
+          </div>
 
-        <div className="bg-gray-50">
-            <div className="min-h-screen flex flex-col items-center justify-center py-6 px-4">
-                <div className="max-w-[480px] w-full">
-
-                    <div className="p-6 sm:p-8 rounded-2xl bg-white border border-gray-200 shadow-sm">
-                        <h1 className="text-slate-900 text-center text-3xl font-semibold">Sign Up</h1>
-                        <form className="mt-12 space-y-6" onSubmit={handleSubmit}>
-                            <div>
-                                <label className="text-slate-900 text-sm font-medium mb-2 block">Full Name</label>
-                                <div className="relative flex items-center">
-                                    <input name="fullName" type="text"  required onFocus={handilFocus}
-                                           className="w-full text-slate-900 text-sm border border-slate-300 px-4 py-3 pr-8 rounded-md outline-blue-600"
-                                           placeholder="Enter your name ..."
-                                           value={data.fullName}
-                                           onChange={(e) => setData({...data , fullName : e.target.value})}
-                                    />
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="#bbb" stroke="#bbb"
-                                         className="w-4 h-4 absolute right-4" viewBox="0 0 24 24">
-                                        <circle cx="10" cy="7" r="6" data-original="#000000"></circle>
-                                        <path
-                                            d="M14 15H6a5 5 0 0 0-5 5 3 3 0 0 0 3 3h12a3 3 0 0 0 3-3 5 5 0 0 0-5-5zm8-4h-2.59l.3-.29a1 1 0 0 0-1.42-1.42l-2 2a1 1 0 0 0 0 1.42l2 2a1 1 0 0 0 1.42 0 1 1 0 0 0 0-1.42l-.3-.29H22a1 1 0 0 0 0-2z"
-                                            data-original="#000000"></path>
-                                    </svg>
-                                </div>
-                                    <span className="text-red-500 text-sm hidden" ref={nameRef}>invalid name</span>
-                            </div>
-                            <div>
-                                <label className="text-slate-900 text-sm font-medium mb-2 block">Email</label>
-                                <div className="relative flex items-center">
-                                    <input name="email" type="email"  required onFocus={handilFocus}
-                                           className="w-full text-slate-900 text-sm border border-slate-300 px-4 py-3 pr-8 rounded-md outline-blue-600"
-                                           placeholder="Enter your email"
-                                           value={data.email}
-                                           onChange={(e) => setData({...data , email : e.target.value})}
-                                    />
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="#bbb" stroke="#bbb"
-                                         className="w-4 h-4 absolute right-4" viewBox="0 0 24 24">
-                                        <circle cx="10" cy="7" r="6" data-original="#000000"></circle>
-                                        <path
-                                            d="M14 15H6a5 5 0 0 0-5 5 3 3 0 0 0 3 3h12a3 3 0 0 0 3-3 5 5 0 0 0-5-5zm8-4h-2.59l.3-.29a1 1 0 0 0-1.42-1.42l-2 2a1 1 0 0 0 0 1.42l2 2a1 1 0 0 0 1.42 0 1 1 0 0 0 0-1.42l-.3-.29H22a1 1 0 0 0 0-2z"
-                                            data-original="#000000"></path>
-                                    </svg>
-                                </div>
-                                    <span className="text-red-500 text-sm hidden" ref={emailRef}>invalid email</span>
-                            </div>
-                            <div>
-                                <label className="text-slate-900 text-sm font-medium mb-2 block">Password</label>
-                                <div className="relative flex items-center">
-                                    <input name="password" type="password" required onFocus={handilFocus}
-                                           className="w-full text-slate-900 text-sm border border-slate-300 px-4 py-3 pr-8 rounded-md outline-blue-600"
-                                           placeholder="Enter password"
-                                           value={data.password}
-                                           onChange={(e )=> setData({...data , password : e.target.value })}
-                                    />
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="#bbb" stroke="#bbb"
-                                         className="w-4 h-4 absolute right-4 cursor-pointer" viewBox="0 0 128 128">
-                                        <path
-                                            d="M64 104C22.127 104 1.367 67.496.504 65.943a4 4 0 0 1 0-3.887C1.367 60.504 22.127 24 64 24s62.633 36.504 63.496 38.057a4 4 0 0 1 0 3.887C126.633 67.496 105.873 104 64 104zM8.707 63.994C13.465 71.205 32.146 96 64 96c31.955 0 50.553-24.775 55.293-31.994C114.535 56.795 95.854 32 64 32 32.045 32 13.447 56.775 8.707 63.994zM64 88c-13.234 0-24-10.766-24-24s10.766-24 24-24 24 10.766 24 24-10.766 24-24 24zm0-40c-8.822 0-16 7.178-16 16s7.178 16 16 16 16-7.178 16-16-7.178-16-16-16z"
-                                            data-original="#000000"></path>
-                                    </svg>
-                                </div>
-                                    <span className="text-red-500 text-sm hidden" ref={passwordRef}>invalid password</span>
-                            </div>
-
-                            <div>
-                                <label className="text-slate-900 text-sm font-medium mb-2 block">Confirme Password</label>
-                                <div className="relative flex items-center">
-                                    <input name="cpassword" type="password" required onFocus={handilFocus}
-                                           className="w-full text-slate-900 text-sm border border-slate-300 px-4 py-3 pr-8 rounded-md outline-blue-600"
-                                           placeholder="Confirme your password..."
-                                           value={data.cpassword}
-                                           onChange={(e )=> setData({...data , cpassword : e.target.value })}
-                                    />
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="#bbb" stroke="#bbb"
-                                         className="w-4 h-4 absolute right-4 cursor-pointer" viewBox="0 0 128 128">
-                                        <path
-                                            d="M64 104C22.127 104 1.367 67.496.504 65.943a4 4 0 0 1 0-3.887C1.367 60.504 22.127 24 64 24s62.633 36.504 63.496 38.057a4 4 0 0 1 0 3.887C126.633 67.496 105.873 104 64 104zM8.707 63.994C13.465 71.205 32.146 96 64 96c31.955 0 50.553-24.775 55.293-31.994C114.535 56.795 95.854 32 64 32 32.045 32 13.447 56.775 8.707 63.994zM64 88c-13.234 0-24-10.766-24-24s10.766-24 24-24 24 10.766 24 24-10.766 24-24 24zm0-40c-8.822 0-16 7.178-16 16s7.178 16 16 16 16-7.178 16-16-7.178-16-16-16z"
-                                            data-original="#000000"></path>
-                                    </svg>
-                                </div>
-                                    <span className="text-red-500 text-sm text-sm hidden" ref={cpasswordRef}>invalid password</span>
-                            </div>
-
-
-                            <div className="!mt-12">
-                                <button type="submit"
-                                        className="w-full py-2 px-4 text-[15px] font-medium tracking-wide rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none cursor-pointer">
-                                    Sign in
-                                </button>
-                            </div>
-                            <p className="text-slate-900 text-sm !mt-6 text-center">already have an account ?
-                                <Link
-                                    to="/login"
-                                    className="text-blue-600 hover:underline ml-1 whitespace-nowrap font-semibold">Login
-                                    here</Link>
-                            </p>
-                        </form>
-                    </div>
-                </div>
+          {/* Error Message */}
+          {apiError && (
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-sm text-red-600">{apiError}</p>
             </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Full Name Field */}
+            <div>
+              <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-2">
+                Full Name
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <svg
+                    className="h-5 w-5 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                    />
+                  </svg>
+                </div>
+                <input
+                  id="fullName"
+                  name="fullName"
+                  type="text"
+                  className={`block w-full pl-10 pr-3 py-3 border ${
+                    errors.fullName
+                      ? "border-red-500 focus:ring-red-500"
+                      : "border-gray-300 focus:ring-[#FF6B6B]"
+                  } rounded-lg focus:outline-none focus:ring-2 transition-colors`}
+                  placeholder="Enter your full name"
+                  value={data.fullName}
+                  onChange={(e) => {
+                    setData({ ...data, fullName: e.target.value });
+                    setErrors({ ...errors, fullName: "" });
+                  }}
+                />
+              </div>
+              {errors.fullName && <p className="mt-1 text-sm text-red-600">{errors.fullName}</p>}
+            </div>
+
+            {/* Email Field */}
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                Email Address
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <svg
+                    className="h-5 w-5 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"
+                    />
+                  </svg>
+                </div>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  className={`block w-full pl-10 pr-3 py-3 border ${
+                    errors.email
+                      ? "border-red-500 focus:ring-red-500"
+                      : "border-gray-300 focus:ring-[#FF6B6B]"
+                  } rounded-lg focus:outline-none focus:ring-2 transition-colors`}
+                  placeholder="example@email.com"
+                  value={data.email}
+                  onChange={(e) => {
+                    setData({ ...data, email: e.target.value });
+                    setErrors({ ...errors, email: "" });
+                  }}
+                />
+              </div>
+              {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
+            </div>
+
+            {/* Password Field */}
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                Password
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <svg
+                    className="h-5 w-5 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                    />
+                  </svg>
+                </div>
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  className={`block w-full pl-10 pr-3 py-3 border ${
+                    errors.password
+                      ? "border-red-500 focus:ring-red-500"
+                      : "border-gray-300 focus:ring-[#FF6B6B]"
+                  } rounded-lg focus:outline-none focus:ring-2 transition-colors`}
+                  placeholder="Enter your password"
+                  value={data.password}
+                  onChange={(e) => {
+                    setData({ ...data, password: e.target.value });
+                    setErrors({ ...errors, password: "" });
+                  }}
+                />
+              </div>
+              {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password}</p>}
+            </div>
+
+            {/* Confirm Password Field */}
+            <div>
+              <label htmlFor="cpassword" className="block text-sm font-medium text-gray-700 mb-2">
+                Confirm Password
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <svg
+                    className="h-5 w-5 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                    />
+                  </svg>
+                </div>
+                <input
+                  id="cpassword"
+                  name="cpassword"
+                  type="password"
+                  className={`block w-full pl-10 pr-3 py-3 border ${
+                    errors.cpassword
+                      ? "border-red-500 focus:ring-red-500"
+                      : "border-gray-300 focus:ring-[#FF6B6B]"
+                  } rounded-lg focus:outline-none focus:ring-2 transition-colors`}
+                  placeholder="Confirm your password"
+                  value={data.cpassword}
+                  onChange={(e) => {
+                    setData({ ...data, cpassword: e.target.value });
+                    setErrors({ ...errors, cpassword: "" });
+                  }}
+                />
+              </div>
+              {errors.cpassword && <p className="mt-1 text-sm text-red-600">{errors.cpassword}</p>}
+            </div>
+
+            {/* Terms and Conditions */}
+            <div className="flex items-center">
+              <input
+                id="terms"
+                name="terms"
+                type="checkbox"
+                className="h-4 w-4 text-[#FF6B6B] focus:ring-[#FF6B6B] border-gray-300 rounded"
+              />
+              <label htmlFor="terms" className="ml-2 block text-sm text-gray-700">
+                I agree to the{" "}
+                <a href="#" className="font-medium text-[#FF6B6B] hover:text-[#ff5252]">
+                  Terms and Conditions
+                </a>
+              </label>
+            </div>
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-[#FF6B6B] hover:bg-[#ff5252] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#FF6B6B] transition-colors"
+            >
+              Create Account
+            </button>
+
+            {/* Divider */}
+            <div className="relative my-6">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white text-gray-500">Or sign up with</span>
+              </div>
+            </div>
+
+            {/* Sign In Link */}
+            <p className="text-center text-sm text-gray-600 mt-6">
+              Already have an account?{" "}
+              <Link to="/login" className="font-medium text-[#FF6B6B] hover:text-[#ff5252]">
+                Sign in
+              </Link>
+            </p>
+          </form>
         </div>
-
-
-    )
-
-}
+      </div>
+    </div>
+  );
+};
 
 export default Register;
