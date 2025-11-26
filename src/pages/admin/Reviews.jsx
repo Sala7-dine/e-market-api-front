@@ -1,18 +1,11 @@
-import React, { useState } from "react";
 import { FaTrash } from "react-icons/fa";
 import "../../assets/styles/admin/UserList.css";
 import Pagination from "../../components/Pagination";
 import { useReviews } from "../../hooks/useReview";
+import { useState } from "react";
 
 const Reviews = () => {
-  const {
-    reviews,
-    isLoading,
-    deleteReview,
-    totalPages,
-    currentPage,
-    setPage,
-  } = useReviews();
+  const { reviews, isLoading, deleteReview, totalPages, currentPage, setPage } = useReviews();
 
   const [showFull, setShowFull] = useState({});
 
@@ -21,9 +14,9 @@ const Reviews = () => {
   };
 
   const toggleShowFull = (reviewId) => {
-    setShowFull(prev => ({
+    setShowFull((prev) => ({
       ...prev,
-      [reviewId]: !prev[reviewId]
+      [reviewId]: !prev[reviewId],
     }));
   };
 
@@ -32,7 +25,7 @@ const Reviews = () => {
   return (
     <div className="user-list">
       <h2>Modération des Avis</h2>
-      <p>Gérez les avis  et assurez la qualité du contenu</p>
+      <p>Gérez les avis et assurez la qualité du contenu</p>
 
       {/* === TABLEAU === */}
       <div className="users-table-container">
@@ -55,13 +48,17 @@ const Reviews = () => {
                 <td>{review.productTitle || "Produit inconnu"}</td>
                 <td>{review.rating} ⭐</td>
                 <td>
-                  {showFull[review._id] 
-                    ? review.comment 
-                    : review.comment?.slice(0, 30) + (review.comment?.length > 30 ? "..." : "")
-                  }
+                  {showFull[review._id]
+                    ? review.comment
+                    : review.comment?.slice(0, 30) + (review.comment?.length > 30 ? "..." : "")}
                   {review.comment?.length > 30 && (
                     <span
-                      style={{ color: "#5b3d29", cursor: "pointer", fontWeight: "600", marginLeft: "5px" }}
+                      style={{
+                        color: "#5b3d29",
+                        cursor: "pointer",
+                        fontWeight: "600",
+                        marginLeft: "5px",
+                      }}
                       onClick={() => toggleShowFull(review._id)}
                     >
                       {showFull[review._id] ? "Voir moins" : "Voir plus"}
@@ -70,8 +67,8 @@ const Reviews = () => {
                 </td>
                 <td>{new Date(review.createdAt).toLocaleDateString()}</td>
                 <td>
-                  <button 
-                    className="btn-delete" 
+                  <button
+                    className="btn-delete"
                     onClick={() => handleDelete(review.productId, review._id)}
                   >
                     <FaTrash color="#FF6F61" />

@@ -28,8 +28,7 @@ const ViewProductModal = ({ isOpen, onClose, product, onEdit }) => {
         .filter((img) => img && typeof img === "string")
         .map((img) => {
           if (img.startsWith("http")) return img;
-          if (img.startsWith("e-market-dh-03e9602f6d1a.herokuapp.com"))
-            return `https://${img}`;
+          if (img.startsWith("e-market-dh-03e9602f6d1a.herokuapp.com")) return `https://${img}`;
           return `https://e-market-dh-03e9602f6d1a.herokuapp.com${
             img.startsWith("/") ? "" : "/"
           }${img}`;
@@ -49,11 +48,7 @@ const ViewProductModal = ({ isOpen, onClose, product, onEdit }) => {
   }, [product]);
 
   const categoryNames = useMemo(() => {
-    if (
-      !product ||
-      !Array.isArray(product.categories) ||
-      product.categories.length === 0
-    )
+    if (!product || !Array.isArray(product.categories) || product.categories.length === 0)
       return "Uncategorized";
     return product.categories
       .map((c) => (c && (c.name ?? c)) ?? "")
@@ -68,10 +63,7 @@ const ViewProductModal = ({ isOpen, onClose, product, onEdit }) => {
       <div className="bg-white rounded-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto m-4 shadow-xl border border-gray-100">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-100 bg-gradient-to-r from-[#FFF7F3] to-[#FDECEC] rounded-t-xl">
-          <h2
-            id="view-product-title"
-            className="text-2xl font-bold text-gray-900"
-          >
+          <h2 id="view-product-title" className="text-2xl font-bold text-gray-900">
             {product.title}
           </h2>
           <div className="flex items-center gap-2">
@@ -137,16 +129,12 @@ const ViewProductModal = ({ isOpen, onClose, product, onEdit }) => {
 
             <div className="space-y-6">
               <div>
-                <h3 className="text-3xl font-bold text-gray-900">
-                  {product.title}
-                </h3>
+                <h3 className="text-3xl font-bold text-gray-900">{product.title}</h3>
               </div>
 
               <div>
                 <p className="text-sm text-gray-600 mb-1">Price</p>
-                <p className="text-4xl font-bold text-[#FF6B6B]">
-                  {product.prix}
-                </p>
+                <p className="text-4xl font-bold text-[#FF6B6B]">{product.prix}</p>
               </div>
 
               <div>
@@ -167,23 +155,17 @@ const ViewProductModal = ({ isOpen, onClose, product, onEdit }) => {
 
               <div>
                 <p className="text-sm text-gray-600 mb-2">Description</p>
-                <p className="text-gray-700 leading-relaxed">
-                  {product.description}
-                </p>
+                <p className="text-gray-700 leading-relaxed">{product.description}</p>
               </div>
 
               <div className="pt-6 border-t border-gray-200 space-y-3">
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Created:</span>
-                  <span className="text-gray-900 font-medium">
-                    Nov 13, 2025
-                  </span>
+                  <span className="text-gray-900 font-medium">Nov 13, 2025</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Last Updated:</span>
-                  <span className="text-gray-900 font-medium">
-                    Nov 13, 2025
-                  </span>
+                  <span className="text-gray-900 font-medium">Nov 13, 2025</span>
                 </div>
               </div>
             </div>
@@ -202,8 +184,18 @@ const ViewProductModal = ({ isOpen, onClose, product, onEdit }) => {
               className="px-6 py-3 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 hover:border-red-400 transition-all font-medium disabled:opacity-50 group"
             >
               <span className="flex items-center gap-2">
-                <svg className="w-4 h-4 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                <svg
+                  className="w-4 h-4 group-hover:scale-110 transition-transform"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                  />
                 </svg>
                 Delete
               </span>
@@ -247,4 +239,3 @@ const ViewProductModal = ({ isOpen, onClose, product, onEdit }) => {
 };
 
 export default ViewProductModal;
-

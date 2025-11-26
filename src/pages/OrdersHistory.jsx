@@ -7,12 +7,7 @@ import { getUserOrders } from "../features/orderSlice";
 
 const OrderHistory = () => {
   const dispatch = useDispatch();
-  const {
-    orders,
-    loading,
-    page: currentPage,
-    totalPages,
-  } = useSelector((state) => state.order);
+  const { orders, loading, page: currentPage, totalPages } = useSelector((state) => state.order);
 
   // const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
@@ -47,18 +42,9 @@ const OrderHistory = () => {
     }
   }, [statusFilter, search, dispatch]);
 
-  // console.log("Redux orders:", orders);
-  // console.log("Type of orders:", typeof orders);
-  // console.log("Is array?:", Array.isArray(orders));
-  // console.log("Orders length:", orders?.length);
-
   const filteredOrders = (orders || [])
     .filter((o) => o._id.toLowerCase().includes(search.toLowerCase()))
-    .filter((o) =>
-      statusFilter === "Toutes les commandes" ? true : o.status === statusFilter
-    );
-
-  console.log("oredres", filteredOrders);
+    .filter((o) => (statusFilter === "Toutes les commandes" ? true : o.status === statusFilter));
 
   return (
     <>
@@ -82,9 +68,7 @@ const OrderHistory = () => {
           <div className="bg-white rounded-xl p-5 shadow-sm h-max">
             {/* Search */}
             <div className="mb-6">
-              <label className="text-gray-700 font-medium text-sm">
-                Rechercher
-              </label>
+              <label className="text-gray-700 font-medium text-sm">Rechercher</label>
               <input
                 type="text"
                 placeholder="Numéro de commande..."
@@ -96,30 +80,21 @@ const OrderHistory = () => {
 
             {/* Filter by status */}
             <div className="mb-6">
-              <label className="text-gray-700 font-medium text-sm">
-                Filtrer par statut
-              </label>
+              <label className="text-gray-700 font-medium text-sm">Filtrer par statut</label>
               <div className="flex flex-col gap-2 mt-3 text-sm">
-                {[
-                  "Toutes les commandes",
-                  "pending",
-                  "paid",
-                  "shipped",
-                  "Livrée",
-                  "cancelled",
-                ].map((item) => (
-                  <button
-                    key={item}
-                    onClick={() => setStatusFilter(item)}
-                    className={`text-left px-3 py-2 rounded-lg hover:bg-pink-100 ${
-                      statusFilter === item
-                        ? "bg-pink-50 text-[#FF6B6B] font-medium"
-                        : ""
-                    }`}
-                  >
-                    {item}
-                  </button>
-                ))}
+                {["Toutes les commandes", "pending", "paid", "shipped", "Livrée", "cancelled"].map(
+                  (item) => (
+                    <button
+                      key={item}
+                      onClick={() => setStatusFilter(item)}
+                      className={`text-left px-3 py-2 rounded-lg hover:bg-pink-100 ${
+                        statusFilter === item ? "bg-pink-50 text-[#FF6B6B] font-medium" : ""
+                      }`}
+                    >
+                      {item}
+                    </button>
+                  )
+                )}
               </div>
             </div>
           </div>
@@ -137,67 +112,65 @@ const OrderHistory = () => {
               filteredOrders.map((order) => {
                 const date = new Date(order.createdAt);
 
-              const customId =
-                date.getFullYear() +
-                (date.getMonth() + 1).toString().padStart(2, "0") +
-                date.getDate().toString().padStart(2, "0") +
-                "-" +
-                date.getHours().toString().padStart(2, "0") +
-                date.getMinutes().toString().padStart(2, "0");
-                return(
-                <div
-                  key={order._id}
-                  className="bg-white rounded-xl p-5 shadow-sm flex items-center justify-between"
-                >
-                  {/* Left */}
-                  <div className="flex gap-4 items-center">
-                    {/* <img
+                const customId = `${
+                  date.getFullYear() +
+                  (date.getMonth() + 1).toString().padStart(2, "0") +
+                  date.getDate().toString().padStart(2, "0")
+                }-${date
+                  .getHours()
+                  .toString()
+                  .padStart(2, "0")}${date.getMinutes().toString().padStart(2, "0")}`;
+                return (
+                  <div
+                    key={order._id}
+                    className="bg-white rounded-xl p-5 shadow-sm flex items-center justify-between"
+                  >
+                    {/* Left */}
+                    <div className="flex gap-4 items-center">
+                      {/* <img
                     src={order.items[0].image}
                     alt="product"
                     className="w-20 h-20 object-cover rounded-lg"
                   /> */}
 
-                    <div>
-                      <h3 className="text-[#8B7355] font-semibold">
-                        Commande #{customId}
-                      </h3>
-                      <div className="text-sm text-gray-500 flex items-center gap-3 mt-1">
-                        <span>
-                          {new Date(order.createdAt).toLocaleDateString()}
-                        </span>
-                        <span>•</span>
-                        <span>{order.items.length} article(s)</span>
+                      <div>
+                        <h3 className="text-[#8B7355] font-semibold">Commande #{customId}</h3>
+                        <div className="text-sm text-gray-500 flex items-center gap-3 mt-1">
+                          <span>{new Date(order.createdAt).toLocaleDateString()}</span>
+                          <span>•</span>
+                          <span>{order.items.length} article(s)</span>
+                        </div>
+                        <p className="text-[#8B7355] font-semibold mt-1">
+                          Total: {order.totalPrice} €
+                        </p>
                       </div>
-                      <p className="text-[#8B7355] font-semibold mt-1">
-                        Total: {order.totalPrice} €
-                      </p>
+                    </div>
+
+                    {/* Status + Button */}
+                    <div className="flex flex-col items-end gap-3">
+                      <span
+                        className={`px-3 py-1 text-xs rounded-full border ${getStatusStyle(order.status)}`}
+                      >
+                        {order.status}
+                      </span>
+
+                      <button
+                        onClick={() => setSelectedOrder({ ...order, customId })}
+                        className="bg-[#FF6B6B] text-white px-4 py-2 rounded-lg text-sm hover:bg-[#FF5555] transition"
+                      >
+                        Voir la commande →
+                      </button>
                     </div>
                   </div>
-
-                  {/* Status + Button */}
-                  <div className="flex flex-col items-end gap-3">
-                    <span className={`px-3 py-1 text-xs rounded-full border ${getStatusStyle(order.status)}`}>
-                      {order.status}
-                    </span>
-
-                    <button
-                      onClick={() => setSelectedOrder({ ...order, customId })}
-                      className="bg-[#FF6B6B] text-white px-4 py-2 rounded-lg text-sm hover:bg-[#FF5555] transition"
-                    >
-                      Voir la commande →
-                    </button>
-                  </div>
-                </div>
-              )})}
+                );
+              })}
 
             {/* Pagination */}
             <div className="flex justify-center mt-4 gap-2">
               <button
                 className="px-3 py-1 border rounded-lg cursor-pointer"
                 disabled={currentPage === 1}
-                onClick={() =>
-                  dispatch(getUserOrders({ page: currentPage - 1, limit: 5 }))
-                }
+                onClick={() => dispatch(getUserOrders({ page: currentPage - 1, limit: 5 }))}
               >
                 &lt;
               </button>
@@ -207,9 +180,7 @@ const OrderHistory = () => {
                   key={i}
                   className={`px-3 py-1 border rounded-lg
               ${currentPage === i + 1 ? "bg-[#FF6B6B] text-white" : ""}`}
-                  onClick={() =>
-                    dispatch(getUserOrders({ page: i + 1, limit: 5 }))
-                  }
+                  onClick={() => dispatch(getUserOrders({ page: i + 1, limit: 5 }))}
                 >
                   {i + 1}
                 </button>
@@ -221,9 +192,7 @@ const OrderHistory = () => {
               <button
                 className="px-3 py-1 border rounded-lg cursor-pointer"
                 disabled={currentPage === totalPages}
-                onClick={() =>
-                  dispatch(getUserOrders({ page: currentPage + 1, limit: 5 }))
-                }
+                onClick={() => dispatch(getUserOrders({ page: currentPage + 1, limit: 5 }))}
               >
                 &gt;
               </button>
@@ -231,7 +200,13 @@ const OrderHistory = () => {
           </div>
         </div>
       </div>
-      {selectedOrder && <OrderDetailsModal order={selectedOrder} customId={selectedOrder.customId} onClose={() => setSelectedOrder(null)} />}
+      {selectedOrder && (
+        <OrderDetailsModal
+          order={selectedOrder}
+          customId={selectedOrder.customId}
+          onClose={() => setSelectedOrder(null)}
+        />
+      )}
       <Footer />
     </>
   );

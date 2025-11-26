@@ -32,12 +32,12 @@ export const useSellerData = (productPage, orderPage, orderStatus) => {
     productPagination: productsQuery.data?.pagination ?? {},
     isLoadingProducts: productsQuery.isLoading,
     productsError: productsQuery.error,
-    
+
     stats: statsQuery.data,
-    
+
     orders: ordersQuery.data?.data ?? [],
     orderPagination: ordersQuery.data?.pagination ?? {},
-    
+
     updateStatus: updateStatusMutation.mutate,
     isUpdatingStatus: updateStatusMutation.isLoading,
   };

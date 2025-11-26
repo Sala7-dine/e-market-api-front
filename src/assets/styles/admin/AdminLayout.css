@@ -1,7 +1,7 @@
 .admin-layout {
   display: flex;
   flex-direction: row;
-  background: linear-gradient(120deg, #EAF2F8, #FDFEFE);
+  background: linear-gradient(120deg, #eaf2f8, #fdfefe);
 
   min-height: 100vh;
 }
@@ -16,7 +16,7 @@
 
 .main-content {
   padding: 30px;
-   background: transparent;
+  background: transparent;
   flex: 1;
 }
 
