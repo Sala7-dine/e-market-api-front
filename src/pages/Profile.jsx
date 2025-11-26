@@ -53,6 +53,12 @@ export default function Profile() {
     setPreviewImage(URL.createObjectURL(file));
   };
 
+  // Get image URL helper
+  const getImageUrl = (imageUrl) => {
+    if (!imageUrl) return "https://via.placeholder.com/160";
+    return imageUrl.startsWith('http') ? imageUrl : `https://res.cloudinary.com/dbrrmsoit/image/upload/${imageUrl}`;
+  };
+
   // Save changes
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -145,7 +151,7 @@ export default function Profile() {
                         <img
                           src={
                             previewImage && previewImage !== ""
-                              ? previewImage
+                              ? (previewImage.startsWith('blob:') ? previewImage : getImageUrl(previewImage))
                               : "https://via.placeholder.com/160"
                           }
                           className="w-48 h-48 rounded-full object-cover border-4 border-gray-100 shadow-lg"
