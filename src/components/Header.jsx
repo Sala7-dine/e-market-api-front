@@ -11,7 +11,6 @@ import { getCart, removeFromCart, updateProductQuantity } from "../features/cart
 
 const Header = () => {
   const dispatch = useDispatch();
-  const cartCount = useSelector(selectCartCount);
   const {cart} = useSelector((state) => state.cart);
   const cartItems = Array.isArray(cart) ? cart : [];
   const [isScrolled, setIsScrolled] = useState(false);
@@ -184,7 +183,7 @@ const Header = () => {
               </div>
               
               <div className="relative group">
-                <button className="flex items-center gap-2 text-black hover:text-gray-700 transition">
+                <button className="flex items-center gap-2 text-black hover:text-gray-700 transition cursor-pointer">
                   <i className="la la-user text-2xl"></i>
                 </button>
                 
