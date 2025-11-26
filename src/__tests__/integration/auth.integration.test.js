@@ -1,3 +1,4 @@
+import React from 'react';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { AuthProvider, useAuth } from '../../contexts/AuthContext';
@@ -12,6 +13,30 @@ jest.mock('js-cookie');
 const TestComponent = () => {
   const { user, login, register, logout, isAuthenticated, getUser } = useAuth();
 
+  const handleLogin = async () => {
+    try {
+      await login({ email: 'test@example.com', password: 'password' });
+    } catch (error) {
+      // Error handled
+    }
+  };
+
+  const handleRegister = async () => {
+    try {
+      await register({ fullName: 'Test', email: 'test@example.com', password: 'password' });
+    } catch (error) {
+      // Error handled
+    }
+  };
+
+  const handleGetUser = async () => {
+    try {
+      await getUser();
+    } catch (error) {
+      // Error handled
+    }
+  };
+
   return (
     <div>
       <div data-testid="user-status">
@@ -20,22 +45,16 @@ const TestComponent = () => {
       <div data-testid="auth-status">
         {isAuthenticated() ? 'Authenticated' : 'Not authenticated'}
       </div>
-      <button
-        data-testid="login-btn"
-        onClick={() => login({ email: 'test@example.com', password: 'password' })}
-      >
+      <button data-testid="login-btn" onClick={handleLogin}>
         Login
       </button>
-      <button
-        data-testid="register-btn"
-        onClick={() => register({ fullName: 'Test', email: 'test@example.com', password: 'password' })}
-      >
+      <button data-testid="register-btn" onClick={handleRegister}>
         Register
       </button>
       <button data-testid="logout-btn" onClick={logout}>
         Logout
       </button>
-      <button data-testid="getuser-btn" onClick={getUser}>
+      <button data-testid="getuser-btn" onClick={handleGetUser}>
         Get User
       </button>
     </div>
