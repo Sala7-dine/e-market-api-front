@@ -1,11 +1,9 @@
-
-
-import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { fetchUsers, deleteUser } from '../../features/usersSlice';
-import Pagination from '../../components/Pagination';
-import '../../assets/styles/admin/UserList.css'
+import { useDispatch, useSelector } from "react-redux";
+import { fetchUsers, deleteUser } from "../../features/usersSlice";
+import Pagination from "../../components/Pagination";
+import "../../assets/styles/admin/UserList.css";
 import { FaTrash } from "react-icons/fa";
+import { useState, useEffect } from "react";
 
 const UserList = () => {
   const dispatch = useDispatch();
@@ -20,12 +18,11 @@ const UserList = () => {
     setCurrentPage(page);
   };
   const handleDelete = (userId) => {
-    console.log(userId);
     dispatch(deleteUser(userId));
-  }
+  };
 
   if (loading) return <p>Chargement...</p>;
-  if (error) return <p style={{ color: 'red' }}>{error}</p>;
+  if (error) return <p style={{ color: "red" }}>{error}</p>;
 
   return (
     <>
@@ -33,21 +30,20 @@ const UserList = () => {
         <h2>Gestion Utilisateurs</h2>
         <p>Gérez et surveillez tous les utilisateurs de votre plateforme</p>
 
-        <div className='stat-user'>
-          <div className='stat-item'>
+        <div className="stat-user">
+          <div className="stat-item">
             <h3>Total Utilisateurs</h3>
             <p>{pagination.totalUsers}</p>
           </div>
-          <div className='stat-item'>
+          <div className="stat-item">
             <h3>Page Courante</h3>
             <p>{pagination.currentPage}</p>
           </div>
 
-          <div className='stat-item'>
+          <div className="stat-item">
             <h3>Total Pages</h3>
             <p>{pagination.totalPages}</p>
           </div>
-
         </div>
         <div className="users-table-container">
           <table className="categories-table">
@@ -63,7 +59,7 @@ const UserList = () => {
               </tr>
             </thead>
             <tbody>
-              {users.map(user => (
+              {users.map((user) => (
                 <tr key={user._id}>
                   <td>{user._id}</td>
                   <td>{user.fullName}</td>
@@ -72,12 +68,9 @@ const UserList = () => {
                   <td>{new Date(user.createdAt).toLocaleDateString()}</td>
 
                   <td>
-                    
-                    <button className="btn-delete" onClick={()=> handleDelete(user._id)}>
+                    <button className="btn-delete" onClick={() => handleDelete(user._id)}>
                       <FaTrash size={16} color="#FF6F61" />
-                      
                     </button>
-
                   </td>
                 </tr>
               ))}
@@ -96,13 +89,9 @@ const UserList = () => {
         <div className="pagination-info">
           Affichage de {users.length} utilisateurs sur {pagination.totalUsers} au total
         </div>
-
       </div>
-
-
     </>
   );
 };
 
 export default UserList;
-

@@ -1,14 +1,3 @@
-const  Users = () => {
-    return ( 
-        <>
-        
-        
-        
-        
-        
-        
-        </>
-     );
-}
- 
-export default  Users;
+const Users = () => <></>;
+
+export default Users;

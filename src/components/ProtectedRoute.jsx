@@ -1,8 +1,8 @@
 import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 
-export default function ProtectedRoute({ roles = [] }) {
-   const { user, loading } = useAuth();
+const ProtectedRoute = ({ roles = [] }) => {
+  const { user, loading } = useAuth();
 
   if (loading) return <p>Chargement...</p>;
 
@@ -15,4 +15,6 @@ export default function ProtectedRoute({ roles = [] }) {
   }
 
   return <Outlet />;
-}
+};
+
+export default ProtectedRoute;
