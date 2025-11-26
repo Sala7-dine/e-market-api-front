@@ -114,7 +114,17 @@ const OrderHistory = () => {
               <p className="text-gray-600">Aucune commande trouvée.</p>
             )}
             {!loading &&
-              filteredOrders.map((order) => (
+              filteredOrders.map((order) => {
+                const date = new Date(order.createdAt);
+
+              const customId =
+                date.getFullYear() +
+                (date.getMonth() + 1).toString().padStart(2, "0") +
+                date.getDate().toString().padStart(2, "0") +
+                "-" +
+                date.getHours().toString().padStart(2, "0") +
+                date.getMinutes().toString().padStart(2, "0");
+                return(
                 <div
                   key={order._id}
                   className="bg-white rounded-xl p-5 shadow-sm flex items-center justify-between"
@@ -129,7 +139,7 @@ const OrderHistory = () => {
 
                     <div>
                       <h3 className="text-[#8B7355] font-semibold">
-                        Commande #{order._id}
+                        Commande #{customId}
                       </h3>
                       <div className="text-sm text-gray-500 flex items-center gap-3 mt-1">
                         <span>
@@ -212,7 +222,7 @@ const OrderHistory = () => {
                     </div>
                   )}
                 </div>
-              ))}
+              )})}
 
             {/* Pagination */}
             <div className="flex justify-center mt-4 gap-2">
