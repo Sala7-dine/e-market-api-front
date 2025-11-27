@@ -83,6 +83,15 @@ return id;
          return thunkAPI.rejectWithValue(error.response?.data?.message || error.message); 
   }
 });
+export const updateUser = createAsyncThunk("users/update", async ({id,data},thunkAPI) => {
+  try{
+const response= await userService.updateUser(id,data);
+return response
+  }
+  catch(error){
+         return thunkAPI.rejectWithValue(error.response?.data?.message || error.message); 
+  }
+});
 // Slice
 const usersSlice = createSlice({
   name: 'users',
@@ -121,7 +130,25 @@ const usersSlice = createSlice({
       })
       .addCase(deleteUser.rejected, (state, action) => {
         state.error = action.payload;
-      });
+      })
+       .addCase(updateUser.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateUser.fulfilled, (state, action) => {
+        state.loading = false;
+       state.users=state.users.map((user)=>{
+        if(user._id===action.payload._id){
+          return action.payload;
+        }
+        return user;
+       })
+      })
+      .addCase(updateUser.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      
   },
 });
 

@@ -90,7 +90,7 @@ if (error) return <p>Erreur: {error}</p>;
                     {product.stock} unités
                   </span>
                 </td>
-                <td>{product.price} €</td>
+                <td>{product.prix} €</td>
                 <td>
                   <button
                     className="btn-view"
