@@ -1,10 +1,9 @@
-import React from 'react';
-import '../assets/styles/admin/pagination.css'; 
+import "../assets/styles/admin/pagination.css";
 
 const Pagination = ({ currentPage, totalPages, onPageChange, hasNext, hasPrev }) => {
   const current = Number(currentPage);
   const total = Number(totalPages);
-  
+
   const handlePageClick = (page) => {
     if (page !== current && page >= 1 && page <= total) {
       onPageChange(page);
@@ -15,7 +14,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange, hasNext, hasPrev })
     const pages = [];
     const maxVisiblePages = 5;
     let startPage = Math.max(1, current - Math.floor(maxVisiblePages / 2));
-    let endPage = Math.min(total, startPage + maxVisiblePages - 1);
+    const endPage = Math.min(total, startPage + maxVisiblePages - 1);
 
     if (endPage - startPage + 1 < maxVisiblePages) {
       startPage = Math.max(1, endPage - maxVisiblePages + 1);
@@ -26,7 +25,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange, hasNext, hasPrev })
         <button
           key={i}
           onClick={() => handlePageClick(i)}
-          className={`pagination-btn ${i === current ? 'active' : ''}`}
+          className={`pagination-btn ${i === current ? "active" : ""}`}
         >
           {i}
         </button>
@@ -45,9 +44,9 @@ const Pagination = ({ currentPage, totalPages, onPageChange, hasNext, hasPrev })
       >
         Précédent
       </button>
-      
+
       {renderPageNumbers()}
-      
+
       <button
         onClick={() => handlePageClick(current + 1)}
         disabled={!hasNext}

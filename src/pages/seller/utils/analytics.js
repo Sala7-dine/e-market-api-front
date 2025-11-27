@@ -1,51 +1,51 @@
 export const calculateRevenueByMonth = (orders) => {
   const monthlyData = {};
-  
-  orders.forEach(order => {
+
+  orders.forEach((order) => {
     const date = new Date(order.createdAt);
-    const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-    const monthName = date.toLocaleDateString('en-US', { month: 'short' });
-    
+    const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+    const monthName = date.toLocaleDateString("en-US", { month: "short" });
+
     if (!monthlyData[monthKey]) {
       monthlyData[monthKey] = { month: monthName, revenue: 0 };
     }
-    
+
     monthlyData[monthKey].revenue += order.orderTotal || 0;
   });
-  
+
   return Object.values(monthlyData).slice(-6);
 };
 
 export const calculateBestSellers = (orders, productList) => {
   const productSales = {};
-  
-  orders.forEach(order => {
-    order.items?.forEach(item => {
+
+  orders.forEach((order) => {
+    order.items?.forEach((item) => {
       const productId = item.productId?._id || item.productId;
       const productTitle = item.productId?.title || item.productName;
-      
+
       if (!productSales[productId]) {
         productSales[productId] = {
           id: productId,
           title: productTitle,
           quantity: 0,
-          revenue: 0
+          revenue: 0,
         };
       }
-      
+
       productSales[productId].quantity += item.quantity;
-      productSales[productId].revenue += item.total || (item.price * item.quantity);
+      productSales[productId].revenue += item.total || item.price * item.quantity;
     });
   });
-  
-  const salesWithImages = Object.values(productSales).map(sale => {
-    const product = productList.find(p => (p._id || p.id) === sale.id);
+
+  const salesWithImages = Object.values(productSales).map((sale) => {
+    const product = productList.find((p) => (p._id || p.id) === sale.id);
     return {
       ...sale,
-      images: product?.images || []
+      images: product?.images || [],
     };
   });
-  
+
   return salesWithImages.sort((a, b) => b.quantity - a.quantity).slice(0, 5);
 };
 
