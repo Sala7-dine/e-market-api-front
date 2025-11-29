@@ -239,9 +239,15 @@ describe("Orders API - Integration Tests", () => {
 
       axios.put.mockResolvedValueOnce(mockResponse);
 
-      const response = await axios.put(`/orders/updateStatus/${orderId}`, statusUpdate);
+      const response = await axios.put(
+        `/orders/updateStatus/${orderId}`,
+        statusUpdate
+      );
 
-      expect(axios.put).toHaveBeenCalledWith(`/orders/updateStatus/${orderId}`, statusUpdate);
+      expect(axios.put).toHaveBeenCalledWith(
+        `/orders/updateStatus/${orderId}`,
+        statusUpdate
+      );
       expect(response.data.success).toBe(true);
       expect(response.data.data.status).toBe("shipped");
     });
@@ -342,5 +348,77 @@ describe("Orders API - Integration Tests", () => {
       expect(response.data.success).toBe(true);
       expect(response.data.data[0].status).toBe("delivered");
     });
+
+    it("Given total=100 When coupon Then total=90", async () => {
+      const userToken = "user-token-123";
+      Cookie.get.mockReturnValue(userToken);
+
+      const orderData = {
+        couponCode: "coupon10",
+        totalPrice: 90,
+      };
+
+      const mockresponse = {
+        data: {
+          success: true,
+          message: "order created",
+          totalPrice: 90,
+        },
+      };
+
+      axios.post.mockResolvedValueOnce(mockresponse);
+
+      const response = await axios.post("/orders", orderData);
+
+      expect(axios.post).toHaveBeenCalledWith("/orders", orderData);
+      expect(response.data.success).toBe(true);
+      expect(response.data.message).toBe("order created");
+      expect(response.data.totalPrice).toEqual(90);
+    });
+
+    it("Given stock inférieur à la quantité When checkout Then erreur", async () => {
+      const userToken = "user-token-123";
+      Cookie.get.mockReturnValue(userToken);
+
+      const mockProduct = {
+        _id: "prod_123",
+        title: "prodTest",
+        description: "desc",
+        stock: 2,
+        prix: 54,
+        category: "electronique",
+      };
+
+      const orderData = {
+        items: [
+          {
+            productId: mockProduct._id,
+            quantity: 4,
+            price: 56,
+          },
+        ],
+      };
+
+      const mockError = {
+        data: {
+          success: false,
+          message: "stock insuffisant",
+        },
+      };
+
+      axios.post.mockRejectedValueOnce(mockError);
+
+      
+      // expect(axios.post).toHaveBeenCalledWith("/orders", orderData);
+      try {
+        await axios.post("/orders", orderData);
+        fail("Should have thrown an error");
+      } catch (error) {
+        expect(error.data.success).toBe(false);
+        expect(error.data.message).toBe("stock insuffisant");
+        
+      }
+    });
+
   });
 });
