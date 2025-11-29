@@ -9,7 +9,7 @@ export const fetchCategories = createAsyncThunk(
       const res = await axios.get("/categories");
       return res.data;
     } catch (error) {
-      console.error('Full API Error (fetchCategories):', error);
+      console.error("Full API Error (fetchCategories):", error);
       return rejectWithValue({
         message: error.message,
         status: error.response?.status,
@@ -25,11 +25,10 @@ export const fetchProducts = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const res = await axios.get("/seller/products");
-      // console.log(res);
 
       return res.data;
     } catch (error) {
-      console.error('Full API Error (fetchProducts):', error);
+      console.error("Full API Error (fetchProducts):", error);
       return rejectWithValue({
         message: error.message,
         status: error.response?.status,
@@ -45,12 +44,12 @@ export const createProduct = createAsyncThunk(
     try {
       const res = await axios.post("/products/create", productData, {
         headers: {
-          'Content-Type': 'multipart/form-data',
+          "Content-Type": "multipart/form-data",
         },
       });
       return res.data;
     } catch (error) {
-      console.error('Full API Error (createProduct):', error);
+      console.error("Full API Error (createProduct):", error);
       return rejectWithValue({
         message: error.message,
         status: error.response?.status,
@@ -71,8 +70,6 @@ export const fetchAllProducts = createAsyncThunk(
   }
 );
 
-
-
 export const updateProduct = createAsyncThunk(
   "products/updateProduct",
   async ({ page = 1, limit = 10 }, { rejectWithValue }) => {
@@ -84,21 +81,18 @@ export const updateProduct = createAsyncThunk(
     }
   }
 );
-export const deleteproduct = createAsyncThunk("products/deleteproduct",
+export const deleteproduct = createAsyncThunk(
+  "products/deleteproduct",
   async (id, { rejectWithValue }) => {
     try {
-      const response = await axios.delete(`/products/delete/${id}`);
-      console.log("res remove", response);
+      await axios.delete(`/products/delete/${id}`);
       return id;
-
-    }
-    catch (error) {
-      console.error('Full API Error (deleterproduct):', error);
+    } catch (error) {
+      console.error("Full API Error (deleterproduct):", error);
       return rejectWithValue(error.response?.data || error.message);
-
     }
   }
-)
+);
 
 // export const fetchProductById = createAsyncThunk(
 //   "products/fetchById",
@@ -116,7 +110,11 @@ const productSlice = createSlice({
   name: "products",
 
   initialState: {
-    products: [], categories: [], loading: false, error: null, currentPage: 1,
+    products: [],
+    categories: [],
+    loading: false,
+    error: null,
+    currentPage: 1,
     totalPages: 1,
     totalItems: 0,
     limit: 10,
@@ -134,7 +132,7 @@ const productSlice = createSlice({
         state.loading = false;
         state.categories = Array.isArray(action.payload)
           ? action.payload
-          : action.payload?.data ?? action.payload?.list ?? [];
+          : (action.payload?.data ?? action.payload?.list ?? []);
       })
       .addCase(fetchCategories.rejected, (state, action) => {
         state.loading = false;
@@ -152,7 +150,7 @@ const productSlice = createSlice({
         // Normalize to array
         state.products = Array.isArray(action.payload)
           ? action.payload
-          : action.payload?.data ?? action.payload?.list ?? [];
+          : (action.payload?.data ?? action.payload?.list ?? []);
       })
       .addCase(fetchProducts.rejected, (state, action) => {
         state.loading = false;
@@ -170,25 +168,23 @@ const productSlice = createSlice({
         state.products.push(action.payload);
       })
 
-
       // FETCH ALL Products :
       .addCase(fetchAllProducts.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-     .addCase(fetchAllProducts.fulfilled, (state, action) => {
-  state.loading = false;
+      .addCase(fetchAllProducts.fulfilled, (state, action) => {
+        state.loading = false;
 
-  // Liste des produits
-  state.products = action.payload.data;
+        // Liste des produits
+        state.products = action.payload.data;
 
-  // Pagination
-  state.currentPage = action.payload.pagination.currentPage;
-  state.totalPages = action.payload.pagination.totalPages;
-  state.totalItems = action.payload.pagination.totalProducts;
-  state.limit = action.payload.pagination.limit;
-})
-
+        // Pagination
+        state.currentPage = action.payload.pagination.currentPage;
+        state.totalPages = action.payload.pagination.totalPages;
+        state.totalItems = action.payload.pagination.totalProducts;
+        state.limit = action.payload.pagination.limit;
+      })
 
       .addCase(fetchAllProducts.rejected, (state, action) => {
         state.loading = false;
@@ -196,9 +192,7 @@ const productSlice = createSlice({
       })
       // delete product :
       .addCase(deleteproduct.fulfilled, (state, action) => {
-        state.products = state.products.filter(
-          (product) => product._id !== action.payload
-        );
+        state.products = state.products.filter((product) => product._id !== action.payload);
         state.totalItems -= 1;
       });
   },

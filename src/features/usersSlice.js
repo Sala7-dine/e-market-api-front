@@ -7,7 +7,7 @@
 //   async (_, thunkAPI) => {
 //     try {
 //       const data = await userService.getAllUsers();
-     
+
 //       return data.data ? data.data : data;
 //     } catch (err) {
 //       return thunkAPI.rejectWithValue(err.response?.data?.message || err.message);
@@ -20,7 +20,7 @@
 // return id;
 //   }
 //   catch(error){
-//          return thunkAPI.rejectWithValue(error.response?.data?.message || error.message); 
+//          return thunkAPI.rejectWithValue(error.response?.data?.message || error.message);
 //   }
 // });
 // // Slice
@@ -58,26 +58,34 @@
 // });
 
 // export default usersSlice.reducer;
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import userService from '../service/userService';
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import userService from "../service/userService";
 
 //  Thunk pour récupérer tous les utilisateurs
 export const fetchUsers = createAsyncThunk(
-  'users/fetchUsers',
+  "users/fetchUsers",
   async ({ page = 1, limit = 10 } = {}, thunkAPI) => {
     try {
       const data = await userService.getAllUsers(page, limit);
-     
+
       return data;
     } catch (err) {
       return thunkAPI.rejectWithValue(err.response?.data?.message || err.message);
     }
   }
 );
-export const deleteUser = createAsyncThunk("users/delete", async (id,thunkAPI) => {
+export const deleteUser = createAsyncThunk("users/delete", async (id, thunkAPI) => {
+  try {
+    const _response = await userService.deleteUser(id);
+    return id;
+  } catch (error) {
+    return thunkAPI.rejectWithValue(error.response?.data?.message || error.message);
+  }
+});
+export const updateUser = createAsyncThunk("users/update", async ({id,data},thunkAPI) => {
   try{
-const response= await userService.deleteUser(id);
-return id;
+const response= await userService.updateUser(id,data);
+return response
   }
   catch(error){
          return thunkAPI.rejectWithValue(error.response?.data?.message || error.message); 
@@ -85,7 +93,7 @@ return id;
 });
 // Slice
 const usersSlice = createSlice({
-  name: 'users',
+  name: "users",
   initialState: {
     users: [],
     pagination: {
@@ -93,7 +101,7 @@ const usersSlice = createSlice({
       totalPages: 1,
       totalUsers: 0,
       hasNext: false,
-      hasPrev: false
+      hasPrev: false,
     },
     loading: false,
     error: null,
@@ -114,16 +122,31 @@ const usersSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-       .addCase(deleteUser.fulfilled, (state, action) => {
-        state.users = state.users.filter(
-          (user) => user._id !== action.payload
-        );
+      .addCase(deleteUser.fulfilled, (state, action) => {
+        state.users = state.users.filter((user) => user._id !== action.payload);
       })
       .addCase(deleteUser.rejected, (state, action) => {
         state.error = action.payload;
-      });
+      })
+       .addCase(updateUser.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateUser.fulfilled, (state, action) => {
+        state.loading = false;
+       state.users=state.users.map((user)=>{
+        if(user._id===action.payload._id){
+          return action.payload;
+        }
+        return user;
+       })
+      })
+      .addCase(updateUser.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      
   },
 });
 
 export default usersSlice.reducer;
-

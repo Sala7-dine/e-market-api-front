@@ -14,7 +14,12 @@ const AddProductModal = ({ isOpen, onClose, categories = [] }) => {
     return res.data;
   };
 
-  const { mutate: createProduct, isLoading, isError, error } = useMutation({
+  const {
+    mutate: createProduct,
+    isLoading,
+    isError,
+    error,
+  } = useMutation({
     mutationKey: ["products"],
     mutationFn: createProductApi,
     onSuccess: () => {
@@ -94,7 +99,9 @@ const AddProductModal = ({ isOpen, onClose, categories = [] }) => {
   if (!isOpen) return null;
 
   // filtered categories by search
-  const filteredCats = categories.filter((c) => c.name.toLowerCase().includes(catQuery.toLowerCase()));
+  const filteredCats = categories.filter((c) =>
+    c.name.toLowerCase().includes(catQuery.toLowerCase())
+  );
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
@@ -111,8 +118,18 @@ const AddProductModal = ({ isOpen, onClose, categories = [] }) => {
               className="p-2 hover:bg-white/60 rounded-lg transition-colors"
               aria-label="Close modal"
             >
-              <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <svg
+                className="w-6 h-6 text-gray-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </button>
           </div>
@@ -192,9 +209,13 @@ const AddProductModal = ({ isOpen, onClose, categories = [] }) => {
             {/* Selected tags */}
             <div className="flex flex-wrap gap-2 mb-2">
               {formData.categories.map((catId) => {
-                const c = categories.find((x) => x._id === catId) || categories.find((x) => x.id === catId);
+                const c =
+                  categories.find((x) => x._id === catId) || categories.find((x) => x.id === catId);
                 return (
-                  <span key={catId} className="flex items-center space-x-2 bg-[#FFF3F3] text-[#FF6B6B] px-3 py-1 rounded-full text-sm">
+                  <span
+                    key={catId}
+                    className="flex items-center space-x-2 bg-[#FFF3F3] text-[#FF6B6B] px-3 py-1 rounded-full text-sm"
+                  >
                     <span>{c ? c.name : catId}</span>
                     <button
                       type="button"
@@ -215,9 +236,23 @@ const AddProductModal = ({ isOpen, onClose, categories = [] }) => {
               onClick={() => setDropdownOpen((s) => !s)}
               className="w-full text-left px-4 py-2 border border-gray-300 rounded-lg flex items-center justify-between focus:ring-2 focus:ring-[#FF6B6B]"
             >
-              <span className="text-sm text-gray-700">{formData.categories.length ? `${formData.categories.length} selected` : "Select categories"}</span>
-              <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              <span className="text-sm text-gray-700">
+                {formData.categories.length
+                  ? `${formData.categories.length} selected`
+                  : "Select categories"}
+              </span>
+              <svg
+                className="w-4 h-4 text-gray-500"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 9l-7 7-7-7"
+                />
               </svg>
             </button>
 
@@ -238,7 +273,10 @@ const AddProductModal = ({ isOpen, onClose, categories = [] }) => {
                     <div className="text-sm text-gray-500 p-2">No categories found</div>
                   ) : (
                     filteredCats.map((category) => (
-                      <label key={category._id ?? category.id} className="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-gray-50 cursor-pointer">
+                      <label
+                        key={category._id ?? category.id}
+                        className="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-gray-50 cursor-pointer"
+                      >
                         <input
                           type="checkbox"
                           checked={formData.categories.includes(category._id ?? category.id)}
@@ -251,7 +289,13 @@ const AddProductModal = ({ isOpen, onClose, categories = [] }) => {
                   )}
                 </div>
                 <div className="p-2 border-t border-gray-100 flex justify-end">
-                  <button type="button" onClick={() => setDropdownOpen(false)} className="px-3 py-1 text-sm font-medium text-[#8B7355]">Done</button>
+                  <button
+                    type="button"
+                    onClick={() => setDropdownOpen(false)}
+                    className="px-3 py-1 text-sm font-medium text-[#8B7355]"
+                  >
+                    Done
+                  </button>
                 </div>
               </div>
             )}
@@ -261,10 +305,27 @@ const AddProductModal = ({ isOpen, onClose, categories = [] }) => {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Product Images</label>
             <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-[#FF6B6B] transition-colors cursor-pointer">
-              <input type="file" multiple accept="image/*" onChange={handleImageChange} className="hidden" id="image-upload-styled" />
+              <input
+                type="file"
+                multiple
+                accept="image/*"
+                onChange={handleImageChange}
+                className="hidden"
+                id="image-upload-styled"
+              />
               <label htmlFor="image-upload-styled" className="cursor-pointer">
-                <svg className="w-12 h-12 text-gray-400 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                <svg
+                  className="w-12 h-12 text-gray-400 mx-auto mb-3"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                  />
                 </svg>
                 <p className="text-sm text-gray-600">Click to upload images</p>
                 <p className="text-xs text-gray-500 mt-1">PNG, JPG, WEBP up to 10MB</p>
@@ -276,14 +337,28 @@ const AddProductModal = ({ isOpen, onClose, categories = [] }) => {
               <div className="grid grid-cols-4 gap-4 mt-4">
                 {images.map((file, index) => (
                   <div key={index} className="relative group">
-                    <img src={URL.createObjectURL(file)} alt={`Preview ${index + 1}`} className="w-full h-24 object-cover rounded-lg" />
+                    <img
+                      src={URL.createObjectURL(file)}
+                      alt={`Preview ${index + 1}`}
+                      className="w-full h-24 object-cover rounded-lg"
+                    />
                     <button
                       type="button"
                       onClick={() => setImages(images.filter((_, i) => i !== index))}
                       className="absolute top-1 right-1 bg-[#FF6B6B] text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
                     >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M6 18L18 6M6 6l12 12"
+                        />
                       </svg>
                     </button>
                   </div>
@@ -294,8 +369,20 @@ const AddProductModal = ({ isOpen, onClose, categories = [] }) => {
 
           {/* Action Buttons */}
           <div className="flex space-x-3 pt-4">
-            <button type="button" onClick={onClose} className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium">Cancel</button>
-            <button type="submit" disabled={isLoading} className="flex-1 px-6 py-3 bg-[#FF6B6B] text-white rounded-lg hover:bg-[#E05555] transition-colors font-medium disabled:opacity-50">{isLoading ? "Adding..." : "Add Product"}</button>
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="flex-1 px-6 py-3 bg-[#FF6B6B] text-white rounded-lg hover:bg-[#E05555] transition-colors font-medium disabled:opacity-50"
+            >
+              {isLoading ? "Adding..." : "Add Product"}
+            </button>
           </div>
         </form>
       </div>

@@ -18,10 +18,7 @@ export const getUserOrders = createAsyncThunk(
   "order/getUserOrders",
   async ({ page = 1, limit = 5 }, { rejectWithValue }) => {
     try {
-      const res = await axios.get(
-        `/orders/getOrder?page=${page}&limit=${limit}`
-      );
-      console.log("RESPONSE DATA:", res.data);
+      const res = await axios.get(`/orders/getOrder?page=${page}&limit=${limit}`);
       return res.data;
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
@@ -62,29 +59,27 @@ const orderSlice = createSlice({
       })
       .addCase(getUserOrders.fulfilled, (state, action) => {
         state.orders = action.payload.orders;
-        console.log("sttttttate", state.orders);
         state.page = action.payload.page;
         state.totalPages = action.payload.totalPages;
         state.totalItems = action.payload.totalItems;
       });
 
-      // .addCase(getUserOrders.fulfilled, (state, action) => {
-      //   console.log("payloooooad", action.payload);
+    // .addCase(getUserOrders.fulfilled, (state, action) => {
 
-      //   if (Array.isArray(action.payload)) {
-      //     state.orders = action.payload;
-      //     state.page = 1;
-      //     state.totalPages = 1;
-      //     state.totalItems = action.payload.length;
-      //   }
-      //   // Si le payload est l'objet complet
-      //   else {
-      //     state.orders = action.payload.orders || [];
-      //     state.page = action.payload.page || 1;
-      //     state.totalPages = action.payload.totalPages || 1;
-      //     state.totalItems = action.payload.totalItems || 0;
-      //   }
-      // });
+    //   if (Array.isArray(action.payload)) {
+    //     state.orders = action.payload;
+    //     state.page = 1;
+    //     state.totalPages = 1;
+    //     state.totalItems = action.payload.length;
+    //   }
+    //   // Si le payload est l'objet complet
+    //   else {
+    //     state.orders = action.payload.orders || [];
+    //     state.page = action.payload.page || 1;
+    //     state.totalPages = action.payload.totalPages || 1;
+    //     state.totalItems = action.payload.totalItems || 0;
+    //   }
+    // });
   },
 });
 

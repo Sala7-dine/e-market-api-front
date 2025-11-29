@@ -114,11 +114,11 @@
   .dashboard-container {
     padding: 1rem;
   }
-  
+
   .stats-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .dashboard-details {
     grid-template-columns: 1fr;
   }

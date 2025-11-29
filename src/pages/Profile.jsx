@@ -2,12 +2,11 @@ import { useEffect, useState } from "react";
 import axios from "../config/axios";
 import { Camera } from "lucide-react";
 import Header from "../components/Header.jsx";
-import Footer from "../components/Footer.jsx";
 
 export default function Profile() {
-  const [user, setUser] = useState(null);
+  const [_user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('account');
+  const [activeTab, setActiveTab] = useState("account");
 
   // form state
   const [fullName, setFullName] = useState("");
@@ -34,8 +33,8 @@ export default function Profile() {
         setEmail(res.data.email);
         setRole(res.data.role);
         setPreviewImage(res.data.profileImage);
-      } catch (err) {
-        console.error(err);
+      } catch {
+        // Error loading profile
         setMessage("Failed to load profile.");
       } finally {
         setLoading(false);
@@ -56,7 +55,9 @@ export default function Profile() {
   // Get image URL helper
   const getImageUrl = (imageUrl) => {
     if (!imageUrl) return "https://via.placeholder.com/160";
-    return imageUrl.startsWith('http') ? imageUrl : `https://res.cloudinary.com/dbrrmsoit/image/upload/${imageUrl}`;
+    return imageUrl.startsWith("http")
+      ? imageUrl
+      : `https://res.cloudinary.com/dbrrmsoit/image/upload/${imageUrl}`;
   };
 
   // Save changes
@@ -92,16 +93,14 @@ export default function Profile() {
       setCurrentPassword("");
       setNewPassword("");
       setConfirmNewPassword("");
-    } catch (err) {
-      console.error(err);
+    } catch {
+      // Error updating profile
       setMessage("Failed to update profile.");
     }
   };
 
   if (loading) {
-    return (
-      <div className="text-center py-20 text-gray-600">Loading profile...</div>
-    );
+    return <div className="text-center py-20 text-gray-600">Loading profile...</div>;
   }
 
   return (
@@ -109,7 +108,6 @@ export default function Profile() {
       {/* Hero Section with Header */}
       <section className="bg-gradient-to-br from-[#E8EEF2] to-[#D5E5F0] relative overflow-visible z-10">
         <Header />
-        
 
         {/* Decorative Elements */}
         <div className="absolute top-10 right-20 w-40 h-40 bg-white/30 rounded-full blur-3xl"></div>
@@ -119,20 +117,23 @@ export default function Profile() {
       {/* Profile Content */}
       <div className="min-h-screen bg-white py-12 px-4 relative z-0">
         <div className="container mx-auto max-w-6xl">
-          
           {/* Tabs Navigation */}
           <div className="flex items-center justify-center gap-8 mb-12 border-b border-gray-200">
-            {['account', 'security', 'settings'].map((tab) => (
-              <button 
+            {["account", "security", "settings"].map((tab) => (
+              <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
                 className={`px-4 pb-4 transition-colors duration-300 capitalize ${
-                  activeTab === tab 
-                    ? 'text-gray-900 border-b-2 border-gray-900 font-medium' 
-                    : 'text-gray-400 hover:text-gray-900'
+                  activeTab === tab
+                    ? "text-gray-900 border-b-2 border-gray-900 font-medium"
+                    : "text-gray-400 hover:text-gray-900"
                 }`}
               >
-                {tab === 'account' ? 'Informations du compte' : tab === 'security' ? 'Sécurité' : 'Paramètres'}
+                {tab === "account"
+                  ? "Informations du compte"
+                  : tab === "security"
+                    ? "Sécurité"
+                    : "Paramètres"}
               </button>
             ))}
           </div>
@@ -140,9 +141,8 @@ export default function Profile() {
           <form onSubmit={handleSubmit}>
             {/* Tab Content */}
             <div className="max-w-4xl mx-auto">
-              
               {/* Account Tab */}
-              {activeTab === 'account' && (
+              {activeTab === "account" && (
                 <div className="py-4">
                   <div className="flex flex-col md:flex-row gap-12">
                     {/* Left Side - Profile Image */}
@@ -151,7 +151,9 @@ export default function Profile() {
                         <img
                           src={
                             previewImage && previewImage !== ""
-                              ? (previewImage.startsWith('blob:') ? previewImage : getImageUrl(previewImage))
+                              ? previewImage.startsWith("blob:")
+                                ? previewImage
+                                : getImageUrl(previewImage)
                               : "https://via.placeholder.com/160"
                           }
                           className="w-48 h-48 rounded-full object-cover border-4 border-gray-100 shadow-lg"
@@ -161,9 +163,7 @@ export default function Profile() {
 
                       <label className="mt-6 cursor-pointer flex items-center justify-center gap-2 border border-gray-300 px-6 py-2.5 rounded-full shadow-sm bg-white hover:bg-gray-50 transition-colors">
                         <Camera className="w-4 h-4 text-gray-600" />
-                        <span className="text-gray-700 font-medium">
-                          Changer la photo
-                        </span>
+                        <span className="text-gray-700 font-medium">Changer la photo</span>
                         <input
                           type="file"
                           accept="image/*"
@@ -225,7 +225,7 @@ export default function Profile() {
               )}
 
               {/* Security Tab */}
-              {activeTab === 'security' && (
+              {activeTab === "security" && (
                 <div className="py-4">
                   <h2 className="text-2xl font-semibold text-gray-800 mb-6">
                     Changer le mot de passe
@@ -275,7 +275,7 @@ export default function Profile() {
               )}
 
               {/* Settings Tab */}
-              {activeTab === 'settings' && (
+              {activeTab === "settings" && (
                 <div className="py-4">
                   <h2 className="text-2xl font-semibold text-gray-800 mb-6">
                     Paramètres du compte
@@ -285,7 +285,6 @@ export default function Profile() {
                   </p>
                 </div>
               )}
-
             </div>
 
             {/* Status Message */}
@@ -313,7 +312,6 @@ export default function Profile() {
           </form>
         </div>
       </div>
- 
     </>
   );
 }

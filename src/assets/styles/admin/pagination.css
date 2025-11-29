@@ -13,16 +13,16 @@
   border-radius: 8px;
   border: 1px solid #e5e7eb;
   background-color: white;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 14px;
   cursor: pointer;
 
   transition: all 0.25s ease-in-out;
-  color: #2C2825;
+  color: #2c2825;
 }
 
 .pagination-btn:hover:not(:disabled) {
-  background-color: #F5F1EB;
+  background-color: #f5f1eb;
   transform: translateY(-1px);
 }
 
@@ -30,23 +30,21 @@
   background-color: whitesmoke;
   cursor: not-allowed;
   color: #a0a0a0;
-  
 }
 
 .pagination-btn.active {
+  background-color: #ff6f61;
 
-    background-color: #FF6F61;
- 
   color: #fff;
   font-weight: 600;
 }
 
 .pagination-info {
   text-align: center;
-  font-family: 'Inter';
+  font-family: "Inter";
   font-size: 14px;
   margin-top: 0.5rem;
-  color: #6B6560;
+  color: #6b6560;
 }
 
 /* Responsive ⚡ */

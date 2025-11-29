@@ -28,17 +28,38 @@ const OrderDetailsModal = ({ order, customId, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={onClose}>
-      <div className="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] flex flex-col shadow-2xl" onClick={(e) => e.stopPropagation()}>
+    <div
+      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] flex flex-col shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Header */}
         <div className="bg-gradient-to-r from-[#FF6B6B] to-[#FF8E8E] text-white p-6 flex justify-between items-center">
           <div>
             <h2 className="text-2xl font-bold">Commande #{customId}</h2>
-            <p className="text-sm opacity-90 mt-1">{new Date(order.createdAt).toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+            <p className="text-sm opacity-90 mt-1">
+              {new Date(order.createdAt).toLocaleDateString("fr-FR", {
+                weekday: "long",
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })}
+            </p>
           </div>
-          <button onClick={onClose} className="text-white hover:bg-white hover:bg-opacity-20 rounded-full p-2 transition">
+          <button
+            onClick={onClose}
+            className="text-white hover:bg-white hover:bg-opacity-20 rounded-full p-2 transition"
+          >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </button>
         </div>
@@ -47,9 +68,16 @@ const OrderDetailsModal = ({ order, customId, onClose }) => {
         <div className="p-6 overflow-y-auto flex-1">
           <div className="space-y-4">
             {order.items.map((item, idx) => (
-              <div key={idx} className="flex gap-4 p-4 bg-gray-50 rounded-xl hover:shadow-md transition">
+              <div
+                key={idx}
+                className="flex gap-4 p-4 bg-gray-50 rounded-xl hover:shadow-md transition"
+              >
                 <img
-                  src={item.productId?.images?.[0]?.startsWith("http") ? item.productId.images[0] : `https://res.cloudinary.com/dbrrmsoit/image/upload/${item.productId?.images?.[0]}`}
+                  src={
+                    item.productId?.images?.[0]?.startsWith("http")
+                      ? item.productId.images[0]
+                      : `https://res.cloudinary.com/dbrrmsoit/image/upload/${item.productId?.images?.[0]}`
+                  }
                   alt={item.productId?.title}
                   className="w-24 h-24 object-cover rounded-lg"
                 />
@@ -58,7 +86,9 @@ const OrderDetailsModal = ({ order, customId, onClose }) => {
                   <p className="text-2xl font-bold text-[#FF6B6B] mt-1">{item.price} €</p>
                   <div className="flex items-center gap-2 mt-2">
                     <span className="text-sm text-gray-600">Quantité:</span>
-                    <span className="bg-[#FF6B6B] text-white px-3 py-1 rounded-full text-sm font-medium">{item.quantity}</span>
+                    <span className="bg-[#FF6B6B] text-white px-3 py-1 rounded-full text-sm font-medium">
+                      {item.quantity}
+                    </span>
                   </div>
                 </div>
               </div>
