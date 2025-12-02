@@ -4,7 +4,6 @@ import { fetchUsers, deleteUser,updateUser } from "../../features/usersSlice";
 import Pagination from "../../components/Pagination";
 import "../../assets/styles/admin/UserList.css";
 import { FaTrash } from "react-icons/fa";
-import { useState, useEffect } from "react";
 
 const UserList = () => {
   const dispatch = useDispatch();
