@@ -1,18 +1,16 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchUsers, deleteUser,updateUser } from "../../features/usersSlice";
+import { fetchUsers, deleteUser, updateUser } from "../../features/usersSlice";
 import Pagination from "../../components/Pagination";
 import "../../assets/styles/admin/UserList.css";
 import { FaTrash } from "react-icons/fa";
 
 const UserList = () => {
   const dispatch = useDispatch();
-  const { users, pagination, loading, error } = useSelector(
-    (state) => state.users
-  );
+  const { users, pagination, loading, error } = useSelector((state) => state.users);
   const [currentPage, setCurrentPage] = useState(1);
   const [idetignId, setIdetingId] = useState(-1);
-  const [selectOption,setSelectedOption]=useState("");
+  const [selectOption, setSelectedOption] = useState("");
 
   useEffect(() => {
     dispatch(fetchUsers({ page: currentPage, limit: 10 }));
@@ -25,19 +23,16 @@ const UserList = () => {
     dispatch(deleteUser(userId));
   };
 
-  const handleUpdate = (userId,option) => {
+  const handleUpdate = (userId, option) => {
     // dispatch(updateRole(userId));
     setIdetingId(userId);
     setSelectedOption(option);
   };
-  const handleSave=()=>{
-    dispatch(updateUser({id:idetignId,data:{role:selectOption}}))
+  const handleSave = () => {
+    dispatch(updateUser({ id: idetignId, data: { role: selectOption } }));
     setIdetingId(-1);
-        setSelectedOption("");
-    
-
-
-  }
+    setSelectedOption("");
+  };
 
   if (loading) return <p>Chargement...</p>;
   if (error) return <p style={{ color: "red" }}>{error}</p>;
@@ -84,12 +79,13 @@ const UserList = () => {
                   <td>{user.email}</td>
                   <td>
                     {idetignId === user._id ? (
-                      <select onChange={(e)=>{
-                        setSelectedOption(e.target.value)
-
-                      }}     value={selectOption}>
-
-                        <option  value="user">user</option>
+                      <select
+                        onChange={(e) => {
+                          setSelectedOption(e.target.value);
+                        }}
+                        value={selectOption}
+                      >
+                        <option value="user">user</option>
                         <option value="seller">seller</option>
                       </select>
                     ) : (
@@ -103,15 +99,12 @@ const UserList = () => {
                       <button onClick={handleSave}>save</button>
                     ) : (
                       <>
-                        <button
-                          className="btn-delete"
-                          onClick={() => handleDelete(user._id)}
-                        >
+                        <button className="btn-delete" onClick={() => handleDelete(user._id)}>
                           <FaTrash size={16} color="#FF6F61" />
                         </button>
                         <button
                           className="btn-update"
-                          onClick={() => handleUpdate(user._id,user.role)}
+                          onClick={() => handleUpdate(user._id, user.role)}
                         >
                           Edit
                         </button>
@@ -133,8 +126,7 @@ const UserList = () => {
         />
 
         <div className="pagination-info">
-          Affichage de {users.length} utilisateurs sur {pagination.totalUsers}{" "}
-          au total
+          Affichage de {users.length} utilisateurs sur {pagination.totalUsers} au total
         </div>
       </div>
     </>
