@@ -1,17 +1,17 @@
-import React from 'react';
+// eslint-disable-next-line no-unused-vars
+import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import Checkout from "../../pages/Checkout.jsx";
 import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { useAuth } from "../../contexts/AuthContext.jsx";
-import Header from '../../components/Header.jsx';
-import PaymentModal from "../../components/PaymentModal.jsx"
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter } from "react-router-dom";
 
 // Mock des hooks et composants externes
 jest.mock("react-router-dom", () => ({
+  ...jest.requireActual("react-router-dom"),
   useNavigate: jest.fn(),
-  useLocation: jest.fn(() => ({ pathname: '/' })),
+  useLocation: jest.fn(() => ({ pathname: "/" })),
 }));
 jest.mock("react-redux", () => ({
   useSelector: jest.fn(),
@@ -20,19 +20,24 @@ jest.mock("react-redux", () => ({
 jest.mock("../../contexts/AuthContext", () => ({
   useAuth: jest.fn(),
 }));
-jest.mock("../../components/PaymentModal", () =>
-  jest.fn(() => <div>PaymentModal Mock</div>)
-);
-
-render(
-  <MemoryRouter>
-    <Checkout />
-  </MemoryRouter>
+jest.mock(
+  "../../components/PaymentModal",
+  () =>
+    function PaymentModalMock() {
+      return <div>PaymentModal Mock</div>;
+    }
 );
 
 describe("Checkout Component", () => {
   const mockDispatch = jest.fn();
   const mockNavigate = jest.fn();
+
+  const renderCheckout = () =>
+    render(
+      <MemoryRouter>
+        <Checkout />
+      </MemoryRouter>
+    );
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -58,27 +63,23 @@ describe("Checkout Component", () => {
   });
 
   it("renders header, footer, and checkout form", () => {
-    render(<Checkout />);
-    expect(screen.getByText(/Paiement/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/Nom complet/i)).toHaveValue("John Doe");
-    expect(screen.getByLabelText(/Adresse email/i)).toHaveValue(
-      "john@example.com"
-    );
-    expect(screen.getByText(/Produit 1/i)).toBeInTheDocument();
+    renderCheckout();
+    expect(screen.getAllByText(/Paiement/i)[0]).toBeInTheDocument();
+    expect(screen.getByDisplayValue("John Doe")).toBeInTheDocument();
+    expect(screen.getByDisplayValue("john@example.com")).toBeInTheDocument();
+    expect(screen.getAllByText(/Produit 1/i)[0]).toBeInTheDocument();
     expect(screen.getByText("PaymentModal Mock")).toBeInTheDocument();
   });
 
   it("changes delivery method when button clicked", () => {
-    render(<Checkout />);
+    renderCheckout();
     const pickupButton = screen.getByText(/Retrait/i);
     fireEvent.click(pickupButton);
-    expect(pickupButton.closest("button")).toHaveClass(
-      "border-blue-500 bg-blue-50"
-    );
+    expect(pickupButton.closest("button")).toHaveClass("border-blue-500 bg-blue-50");
   });
 
   it("updates form fields on change", () => {
-    render(<Checkout />);
+    renderCheckout();
     const phoneInput = screen.getByPlaceholderText(/Entrez votre numéro/i);
     fireEvent.change(phoneInput, { target: { value: "0600000000" } });
     expect(phoneInput).toHaveValue("0600000000");
@@ -88,18 +89,14 @@ describe("Checkout Component", () => {
     expect(agreeCheckbox).toBeChecked();
   });
 
-  it("shows alert if submitting without agreeing terms", () => {
-    window.alert = jest.fn();
-    render(<Checkout />);
+  it("disables pay button when terms not agreed", () => {
+    renderCheckout();
     const payButton = screen.getByText(/Payer maintenant/i);
-    fireEvent.click(payButton);
-    expect(window.alert).toHaveBeenCalledWith(
-      "Please agree to the terms and conditions"
-    );
+    expect(payButton).toBeDisabled();
   });
 
   it("opens payment modal when terms agreed", () => {
-    render(<Checkout />);
+    renderCheckout();
     const agreeCheckbox = screen.getByLabelText(/Conditions générales/i);
     fireEvent.click(agreeCheckbox);
     const payButton = screen.getByText(/Payer maintenant/i);

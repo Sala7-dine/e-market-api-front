@@ -1,5 +1,5 @@
-import React from 'react';
-import { useState, useEffect } from "react";
+// eslint-disable-next-line no-unused-vars
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import Header from "../components/Header";

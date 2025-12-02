@@ -239,15 +239,9 @@ describe("Orders API - Integration Tests", () => {
 
       axios.put.mockResolvedValueOnce(mockResponse);
 
-      const response = await axios.put(
-        `/orders/updateStatus/${orderId}`,
-        statusUpdate
-      );
+      const response = await axios.put(`/orders/updateStatus/${orderId}`, statusUpdate);
 
-      expect(axios.put).toHaveBeenCalledWith(
-        `/orders/updateStatus/${orderId}`,
-        statusUpdate
-      );
+      expect(axios.put).toHaveBeenCalledWith(`/orders/updateStatus/${orderId}`, statusUpdate);
       expect(response.data.success).toBe(true);
       expect(response.data.data.status).toBe("shipped");
     });
@@ -408,7 +402,6 @@ describe("Orders API - Integration Tests", () => {
 
       axios.post.mockRejectedValueOnce(mockError);
 
-      
       // expect(axios.post).toHaveBeenCalledWith("/orders", orderData);
       try {
         await axios.post("/orders", orderData);
@@ -416,9 +409,7 @@ describe("Orders API - Integration Tests", () => {
       } catch (error) {
         expect(error.data.success).toBe(false);
         expect(error.data.message).toBe("stock insuffisant");
-        
       }
     });
-
   });
 });
