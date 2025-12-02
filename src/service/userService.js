@@ -12,10 +12,10 @@ const userService = {
     const res = await axios.delete(`/users/delete/${id}`);
     return res.data;
   },
-  updateUser:async(id,data)=>{
-    const res= await axios.put(`/users/update/${id}`,data);
+  updateUser: async (id, data) => {
+    const res = await axios.put(`/users/update/${id}`, data);
     return res.data;
-  }
+  },
 };
 
 export default userService;

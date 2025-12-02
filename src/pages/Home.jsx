@@ -139,9 +139,7 @@ const Home = () => {
           <div
             className="relative rounded-lg overflow-hidden shadow-xl min-h-[350px] bg-cover bg-center"
             style={{ backgroundImage: `url(${bannerBg})` }}
-          >
-         
-          </div>
+          ></div>
         </div>
       </section>
 
