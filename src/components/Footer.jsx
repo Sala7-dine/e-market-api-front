@@ -1,3 +1,6 @@
+// eslint-disable-next-line no-unused-vars
+import React from "react";
+
 const Footer = () => (
   <footer className="tracking-wide bg-[#222] pt-12 pb-6 px-10">
     <div className="max-w-screen-xl mx-auto">

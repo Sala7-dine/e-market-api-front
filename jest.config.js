@@ -19,6 +19,7 @@ export default {
     "!src/**/*.test.{js,jsx}",
     "!src/__tests__/**",
   ],
+  coverageDirectory: "coverage",
   coverageThreshold: {
     global: {
       branches: 70,

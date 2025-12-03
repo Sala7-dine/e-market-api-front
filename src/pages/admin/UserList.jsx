@@ -1,14 +1,16 @@
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchUsers, deleteUser } from "../../features/usersSlice";
+import { fetchUsers, deleteUser, updateUser } from "../../features/usersSlice";
 import Pagination from "../../components/Pagination";
 import "../../assets/styles/admin/UserList.css";
 import { FaTrash } from "react-icons/fa";
-import { useState, useEffect } from "react";
 
 const UserList = () => {
   const dispatch = useDispatch();
   const { users, pagination, loading, error } = useSelector((state) => state.users);
   const [currentPage, setCurrentPage] = useState(1);
+  const [idetignId, setIdetingId] = useState(-1);
+  const [selectOption, setSelectedOption] = useState("");
 
   useEffect(() => {
     dispatch(fetchUsers({ page: currentPage, limit: 10 }));
@@ -19,6 +21,17 @@ const UserList = () => {
   };
   const handleDelete = (userId) => {
     dispatch(deleteUser(userId));
+  };
+
+  const handleUpdate = (userId, option) => {
+    // dispatch(updateRole(userId));
+    setIdetingId(userId);
+    setSelectedOption(option);
+  };
+  const handleSave = () => {
+    dispatch(updateUser({ id: idetignId, data: { role: selectOption } }));
+    setIdetingId(-1);
+    setSelectedOption("");
   };
 
   if (loading) return <p>Chargement...</p>;
@@ -64,13 +77,39 @@ const UserList = () => {
                   <td>{user._id}</td>
                   <td>{user.fullName}</td>
                   <td>{user.email}</td>
-                  <td>{user.role}</td>
+                  <td>
+                    {idetignId === user._id ? (
+                      <select
+                        onChange={(e) => {
+                          setSelectedOption(e.target.value);
+                        }}
+                        value={selectOption}
+                      >
+                        <option value="user">user</option>
+                        <option value="seller">seller</option>
+                      </select>
+                    ) : (
+                      user.role
+                    )}
+                  </td>
                   <td>{new Date(user.createdAt).toLocaleDateString()}</td>
 
                   <td>
-                    <button className="btn-delete" onClick={() => handleDelete(user._id)}>
-                      <FaTrash size={16} color="#FF6F61" />
-                    </button>
+                    {idetignId === user._id ? (
+                      <button onClick={handleSave}>save</button>
+                    ) : (
+                      <>
+                        <button className="btn-delete" onClick={() => handleDelete(user._id)}>
+                          <FaTrash size={16} color="#FF6F61" />
+                        </button>
+                        <button
+                          className="btn-update"
+                          onClick={() => handleUpdate(user._id, user.role)}
+                        >
+                          Edit
+                        </button>
+                      </>
+                    )}
                   </td>
                 </tr>
               ))}

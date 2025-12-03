@@ -80,7 +80,7 @@ const Products = () => {
                     {product.stock} unités
                   </span>
                 </td>
-                <td>{product.price} €</td>
+                <td>{product.prix} €</td>
                 <td>
                   <button className="btn-view" onClick={() => handleViewImages(product)}>
                     <FaEye size={16} color="#5a9ed1" />
