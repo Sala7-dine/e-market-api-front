@@ -7,7 +7,6 @@ import {
   fetchProducts,
 } from "../../features/productSlice";
 
-
 const MultiSelectCategoriesStyled = ({ categories = [], value = [], onChange }) => {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -40,11 +39,16 @@ const MultiSelectCategoriesStyled = ({ categories = [], value = [], onChange }) 
         }}
       >
         <div className="flex-1 flex flex-wrap gap-2">
-          {value.length === 0 && <span className="text-sm text-gray-400">Select categories...</span>}
+          {value.length === 0 && (
+            <span className="text-sm text-gray-400">Select categories...</span>
+          )}
           {value.map((id) => {
             const cat = categories.find((c) => c._id === id) || categories.find((c) => c.id === id);
             return (
-              <div key={id} className="bg-[#FFF3F3] text-[#FF6B6B] px-2 py-1 rounded-full text-sm flex items-center gap-2">
+              <div
+                key={id}
+                className="bg-[#FFF3F3] text-[#FF6B6B] px-2 py-1 rounded-full text-sm flex items-center gap-2"
+              >
                 <span>{cat ? cat.name : id}</span>
                 <button
                   type="button"
@@ -74,7 +78,10 @@ const MultiSelectCategoriesStyled = ({ categories = [], value = [], onChange }) 
           />
           <div className="max-h-48 overflow-auto">
             {filtered.map((cat) => (
-              <label key={cat._id ?? cat.id} className="flex items-center gap-2 py-1 px-2 hover:bg-gray-50 rounded cursor-pointer">
+              <label
+                key={cat._id ?? cat.id}
+                className="flex items-center gap-2 py-1 px-2 hover:bg-gray-50 rounded cursor-pointer"
+              >
                 <input
                   type="checkbox"
                   checked={value.includes(cat._id ?? cat.id)}
@@ -83,10 +90,18 @@ const MultiSelectCategoriesStyled = ({ categories = [], value = [], onChange }) 
                 <span className="text-sm">{cat.name}</span>
               </label>
             ))}
-            {filtered.length === 0 && <div className="text-sm text-gray-500 px-2 py-2">No categories</div>}
+            {filtered.length === 0 && (
+              <div className="text-sm text-gray-500 px-2 py-2">No categories</div>
+            )}
           </div>
           <div className="flex justify-end mt-2">
-            <button type="button" onClick={() => setOpen(false)} className="px-3 py-1 rounded bg-white border text-sm text-[#8B7355]">Close</button>
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              className="px-3 py-1 rounded bg-white border text-sm text-[#8B7355]"
+            >
+              Close
+            </button>
           </div>
         </div>
       )}
@@ -100,7 +115,13 @@ const EditProductModal = ({ isOpen, onClose, product, categories = [] }) => {
   const error = useSelector(selectProductsError);
   const fileInputRef = useRef(null);
 
-  const [formData, setFormData] = useState({ title: "", description: "", prix: "", stock: "", categories: [] });
+  const [formData, setFormData] = useState({
+    title: "",
+    description: "",
+    prix: "",
+    stock: "",
+    categories: [],
+  });
   const [images, setImages] = useState([]);
   const [existingImages, setExistingImages] = useState([]);
   const [removedExistingImages, setRemovedExistingImages] = useState([]);
@@ -109,10 +130,10 @@ const EditProductModal = ({ isOpen, onClose, product, categories = [] }) => {
   useEffect(() => {
     if (product) {
       const cats = Array.isArray(product.categories)
-        ? product.categories.map((cat) => (cat._id || cat))
+        ? product.categories.map((cat) => cat._id || cat)
         : product.categories
-        ? [product.categories]
-        : [];
+          ? [product.categories]
+          : [];
 
       setFormData({
         title: product.title || "",
@@ -126,12 +147,16 @@ const EditProductModal = ({ isOpen, onClose, product, categories = [] }) => {
         .map((img) => {
           if (!img) return null;
           if (typeof img === "string") {
-            const url = img.startsWith("http") ? img : `${baseUrl}${img.startsWith("/") ? "" : "/"}${img}`;
+            const url = img.startsWith("http")
+              ? img
+              : `${baseUrl}${img.startsWith("/") ? "" : "/"}${img}`;
             const id = img;
             return { id, url };
           }
           const url = img.url || img.path || img.src || img.preview || "";
-          const fullUrl = url.startsWith("http") ? url : `${baseUrl}${url.startsWith("/") ? "" : "/"}${url}`;
+          const fullUrl = url.startsWith("http")
+            ? url
+            : `${baseUrl}${url.startsWith("/") ? "" : "/"}${url}`;
           const id = img._id || img.id || img.filename || fullUrl;
           return { id, url: fullUrl };
         })
@@ -146,17 +171,19 @@ const EditProductModal = ({ isOpen, onClose, product, categories = [] }) => {
     }
   }, [product]);
 
-  useEffect(() => {
-    return () => images.forEach((p) => URL.revokeObjectURL(p.preview));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  useEffect(
+    () => () => images.forEach((p) => URL.revokeObjectURL(p.preview)),
+
+    []
+  );
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((fd) => ({ ...fd, [name]: value }));
   };
 
-  const handleCategoriesChange = (newValue) => setFormData((fd) => ({ ...fd, categories: newValue }));
+  const handleCategoriesChange = (newValue) =>
+    setFormData((fd) => ({ ...fd, categories: newValue }));
 
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files || []);
@@ -222,9 +249,23 @@ const EditProductModal = ({ isOpen, onClose, product, categories = [] }) => {
             <p className="text-sm text-gray-600">Update product details</p>
           </div>
           <div>
-            <button onClick={handleClose} className="p-2 hover:bg-white/60 rounded-lg transition-colors" aria-label="Close dialog">
-              <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            <button
+              onClick={handleClose}
+              className="p-2 hover:bg-white/60 rounded-lg transition-colors"
+              aria-label="Close dialog"
+            >
+              <svg
+                className="w-6 h-6 text-gray-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </button>
           </div>
@@ -232,32 +273,75 @@ const EditProductModal = ({ isOpen, onClose, product, categories = [] }) => {
 
         {/* Content */}
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
-          {error && <div className="text-red-600 text-sm">{typeof error === "object" ? JSON.stringify(error, null, 2) : error}</div>}
+          {error && (
+            <div className="text-red-600 text-sm">
+              {typeof error === "object" ? JSON.stringify(error, null, 2) : error}
+            </div>
+          )}
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Product Title *</label>
-            <input type="text" name="title" value={formData.title} onChange={handleChange} required className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FF6B6B] focus:border-transparent" placeholder="Enter product title" />
+            <input
+              type="text"
+              name="title"
+              value={formData.title}
+              onChange={handleChange}
+              required
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FF6B6B] focus:border-transparent"
+              placeholder="Enter product title"
+            />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Description *</label>
-            <textarea name="description" rows={4} value={formData.description} onChange={handleChange} required className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FF6B6B] focus:border-transparent" placeholder="Enter product description" />
+            <textarea
+              name="description"
+              rows={4}
+              value={formData.description}
+              onChange={handleChange}
+              required
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FF6B6B] focus:border-transparent"
+              placeholder="Enter product description"
+            />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Price *</label>
-              <input type="number" name="prix" min="0" step="0.01" value={formData.prix} onChange={handleChange} required className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FF6B6B] focus:border-transparent" placeholder="0.00" />
+              <input
+                type="number"
+                name="prix"
+                min="0"
+                step="0.01"
+                value={formData.prix}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FF6B6B] focus:border-transparent"
+                placeholder="0.00"
+              />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Stock *</label>
-              <input type="number" name="stock" min="0" value={formData.stock} onChange={handleChange} required className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FF6B6B] focus:border-transparent" placeholder="0" />
+              <input
+                type="number"
+                name="stock"
+                min="0"
+                value={formData.stock}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FF6B6B] focus:border-transparent"
+                placeholder="0"
+              />
             </div>
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Category *</label>
-            <MultiSelectCategoriesStyled categories={categories} value={formData.categories} onChange={handleCategoriesChange} />
+            <MultiSelectCategoriesStyled
+              categories={categories}
+              value={formData.categories}
+              onChange={handleCategoriesChange}
+            />
           </div>
 
           <div>
@@ -269,9 +353,31 @@ const EditProductModal = ({ isOpen, onClose, product, categories = [] }) => {
                 <div className="grid grid-cols-4 gap-4">
                   {existingImages.map((image) => (
                     <div key={image.id} className="relative group">
-                      <img src={image.url} alt="Existing" className="w-full h-24 object-cover rounded-lg" />
-                      <button type="button" onClick={() => removeExistingImage(image.id)} className="absolute top-1 right-1 bg-[#FF6B6B] text-white p-1 rounded-full opacity-80 hover:opacity-100" title="Remove this image" aria-label={`Remove image`}>
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                      <img
+                        src={image.url}
+                        alt="Existing"
+                        className="w-full h-24 object-cover rounded-lg"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeExistingImage(image.id)}
+                        className="absolute top-1 right-1 bg-[#FF6B6B] text-white p-1 rounded-full opacity-80 hover:opacity-100"
+                        title="Remove this image"
+                        aria-label={`Remove image`}
+                      >
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M6 18L18 6M6 6l12 12"
+                          />
+                        </svg>
                       </button>
                     </div>
                   ))}
@@ -279,11 +385,34 @@ const EditProductModal = ({ isOpen, onClose, product, categories = [] }) => {
               </div>
             )}
 
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-[#FF6B6B] transition-colors cursor-pointer relative" onClick={() => fileInputRef.current && fileInputRef.current.click()}>
-              <input ref={fileInputRef} type="file" multiple accept="image/*" onChange={handleImageChange} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" aria-label="Upload product images" />
+            <div
+              className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-[#FF6B6B] transition-colors cursor-pointer relative"
+              onClick={() => fileInputRef.current && fileInputRef.current.click()}
+            >
+              <input
+                ref={fileInputRef}
+                type="file"
+                multiple
+                accept="image/*"
+                onChange={handleImageChange}
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                aria-label="Upload product images"
+              />
 
               <div>
-                <svg className="w-12 h-12 text-gray-400 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+                <svg
+                  className="w-12 h-12 text-gray-400 mx-auto mb-3"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                  />
+                </svg>
                 <p className="text-sm text-gray-600">Click to upload new images</p>
                 <p className="text-xs text-gray-500 mt-1">PNG, JPG, WEBP up to 10MB</p>
               </div>
@@ -293,9 +422,30 @@ const EditProductModal = ({ isOpen, onClose, product, categories = [] }) => {
               <div className="grid grid-cols-4 gap-4 mt-4">
                 {images.map((item, index) => (
                   <div key={index} className="relative group">
-                    <img src={item.preview} alt={`New Preview ${index + 1}`} className="w-full h-24 object-cover rounded-lg" />
-                    <button type="button" onClick={() => removeNewImage(index)} className="absolute top-1 right-1 bg-[#FF6B6B] text-white p-1 rounded-full opacity-80 hover:opacity-100" aria-label={`Remove new image ${index + 1}`}>
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                    <img
+                      src={item.preview}
+                      alt={`New Preview ${index + 1}`}
+                      className="w-full h-24 object-cover rounded-lg"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeNewImage(index)}
+                      className="absolute top-1 right-1 bg-[#FF6B6B] text-white p-1 rounded-full opacity-80 hover:opacity-100"
+                      aria-label={`Remove new image ${index + 1}`}
+                    >
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M6 18L18 6M6 6l12 12"
+                        />
+                      </svg>
                     </button>
                   </div>
                 ))}
@@ -304,8 +454,20 @@ const EditProductModal = ({ isOpen, onClose, product, categories = [] }) => {
           </div>
 
           <div className="flex space-x-3 pt-4">
-            <button type="button" onClick={handleClose} className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium">Cancel</button>
-            <button type="submit" disabled={loading} className="flex-1 px-6 py-3 bg-[#FF6B6B] text-white rounded-lg hover:bg-[#E05555] transition-colors font-medium disabled:opacity-50">{loading ? "Saving..." : "Save Changes"}</button>
+            <button
+              type="button"
+              onClick={handleClose}
+              className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="flex-1 px-6 py-3 bg-[#FF6B6B] text-white rounded-lg hover:bg-[#E05555] transition-colors font-medium disabled:opacity-50"
+            >
+              {loading ? "Saving..." : "Save Changes"}
+            </button>
           </div>
         </form>
       </div>

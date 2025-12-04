@@ -3,17 +3,13 @@ export default {
   setupFilesAfterEnv: ["<rootDir>/src/__tests__/setup.js"],
   moduleNameMapper: {
     "\\.(css|less|scss|sass)$": "identity-obj-proxy",
-    "\\.(jpg|jpeg|png|gif|webp|svg)$":
-      "<rootDir>/src/__tests__/__mocks__/fileMock.js",
+    "\\.(jpg|jpeg|png|gif|webp|svg)$": "<rootDir>/src/__tests__/__mocks__/fileMock.js",
     "^../config/axios$": "<rootDir>/src/__tests__/__mocks__/axios.js",
     "^../../config/axios$": "<rootDir>/src/__tests__/__mocks__/axios.js",
     "^../../../config/axios$": "<rootDir>/src/__tests__/__mocks__/axios.js",
   },
   transform: {
-    "^.+\\.(js|jsx)$": [
-      "babel-jest",
-      { presets: ["@babel/preset-env", "@babel/preset-react"] },
-    ],
+    "^.+\\.(js|jsx)$": ["babel-jest", { presets: ["@babel/preset-env", "@babel/preset-react"] }],
   },
   testMatch: [
     "**/__tests__/**/*.test.[jt]s?(x)",

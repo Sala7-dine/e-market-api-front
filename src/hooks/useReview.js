@@ -1,6 +1,6 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
-import reviewService from '../service/reviewService.js';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
+import reviewService from "../service/reviewService.js";
 
 export const useReviews = (initialPage = 1, limit = 5) => {
   const [page, setPage] = useState(initialPage);
@@ -8,18 +8,17 @@ export const useReviews = (initialPage = 1, limit = 5) => {
 
   // === Fetch reviews avec pagination ===
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['reviews', page],
+    queryKey: ["reviews", page],
     queryFn: () => reviewService.AllReviews(page, limit),
     keepPreviousData: true,
   });
 
   // === Mutation pour supprimer une review ===
   const deleteReview = useMutation({
-    mutationFn: ({ productId, reviewId }) =>
-      reviewService.deleteReview(productId, reviewId),
+    mutationFn: ({ productId, reviewId }) => reviewService.deleteReview(productId, reviewId),
     onSuccess: () => {
       // Recharger les reviews après suppression
-      queryClient.invalidateQueries({ queryKey: ['reviews', page] });
+      queryClient.invalidateQueries({ queryKey: ["reviews", page] });
     },
   });
 

@@ -1,8 +1,16 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import Pagination from "../../../components/Pagination";
 import { getStatusColor } from "../utils/analytics";
 
-const OrdersTab = ({ orders, pagination, onPageChange, onStatusChange, isUpdatingStatus, orderStatus, setOrderStatus }) => {
+const OrdersTab = ({
+  orders,
+  pagination,
+  onPageChange,
+  onStatusChange,
+  isUpdatingStatus,
+  orderStatus,
+  setOrderStatus,
+}) => {
   const [editingOrderId, setEditingOrderId] = useState(null);
 
   const handleStatusChange = (orderId, newStatus) => {
@@ -37,20 +45,38 @@ const OrdersTab = ({ orders, pagination, onPageChange, onStatusChange, isUpdatin
           <table className="w-full">
             <thead className="bg-[#FFF7F6]">
               <tr>
-                <th className="text-left px-6 py-4 text-xs font-semibold text-gray-600 uppercase">Order ID</th>
-                <th className="text-left px-6 py-4 text-xs font-semibold text-gray-600 uppercase">Customer</th>
-                <th className="text-left px-6 py-4 text-xs font-semibold text-gray-600 uppercase">Product</th>
-                <th className="text-left px-6 py-4 text-xs font-semibold text-gray-600 uppercase">Amount</th>
-                <th className="text-left px-6 py-4 text-xs font-semibold text-gray-600 uppercase">Status</th>
-                <th className="text-left px-6 py-4 text-xs font-semibold text-gray-600 uppercase">Date</th>
-                <th className="text-left px-6 py-4 text-xs font-semibold text-gray-600 uppercase">Actions</th>
+                <th className="text-left px-6 py-4 text-xs font-semibold text-gray-600 uppercase">
+                  Order ID
+                </th>
+                <th className="text-left px-6 py-4 text-xs font-semibold text-gray-600 uppercase">
+                  Customer
+                </th>
+                <th className="text-left px-6 py-4 text-xs font-semibold text-gray-600 uppercase">
+                  Product
+                </th>
+                <th className="text-left px-6 py-4 text-xs font-semibold text-gray-600 uppercase">
+                  Amount
+                </th>
+                <th className="text-left px-6 py-4 text-xs font-semibold text-gray-600 uppercase">
+                  Status
+                </th>
+                <th className="text-left px-6 py-4 text-xs font-semibold text-gray-600 uppercase">
+                  Date
+                </th>
+                <th className="text-left px-6 py-4 text-xs font-semibold text-gray-600 uppercase">
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
               {orders.map((order) => (
                 <tr key={order._id} className="hover:bg-white/50 transition-colors">
-                  <td className="px-6 py-4 text-sm font-medium text-gray-900">{order._id.slice(-8)}</td>
-                  <td className="px-6 py-4 text-sm text-gray-700">{order.user?.fullName ?? "N/A"}</td>
+                  <td className="px-6 py-4 text-sm font-medium text-gray-900">
+                    {order._id.slice(-8)}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-700">
+                    {order.user?.fullName ?? "N/A"}
+                  </td>
                   <td className="px-6 py-4">
                     <div className="text-sm text-gray-700 space-y-1">
                       {order.items?.map((item, idx) => (
@@ -61,7 +87,9 @@ const OrdersTab = ({ orders, pagination, onPageChange, onStatusChange, isUpdatin
                       ))}
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-sm font-semibold text-gray-900">${order.orderTotal}</td>
+                  <td className="px-6 py-4 text-sm font-semibold text-gray-900">
+                    ${order.orderTotal}
+                  </td>
                   <td className="px-6 py-4">
                     {editingOrderId === order._id ? (
                       <select
@@ -77,7 +105,9 @@ const OrdersTab = ({ orders, pagination, onPageChange, onStatusChange, isUpdatin
                         <option value="cancelled">Cancelled</option>
                       </select>
                     ) : (
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
+                      <span
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}
+                      >
                         {order.status}
                       </span>
                     )}
@@ -87,7 +117,9 @@ const OrdersTab = ({ orders, pagination, onPageChange, onStatusChange, isUpdatin
                   </td>
                   <td className="px-6 py-4">
                     <button
-                      onClick={() => setEditingOrderId(editingOrderId === order._id ? null : order._id)}
+                      onClick={() =>
+                        setEditingOrderId(editingOrderId === order._id ? null : order._id)
+                      }
                       className="text-[#8B7355] hover:text-[#6B5335] text-sm font-medium"
                     >
                       {editingOrderId === order._id ? "Cancel" : "Edit Status"}

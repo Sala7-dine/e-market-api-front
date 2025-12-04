@@ -1,6 +1,6 @@
 .admin-sidebar {
   width: 250px;
-  
+
   min-height: 100vh;
   padding: 20px;
 
@@ -8,10 +8,9 @@
   flex-direction: column;
   position: relative;
   transition: transform 0.3s ease;
-    background: #FFFFFF;
-  border-right: 1px solid #EBEDEF;
+  background: #ffffff;
+  border-right: 1px solid #ebedef;
   box-shadow: 4px 0 12px rgba(0, 0, 0, 0.06);
-
 }
 
 .sidebar-logo {
@@ -21,21 +20,21 @@
 .sidebar-logo h2 {
   margin: 0;
   font-size: 24px;
-  color: #2C2825;
-  font-family: 'Playfair Display', serif;
+  color: #2c2825;
+  font-family: "Playfair Display", serif;
 }
 
 .sidebar-logo span {
   font-size: 12px;
-  color: #6B6560;
-  font-family: 'Inter', sans-serif;
+  color: #6b6560;
+  font-family: "Inter", sans-serif;
 }
 
 .sidebar-menu {
   list-style: none;
   padding: 0;
   margin: 0;
-  color: #2C2825;
+  color: #2c2825;
 }
 
 .sidebar-menu li {
@@ -49,8 +48,8 @@
 
 .sidebar-menu li:hover,
 .sidebar-menu li.active {
-  background-color: #FF6F61;
-  color: #FFFFFF;
+  background-color: #ff6f61;
+  color: #ffffff;
   box-shadow: 0px 4px 12px rgba(255, 111, 97, 0.4);
   transform: scale(1.03);
 }
@@ -60,7 +59,7 @@
   align-items: center;
   text-decoration: none;
   color: inherit;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 14px;
   font-weight: 400;
 }
@@ -86,7 +85,7 @@
 .sidebar-help button {
   padding: 8px 16px;
   border: none;
-  background-color: #6B4B3E;
+  background-color: #6b4b3e;
   color: #fff;
   border-radius: 6px;
   cursor: pointer;
@@ -105,7 +104,7 @@
   top: 20px;
   left: 20px;
   z-index: 1001;
-  background-color: #6B4B3E;
+  background-color: #6b4b3e;
   color: white;
   border: none;
   padding: 10px;
@@ -127,26 +126,22 @@
 }
 /* Style pour Logout comme les autres items */
 .logout-item {
- 
-
   border-radius: 12px;
   cursor: pointer;
   color: #333;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 14px;
   font-weight: 400;
   display: flex;
   align-items: center;
   gap: 12px;
- 
 }
 
 /* Hover identique */
 .logout-item:hover {
-  background-color: #FF6F61;
-  color: #FFFFFF;
+  background-color: #ff6f61;
+  color: #ffffff;
   box-shadow: 0px 4px 12px rgba(255, 111, 97, 0.4);
- 
 }
 
 /* Icône Logout */
@@ -154,7 +149,6 @@
   font-size: 18px;
   min-width: 18px;
 }
-
 
 /* Responsive Tablet */
 @media (max-width: 1024px) {

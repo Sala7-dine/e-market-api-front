@@ -1,12 +1,12 @@
-import { useState, useEffect } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import axios from '../config/axios';
+import { useState, useEffect, useCallback } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import axios from "../config/axios";
 
 const PaymentModal = ({ isOpen, onClose, onSuccess, cartId, total, couponCode }) => {
   const queryClient = useQueryClient();
-  const [paymentStep, setPaymentStep] = useState('payment'); // payment, processing, success, error
-  const [errorMessage, setErrorMessage] = useState('');
-  
+  const [paymentStep, setPaymentStep] = useState("payment"); // payment, processing, success, error
+  const [errorMessage, setErrorMessage] = useState("");
+
   const createOrderMutation = useMutation({
     mutationFn: async ({ cartId, couponCode }) => {
       const payload = couponCode ? { couponCode } : {};
@@ -14,62 +14,61 @@ const PaymentModal = ({ isOpen, onClose, onSuccess, cartId, total, couponCode })
       return res.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['cart']);
-      queryClient.refetchQueries(['cart']);
+      queryClient.invalidateQueries(["cart"]);
+      queryClient.refetchQueries(["cart"]);
     },
     onError: (error) => {
-      const message = error.response?.data?.message || 'Payment failed';
+      const message = error.response?.data?.message || "Payment failed";
       setErrorMessage(message);
-      setPaymentStep('error');
-    }
+      setPaymentStep("error");
+    },
   });
 
   const handlePayment = async () => {
-    setPaymentStep('processing');
-    
+    setPaymentStep("processing");
+
     try {
       await createOrderMutation.mutateAsync({ cartId, couponCode });
-      
+
       // Simulate payment processing
       setTimeout(() => {
-        setPaymentStep('success');
+        setPaymentStep("success");
       }, 2000);
     } catch (error) {
       // Error is handled by onError callback
-      console.error('Payment failed:', error);
+      console.error("Payment failed:", error);
     }
   };
 
-  const handleClose = () => {
-    setPaymentStep('payment');
-    setErrorMessage('');
+  const handleClose = useCallback(() => {
+    setPaymentStep("payment");
+    setErrorMessage("");
     onClose();
-  };
+  }, [onClose]);
 
   useEffect(() => {
-    if (paymentStep === 'success') {
+    if (paymentStep === "success") {
       setTimeout(() => {
         if (onSuccess) onSuccess();
         handleClose();
       }, 3000);
     }
-  }, [paymentStep, onSuccess]);
+  }, [paymentStep, onSuccess, handleClose]);
 
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 backdrop-blur-sm bg-black/30 flex items-center justify-center z-50">
       <div className="bg-white rounded-2xl p-8 max-w-md w-full mx-4 relative">
-        
-        {paymentStep === 'payment' && (
+        {paymentStep === "payment" && (
           <>
-            <button 
+            <button
               onClick={handleClose}
               className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
             >
               ✕
             </button>
-            
+
             <div className="text-center mb-6">
               <h2 className="text-2xl font-bold text-gray-800 mb-2">Payment</h2>
               <p className="text-gray-600">Complete your order</p>
@@ -92,7 +91,7 @@ const PaymentModal = ({ isOpen, onClose, onSuccess, cartId, total, couponCode })
           </>
         )}
 
-        {paymentStep === 'processing' && (
+        {paymentStep === "processing" && (
           <div className="text-center py-8">
             <div className="animate-spin w-16 h-16 border-4 border-[#FF6B6B] border-t-transparent rounded-full mx-auto mb-4"></div>
             <h2 className="text-xl font-semibold text-gray-800 mb-2">Processing Payment...</h2>
@@ -100,11 +99,21 @@ const PaymentModal = ({ isOpen, onClose, onSuccess, cartId, total, couponCode })
           </div>
         )}
 
-        {paymentStep === 'success' && (
+        {paymentStep === "success" && (
           <div className="text-center py-8">
             <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce">
-              <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+              <svg
+                className="w-8 h-8 text-white"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M5 13l4 4L19 7"
+                ></path>
               </svg>
             </div>
             <h2 className="text-xl font-semibold text-green-600 mb-2">Payment Successful!</h2>
@@ -112,25 +121,35 @@ const PaymentModal = ({ isOpen, onClose, onSuccess, cartId, total, couponCode })
           </div>
         )}
 
-        {paymentStep === 'error' && (
+        {paymentStep === "error" && (
           <>
-            <button 
+            <button
               onClick={handleClose}
               className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
             >
               ✕
             </button>
-            
+
             <div className="text-center py-8">
               <div className="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+                <svg
+                  className="w-8 h-8 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M6 18L18 6M6 6l12 12"
+                  ></path>
                 </svg>
               </div>
               <h2 className="text-xl font-semibold text-red-600 mb-2">Payment Failed</h2>
               <p className="text-gray-600 mb-4">{errorMessage}</p>
               <button
-                onClick={() => setPaymentStep('payment')}
+                onClick={() => setPaymentStep("payment")}
                 className="bg-[#FF6B6B] text-white py-2 px-6 rounded-full font-medium hover:bg-[#ff5252] transition-colors"
               >
                 Try Again

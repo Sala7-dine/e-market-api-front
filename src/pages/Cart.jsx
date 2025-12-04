@@ -1,19 +1,11 @@
-import { useEffect, useState } from "react";
-import React from 'react';
-
-import {
-  addToCart,
-  getCart,
-  removeFromCart,
-  updateProductQuantity,
-} from "../features/cartSlice";
-import { useDispatch, useSelector } from "react-redux";
+import { useState } from "react";
+import { getCart, removeFromCart, updateProductQuantity } from "../features/cartSlice";
+import { useDispatch } from "react-redux";
 import { Trash2, ShoppingBag } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import fetchCartApi from "../service/cartService";
 import axios from "../config/axios";
-import PaymentModal from '../components/PaymentModal';
+import PaymentModal from "../components/PaymentModal";
 
 export default function Cart() {
   const navigate = useNavigate();
@@ -24,19 +16,11 @@ export default function Cart() {
   // const {cart} = useSelector((state) => state.cart);
   // const loading = useSelector((state) => state.loading);
   const fetchCartApi = async () => {
-    console.log("inside fetchCartApi");
     const res = await axios.get("/carts/getcarts");
-    console.log("ressssssssssss", res.data.data[0]);
-
     return res.data.data[0];
   };
 
-  const {
-    data: cartData,
-    isLoading,
-    isError,
-    error,
-  } = useQuery({
+  const { data: cartData, isLoading } = useQuery({
     queryKey: ["cart"],
     queryFn: fetchCartApi,
   });
@@ -47,48 +31,30 @@ export default function Cart() {
   //   dispatch(getCart());
   // }, [dispatch]);
 
-
   // Calcul du total
 
-  const subtotal = cartItems.reduce(
-    (acc, item) => acc + item.price * item.quantity,
-    0
-  );
+  const subtotal = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
   const taxRate = 0.08; // 8% de taxe
   const estimatedTax = subtotal * taxRate;
   const total = subtotal + estimatedTax;
 
   //mette à jours la quantité
   const updateQuantity = (productId, quantity) => {
-    console.log("inside updateQuantity");
-    console.log("productId", productId);
-    console.log("quantity", quantity);
-
     if (quantity < 1) return;
-    dispatch(updateProductQuantity({ productId, quantity })).then(() =>
-      dispatch(getCart())
-    );
+    dispatch(updateProductQuantity({ productId, quantity })).then(() => dispatch(getCart()));
   };
 
   // Supprimer un article
   const removeItem = (productId) => {
-    console.log("id", productId);
     dispatch(removeFromCart({ productId }));
   };
-
-  console.log(
-    "hadi rah cart : ",
-    cartItems.length > 0 ? cartItems[0]?.productId?._id : "Cart is empty"
-  );
 
   return (
     <div className="min-h-screen bg-[#F5F0EC] py-8 px-4">
       <div className="max-w-7xl mx-auto">
         {/* En-tête */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-serif text-gray-800 mb-2">
-            Your Shopping Cart
-          </h1>
+          <h1 className="text-4xl font-serif text-gray-800 mb-2">Your Shopping Cart</h1>
           <p className="text-gray-500">Review your items before checkout</p>
         </div>
 
@@ -113,8 +79,7 @@ export default function Cart() {
                     src={
                       item.productId?.images?.[0]?.startsWith("http")
                         ? item.productId.images[0]
-                        : `https://res.cloudinary.com/dbrrmsoit/image/upload/${item.productId?.images?.[0]}` ||
-                          "https://via.placeholder.com/150"
+                        : `https://res.cloudinary.com/dbrrmsoit/image/upload/${item.productId?.images?.[0] || "placeholder"}`
                     }
                     alt={item.productId?.title || "Product"}
                     className="w-28 h-28 rounded-xl object-cover"
@@ -125,24 +90,16 @@ export default function Cart() {
                     <h3 className="text-lg font-serif text-gray-800 mb-1">
                       {item.productId?.title || "Unknown Product"}
                     </h3>
-                    <p className="text-sm text-gray-500 mb-3">
-                      {item.categories}
-                    </p>
-                    <p className="text-xl font-medium text-gray-800">
-                      ${item.price.toFixed(2)}
-                    </p>
+                    <p className="text-sm text-gray-500 mb-3">{item.categories}</p>
+                    <p className="text-xl font-medium text-gray-800">${item.price.toFixed(2)}</p>
                   </div>
 
                   {/* Contrôles de quantité */}
                   <div className="flex items-center gap-4">
                     <div className="flex items-center gap-2">
-                      <span className="text-sm text-gray-600 mr-2">
-                        Quantity:
-                      </span>
+                      <span className="text-sm text-gray-600 mr-2">Quantity:</span>
                       <button
-                        onClick={() =>
-                          updateQuantity(item.productId?._id, item.quantity - 1)
-                        }
+                        onClick={() => updateQuantity(item.productId?._id, item.quantity - 1)}
                         className="w-8 h-8 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
                         aria-label="Decrease quantity"
                         disabled={!item.productId?._id}
@@ -153,9 +110,7 @@ export default function Cart() {
                         {item.quantity}
                       </span>
                       <button
-                        onClick={() =>
-                          updateQuantity(item.productId?._id, item.quantity + 1)
-                        }
+                        onClick={() => updateQuantity(item.productId?._id, item.quantity + 1)}
                         className="w-8 h-8 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
                         aria-label="Increase quantity"
                         disabled={!item.productId?._id}
@@ -182,9 +137,7 @@ export default function Cart() {
           {/* Résumé de commande */}
           <div className="lg:w-96">
             <div className="bg-white rounded-2xl shadow-sm p-8 sticky top-8">
-              <h2 className="text-2xl font-serif text-gray-800 mb-6">
-                Order Summary
-              </h2>
+              <h2 className="text-2xl font-serif text-gray-800 mb-6">Order Summary</h2>
 
               {/* Détails des prix */}
               <div className="space-y-4 mb-6">
@@ -229,8 +182,8 @@ export default function Cart() {
           </div>
         </div>
       </div>
-      
-      <PaymentModal 
+
+      <PaymentModal
         isOpen={showPaymentModal}
         onClose={() => setShowPaymentModal(false)}
         cartId={cartId}

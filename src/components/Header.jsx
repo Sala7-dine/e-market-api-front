@@ -1,18 +1,14 @@
 import React from 'react';
 import { useState, useEffect } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Menu, X, ShoppingBag, User, ShoppingCart } from "lucide-react";
-import Cookie from "js-cookie";
-// import { jwtDecode } from "jwt-decode";
-// import axios from "../config/axios";
+import { Link, useLocation } from "react-router-dom";
+import { ShoppingBag } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
-import { selectCartCount } from "../features/cartSlice.js";
 import { useSelector, useDispatch } from "react-redux";
 import { getCart, removeFromCart, updateProductQuantity } from "../features/cartSlice.js";
 
 const Header = () => {
   const dispatch = useDispatch();
-  const {cart} = useSelector((state) => state.cart);
+  const { cart } = useSelector((state) => state.cart);
   const cartItems = Array.isArray(cart) ? cart : [];
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -23,7 +19,7 @@ const Header = () => {
     if (isAuthenticated()) {
       dispatch(getCart());
     }
-  }, [dispatch, isAuthenticated , cart , logout]);
+  }, [dispatch, isAuthenticated, cart, logout]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -57,9 +53,7 @@ const Header = () => {
           {/* Logo */}
           <Link
             to="/"
-            className={`flex items-center space-x-3 group ${
-              isHomePage ? "text-black" : ""
-            }`}
+            className={`flex items-center space-x-3 group ${isHomePage ? "text-black" : ""}`}
           >
             <div
               className={`p-2 rounded-xl transition-all ${
@@ -97,7 +91,7 @@ const Header = () => {
                   <i className="la la-shopping-cart text-3xl"></i>
                   {isAuthenticated() && <span className="text-sm">{cartItems.length} Items</span>}
                 </span>
-                
+
                 <div className="absolute right-0 top-full mt-4 w-[420px] bg-gradient-to-br from-white via-gray-50 to-gray-100 rounded-2xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 backdrop-blur-sm">
                   <div className="p-6">
                     <div className="flex items-center gap-2 mb-6">
@@ -108,41 +102,62 @@ const Header = () => {
                       <div className="text-center py-8">
                         <i className="la la-shopping-cart text-4xl text-gray-300 mb-4 block"></i>
                         <p className="text-gray-500 text-lg font-medium">Your cart is empty</p>
-                        <p className="text-gray-400 text-sm mt-2">Add some products to get started</p>
+                        <p className="text-gray-400 text-sm mt-2">
+                          Add some products to get started
+                        </p>
                       </div>
                     ) : (
                       <>
                         <div className="max-h-80 overflow-y-auto space-y-4">
                           {cartItems.map((item, index) => (
-                            <div key={item.productId?._id || index} className="flex items-center gap-4 p-4 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow">
-                              <img 
-                                src={item.productId?.images?.[0]?.startsWith('http') ? item.productId.images[0] : `https://res.cloudinary.com/dbrrmsoit/image/upload/${item.productId?.images?.[0]}` || "https://via.placeholder.com/60"}
-                                alt={item.productId?.title || 'Product'}
+                            <div
+                              key={item.productId?._id || index}
+                              className="flex items-center gap-4 p-4 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow"
+                            >
+                              <img
+                                src={
+                                  item.productId?.images?.[0]?.startsWith("http")
+                                    ? item.productId.images[0]
+                                    : `https://res.cloudinary.com/dbrrmsoit/image/upload/${item.productId?.images?.[0] || "placeholder"}`
+                                }
+                                alt={item.productId?.title || "Product"}
                                 className="w-20 h-20 object-cover rounded-lg"
                               />
                               <div className="flex-1">
-                                <h4 className="text-base  text-gray-800 truncate mb-1">{item.productId?.title || 'Unknown Product'}</h4>
+                                <h4 className="text-base  text-gray-800 truncate mb-1">
+                                  {item.productId?.title || "Unknown Product"}
+                                </h4>
                                 <p className="text-lg font-bold text-[#FF6B6B]">${item.price}</p>
                                 <div className="flex items-center gap-3 mt-2">
-                                  <button 
+                                  <button
                                     type="button"
                                     onClick={(e) => {
                                       e.preventDefault();
-                                      dispatch(updateProductQuantity({ productId: item.productId?._id, quantity: item.quantity - 1 }))
-                                        .then(() => dispatch(getCart()));
+                                      dispatch(
+                                        updateProductQuantity({
+                                          productId: item.productId?._id,
+                                          quantity: item.quantity - 1,
+                                        })
+                                      ).then(() => dispatch(getCart()));
                                     }}
                                     disabled={item.quantity <= 1}
                                     className="w-8 h-8 flex items-center justify-center bg-gray-100 hover:bg-[#FF6B6B] hover:text-white rounded-full text-sm font-bold disabled:opacity-50 disabled:hover:bg-gray-100 disabled:hover:text-gray-600 transition-all"
                                   >
                                     -
                                   </button>
-                                  <span className="text-base font-bold w-10 text-center bg-gray-50 py-1 rounded-lg">{item.quantity}</span>
-                                  <button 
+                                  <span className="text-base font-bold w-10 text-center bg-gray-50 py-1 rounded-lg">
+                                    {item.quantity}
+                                  </span>
+                                  <button
                                     type="button"
                                     onClick={(e) => {
                                       e.preventDefault();
-                                      dispatch(updateProductQuantity({ productId: item.productId?._id, quantity: item.quantity + 1 }))
-                                        .then(() => dispatch(getCart()));
+                                      dispatch(
+                                        updateProductQuantity({
+                                          productId: item.productId?._id,
+                                          quantity: item.quantity + 1,
+                                        })
+                                      ).then(() => dispatch(getCart()));
                                     }}
                                     className="w-8 h-8 flex items-center justify-center bg-gray-100 hover:bg-[#FF6B6B] hover:text-white rounded-full text-sm font-bold transition-all"
                                   >
@@ -150,12 +165,13 @@ const Header = () => {
                                   </button>
                                 </div>
                               </div>
-                              <button 
+                              <button
                                 type="button"
                                 onClick={(e) => {
                                   e.preventDefault();
-                                  dispatch(removeFromCart({ productId: item.productId?._id }))
-                                    .then(() => dispatch(getCart()));
+                                  dispatch(removeFromCart({ productId: item.productId?._id })).then(
+                                    () => dispatch(getCart())
+                                  );
                                 }}
                                 className="text-gray-400 hover:text-red-500 p-2 hover:bg-red-50 rounded-full transition-all"
                               >
@@ -167,7 +183,12 @@ const Header = () => {
                         <div className="mt-6 pt-4 bg-gradient-to-r from-gray-50 to-white rounded-xl p-4">
                           <div className="flex justify-between items-center mb-4">
                             <span className="text-lg font-medium text-gray-600">Total:</span>
-                            <span className="text-lg font-bold text-[#FF6B6B]">${cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0).toFixed(2)}</span>
+                            <span className="text-lg font-bold text-[#FF6B6B]">
+                              $
+                              {cartItems
+                                .reduce((acc, item) => acc + item.price * item.quantity, 0)
+                                .toFixed(2)}
+                            </span>
                           </div>
                           <Link
                             to="/checkout"
@@ -182,12 +203,12 @@ const Header = () => {
                   </div>
                 </div>
               </div>
-              
+
               <div className="relative group">
                 <button className="flex items-center gap-2 text-black hover:text-gray-700 transition cursor-pointer">
                   <i className="la la-user text-2xl"></i>
                 </button>
-                
+
                 <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                   <div className="py-2">
                     <Link
@@ -197,7 +218,7 @@ const Header = () => {
                       <i className="la la-user mr-2"></i>
                       Profile
                     </Link>
-                    {user?.role === 'seller' && (
+                    {user?.role === "seller" && (
                       <Link
                         to="/seller/dashboard"
                         className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
@@ -206,7 +227,7 @@ const Header = () => {
                         Dashboard
                       </Link>
                     )}
-                    {user?.role === 'admin' && (
+                    {user?.role === "admin" && (
                       <Link
                         to="/admin"
                         className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
@@ -215,7 +236,7 @@ const Header = () => {
                         Admin Dashboard
                       </Link>
                     )}
-                    {user?.role === 'user' && (
+                    {user?.role === "user" && (
                       <Link
                         to="/ordersHistory"
                         className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
@@ -239,7 +260,6 @@ const Header = () => {
           ) : (
             <div className="hidden md:flex text-black gap-6 items-center">
               <div className="relative group">
-                
                 <div className="absolute right-0 top-full mt-4 w-96 bg-gradient-to-br from-white via-gray-50 to-gray-100 rounded-2xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 backdrop-blur-sm">
                   <div className="p-6">
                     <div className="flex items-center gap-2 mb-6">
@@ -248,10 +268,14 @@ const Header = () => {
                     </div>
                     <div className="text-center py-8">
                       <i className="la la-lock text-4xl text-gray-300 mb-4 block"></i>
-                      <p className="text-gray-600 text-lg font-medium mb-2">Please login to view your cart</p>
-                      <p className="text-gray-400 text-sm mb-6">Sign in to access your saved items</p>
-                      <Link 
-                        to="/login" 
+                      <p className="text-gray-600 text-lg font-medium mb-2">
+                        Please login to view your cart
+                      </p>
+                      <p className="text-gray-400 text-sm mb-6">
+                        Sign in to access your saved items
+                      </p>
+                      <Link
+                        to="/login"
                         className="inline-block bg-gradient-to-r from-[#FF6B6B] to-[#FF5252] text-white py-3 px-8 rounded-xl  text-lg hover:from-[#FF5252] hover:to-[#FF6B6B] transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
                       >
                         <i className="la la-sign-in mr-2"></i>
@@ -261,7 +285,7 @@ const Header = () => {
                   </div>
                 </div>
               </div>
-              
+
               <Link
                 to="/login"
                 className="text-sm cursor-pointer relative px-6 py-2.5 text-black  border rounded-full overflow-hidden group"
@@ -304,8 +328,8 @@ const Header = () => {
                         ? "bg-white/10 text-white"
                         : "bg-primary/10 text-primary"
                       : isHomePage
-                      ? "text-white/70 hover:bg-white/5 hover:text-white"
-                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                        ? "text-white/70 hover:bg-white/5 hover:text-white"
+                        : "text-muted-foreground hover:bg-muted hover:text-foreground"
                   }`}
                 >
                   {link.name}
