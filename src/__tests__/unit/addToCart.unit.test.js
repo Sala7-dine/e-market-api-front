@@ -33,7 +33,7 @@ describe("Unit: addToCart thunk", () => {
   test("dispatch returns rejected when API fails", async () => {
     mockedAxios.post.mockRejectedValueOnce({
       response: { data: { message: "Product not found" } },
-    });
+    });²
 
     const dispatch = jest.fn();
     const getState = () => ({});
