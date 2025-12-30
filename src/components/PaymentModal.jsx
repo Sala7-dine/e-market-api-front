@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback } from "react";
+// eslint-disable-next-line no-unused-vars
+import React, { useState, useEffect, useCallback } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "../config/axios";
 
@@ -45,6 +46,14 @@ const PaymentModal = ({ isOpen, onClose, onSuccess, cartId, total, couponCode })
     setErrorMessage("");
     onClose();
   }, [onClose]);
+
+  useEffect(() => {
+    if (isOpen) {
+      // Reset state when modal opens
+      setPaymentStep("payment");
+      setErrorMessage("");
+    }
+  }, [isOpen]);
 
   useEffect(() => {
     if (paymentStep === "success") {

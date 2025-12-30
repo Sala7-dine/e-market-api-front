@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+// eslint-disable-next-line no-unused-vars
+import React, { useEffect, useState } from "react";
 import axios from "../config/axios";
 import { Camera } from "lucide-react";
 import Header from "../components/Header.jsx";

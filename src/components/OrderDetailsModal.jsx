@@ -1,4 +1,5 @@
-import { useEffect } from "react";
+// eslint-disable-next-line no-unused-vars
+import React, { useEffect } from "react";
 
 const OrderDetailsModal = ({ order, customId, onClose }) => {
   useEffect(() => {
