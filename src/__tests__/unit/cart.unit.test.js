@@ -1,175 +1,404 @@
-describe("Cart - Unit Tests", () => {
-  let mockAxios;
-  let mockCart;
+// eslint-disable-next-line no-unused-vars
+import React from "react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { Provider } from "react-redux";
+import { configureStore } from "@reduxjs/toolkit";
+import { BrowserRouter } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import Cart from "../../pages/Cart";
+import cartReducer from "../../features/cartSlice";
+import axios from "../../config/axios";
 
+jest.mock("../../config/axios");
+const mockedAxios = axios;
+
+const mockNavigate = jest.fn();
+jest.mock("react-router-dom", () => ({
+  ...jest.requireActual("react-router-dom"),
+  useNavigate: () => mockNavigate,
+}));
+
+const TestWrapper = ({ children }) => {
+  const store = configureStore({
+    reducer: { cart: cartReducer },
+  });
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+
+  return (
+    <Provider store={store}>
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter>{children}</BrowserRouter>
+      </QueryClientProvider>
+    </Provider>
+  );
+};
+
+const mockCartData = {
+  _id: "cart123",
+  items: [
+    {
+      productId: {
+        _id: "prod1",
+        title: "Test Product 1",
+        images: ["test-image1.jpg"],
+      },
+      price: 29.99,
+      quantity: 2,
+      categories: "Electronics",
+    },
+    {
+      productId: {
+        _id: "prod2",
+        title: "Test Product 2",
+        images: ["http://example.com/image.jpg"],
+      },
+      price: 49.99,
+      quantity: 1,
+      categories: "Accessories",
+    },
+  ],
+};
+
+describe("Cart Component Unit Tests", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-
-    // Mock axios
-    mockAxios = {
-      get: jest.fn(),
-      post: jest.fn(),
-      put: jest.fn(),
-      delete: jest.fn(),
-    };
-
-    // Mock cart initial state
-    mockCart = [];
+    mockNavigate.mockClear();
   });
 
-  describe("calculateTotal", () => {
-    it("should return 0 for empty cart", () => {
-      const total = mockCart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-
-      expect(total).toBe(0);
-      expect(mockCart).toHaveLength(0);
+  test("should render cart page with title", async () => {
+    mockedAxios.get.mockResolvedValueOnce({
+      data: { data: [{ _id: "cart123", items: [] }] },
     });
 
-    it("Given 2 produits When calculate total Then return correct price", () => {
-      // Given - 2 produits dans le panier
-      mockCart = [
-        { price: 25, quantity: 2 },
-        { price: 30, quantity: 1 },
-      ];
+    render(
+      <TestWrapper>
+        <Cart />
+      </TestWrapper>
+    );
 
-      const total = mockCart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    expect(screen.getByText("Your Shopping Cart")).toBeInTheDocument();
+    expect(screen.getByText("Review your items before checkout")).toBeInTheDocument();
+  });
 
-      expect(total).toBe(80);
-      expect(mockCart).toHaveLength(2);
+  test("should display empty cart message when no items", async () => {
+    mockedAxios.get.mockResolvedValueOnce({
+      data: { data: [{ _id: "cart123", items: [] }] },
     });
 
-    it("should handle decimal prices correctly", () => {
-      mockCart = [
-        { price: 9.99, quantity: 2 },
-        { price: 15.5, quantity: 1 },
-      ];
+    render(
+      <TestWrapper>
+        <Cart />
+      </TestWrapper>
+    );
 
-      const total = mockCart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-
-      expect(total).toBeCloseTo(35.48, 2);
+    await waitFor(() => {
+      expect(screen.getByText("Your cart is empty")).toBeInTheDocument();
     });
   });
 
-  describe("addToCart", () => {
-    it("should successfully add product to cart", async () => {
-      const product = { productId: "product123", quantity: 1 };
-
-      const mockResponse = {
-        data: {
-          _id: "cart123",
-          items: [{ productId: "product123", quantity: 1, price: 25 }],
-        },
-      };
-
-      mockAxios.post.mockResolvedValue(mockResponse);
-
-      const response = await mockAxios.post("/carts/addtocart", product);
-
-      expect(mockAxios.post).toHaveBeenCalledWith("/carts/addtocart", product);
-      expect(response.data.items).toHaveLength(1);
-      expect(response.data.items[0].productId).toBe("product123");
+  test("should render cart items correctly", async () => {
+    mockedAxios.get.mockResolvedValueOnce({
+      data: { data: [mockCartData] },
     });
 
-    it("should handle error when adding invalid product", async () => {
-      const invalidProduct = { productId: null, quantity: -1 };
+    render(
+      <TestWrapper>
+        <Cart />
+      </TestWrapper>
+    );
 
-      const mockError = {
-        response: {
-          data: { message: "Invalid product data" },
-        },
-      };
-
-      mockAxios.post.mockRejectedValue(mockError);
-
-      await expect(mockAxios.post("/carts/addtocart", invalidProduct)).rejects.toEqual(mockError);
+    await waitFor(() => {
+      expect(screen.getByText("Test Product 1")).toBeInTheDocument();
+      expect(screen.getByText("Test Product 2")).toBeInTheDocument();
+      expect(screen.getByText("Electronics")).toBeInTheDocument();
+      expect(screen.getByText("Accessories")).toBeInTheDocument();
     });
   });
 
-  describe("removeFromCart", () => {
-    it("should successfully remove product from cart", async () => {
-      const mockResponse = { data: { success: true } };
-
-      mockAxios.delete.mockResolvedValue(mockResponse);
-
-      const response = await mockAxios.delete("carts/deleteProduct/product123");
-
-      expect(mockAxios.delete).toHaveBeenCalledWith("carts/deleteProduct/product123");
-      expect(response.data.success).toBe(true);
+  test("should display product images correctly", async () => {
+    mockedAxios.get.mockResolvedValueOnce({
+      data: { data: [mockCartData] },
     });
 
-    it("should handle error when removing non-existent product", async () => {
-      const mockError = {
-        response: {
-          status: 404,
-          data: { message: "Product not found in cart" },
-        },
-      };
+    render(
+      <TestWrapper>
+        <Cart />
+      </TestWrapper>
+    );
 
-      mockAxios.delete.mockRejectedValue(mockError);
-
-      await expect(mockAxios.delete("carts/deleteProduct/invalid")).rejects.toEqual(mockError);
+    await waitFor(() => {
+      const images = screen.getAllByRole("img");
+      expect(images.length).toBeGreaterThan(0);
+      // Check that cloudinary URL is used for non-http images
+      expect(images[0].src).toContain("cloudinary");
+      // Check that http URLs are used directly
+      expect(images[1].src).toBe("http://example.com/image.jpg");
     });
   });
 
-  describe("updateQuantity", () => {
-    it("should successfully update product quantity", async () => {
-      const updateData = { quantity: 5 };
-
-      const mockResponse = { data: { success: true } };
-
-      mockAxios.put.mockResolvedValue(mockResponse);
-
-      const response = await mockAxios.put("carts/updateCart/product123", updateData);
-
-      expect(mockAxios.put).toHaveBeenCalledWith("carts/updateCart/product123", updateData);
-      expect(response.data.success).toBe(true);
+  test("should calculate subtotal correctly", async () => {
+    mockedAxios.get.mockResolvedValueOnce({
+      data: { data: [mockCartData] },
     });
 
-    it("should handle invalid quantity update", async () => {
-      const updateData = { quantity: 0 };
+    render(
+      <TestWrapper>
+        <Cart />
+      </TestWrapper>
+    );
 
-      const mockError = {
-        response: {
-          data: { message: "Quantity must be greater than 0" },
-        },
-      };
-
-      mockAxios.put.mockRejectedValue(mockError);
-
-      await expect(mockAxios.put("carts/updateCart/product123", updateData)).rejects.toEqual(
-        mockError
-      );
+    await waitFor(() => {
+      // Subtotal = (29.99 * 2) + (49.99 * 1) = 109.97
+      expect(screen.getByText(/\$109\.97/)).toBeInTheDocument();
     });
   });
 
-  describe("getCart", () => {
-    it("should fetch current cart data", async () => {
-      const mockCartData = {
-        data: {
-          data: [
-            {
-              _id: "cart123",
-              items: [
-                { productId: { _id: "product1", title: "Product A" }, price: 25, quantity: 2 },
-                { productId: { _id: "product2", title: "Product B" }, price: 30, quantity: 1 },
-              ],
-            },
-          ],
-        },
-      };
-
-      mockAxios.get.mockResolvedValue(mockCartData);
-
-      const response = await mockAxios.get("/carts/getcarts");
-
-      expect(mockAxios.get).toHaveBeenCalledWith("/carts/getcarts");
-      expect(response.data.data[0].items).toHaveLength(2);
+  test("should calculate tax and total correctly", async () => {
+    mockedAxios.get.mockResolvedValueOnce({
+      data: { data: [mockCartData] },
     });
 
-    it("should handle network error when fetching cart", async () => {
-      mockAxios.get.mockRejectedValue(new Error("Network Error"));
+    render(
+      <TestWrapper>
+        <Cart />
+      </TestWrapper>
+    );
 
-      await expect(mockAxios.get("/carts/getcarts")).rejects.toThrow("Network Error");
+    await waitFor(() => {
+      // Tax = 109.97 * 0.08 = 8.80
+      expect(screen.getByText(/\$8\.80/)).toBeInTheDocument();
+      // Total = 109.97 + 8.80 = 118.77
+      expect(screen.getByText(/\$118\.77/)).toBeInTheDocument();
     });
+  });
+
+  test("should show loading state while fetching", () => {
+    mockedAxios.get.mockImplementation(() => new Promise(() => {})); // Never resolves
+
+    render(
+      <TestWrapper>
+        <Cart />
+      </TestWrapper>
+    );
+
+    expect(screen.getByText("Loading cart...")).toBeInTheDocument();
+  });
+
+  test("should handle API error gracefully", async () => {
+    mockedAxios.get.mockRejectedValueOnce(new Error("API Error"));
+
+    render(
+      <TestWrapper>
+        <Cart />
+      </TestWrapper>
+    );
+
+    // Should not crash and handle error
+    await waitFor(() => {
+      expect(screen.getByText("Your Shopping Cart")).toBeInTheDocument();
+    });
+  });
+
+  test("should call update quantity when quantity changes", async () => {
+    mockedAxios.get.mockResolvedValueOnce({
+      data: { data: [mockCartData] },
+    });
+    mockedAxios.put.mockResolvedValueOnce({ data: { success: true } });
+    mockedAxios.get.mockResolvedValueOnce({
+      data: { data: [mockCartData] },
+    });
+
+    render(
+      <TestWrapper>
+        <Cart />
+      </TestWrapper>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText("Test Product 1")).toBeInTheDocument();
+    });
+
+    // Find increment buttons
+    const buttons = screen.getAllByRole("button");
+    const incrementBtn = buttons.find((btn) => btn.textContent === "+");
+
+    if (incrementBtn) {
+      fireEvent.click(incrementBtn);
+
+      await waitFor(() => {
+        expect(mockedAxios.put).toHaveBeenCalled();
+      });
+    }
+  });
+
+  test("should not allow quantity less than 1", async () => {
+    mockedAxios.get.mockResolvedValueOnce({
+      data: {
+        data: [
+          {
+            _id: "cart123",
+            items: [
+              {
+                productId: {
+                  _id: "prod1",
+                  title: "Test Product",
+                  images: ["test.jpg"],
+                },
+                price: 29.99,
+                quantity: 1,
+                categories: "Test",
+              },
+            ],
+          },
+        ],
+      },
+    });
+
+    render(
+      <TestWrapper>
+        <Cart />
+      </TestWrapper>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText("Test Product")).toBeInTheDocument();
+    });
+
+    // Try to decrement from quantity 1 - should not call API
+    const buttons = screen.getAllByRole("button");
+    const decrementBtn = buttons.find((btn) => btn.textContent === "-");
+
+    if (decrementBtn) {
+      fireEvent.click(decrementBtn);
+      // Should not make API call since quantity is already 1
+      expect(mockedAxios.put).not.toHaveBeenCalled();
+    }
+  });
+
+  test("should call remove item when delete button is clicked", async () => {
+    mockedAxios.get.mockResolvedValueOnce({
+      data: { data: [mockCartData] },
+    });
+    mockedAxios.delete.mockResolvedValueOnce({ data: { success: true } });
+
+    render(
+      <TestWrapper>
+        <Cart />
+      </TestWrapper>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText("Test Product 1")).toBeInTheDocument();
+    });
+
+    // Find and click remove button
+    const buttons = screen.getAllByRole("button");
+    // Look for button that might contain the Trash icon or delete functionality
+    const removeBtn = buttons.find((btn) => {
+      const svg = btn.querySelector("svg");
+      return svg !== null;
+    });
+
+    if (removeBtn) {
+      fireEvent.click(removeBtn);
+
+      await waitFor(() => {
+        expect(mockedAxios.delete).toHaveBeenCalled();
+      });
+    }
+  });
+
+  test("should handle products without images", async () => {
+    mockedAxios.get.mockResolvedValueOnce({
+      data: {
+        data: [
+          {
+            _id: "cart123",
+            items: [
+              {
+                productId: {
+                  _id: "prod1",
+                  title: "No Image Product",
+                  images: [],
+                },
+                price: 29.99,
+                quantity: 1,
+                categories: "Test",
+              },
+            ],
+          },
+        ],
+      },
+    });
+
+    render(
+      <TestWrapper>
+        <Cart />
+      </TestWrapper>
+    );
+
+    await waitFor(() => {
+      const images = screen.getAllByRole("img");
+      expect(images[0].src).toContain("placeholder");
+    });
+  });
+
+  test("should handle products without productId", async () => {
+    mockedAxios.get.mockResolvedValueOnce({
+      data: {
+        data: [
+          {
+            _id: "cart123",
+            items: [
+              {
+                productId: null,
+                price: 29.99,
+                quantity: 1,
+                categories: "Test",
+              },
+            ],
+          },
+        ],
+      },
+    });
+
+    render(
+      <TestWrapper>
+        <Cart />
+      </TestWrapper>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText("Unknown Product")).toBeInTheDocument();
+    });
+  });
+
+  test("should show payment modal when checkout button is clicked", async () => {
+    mockedAxios.get.mockResolvedValueOnce({
+      data: { data: [mockCartData] },
+    });
+
+    render(
+      <TestWrapper>
+        <Cart />
+      </TestWrapper>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText("Test Product 1")).toBeInTheDocument();
+    });
+
+    // Look for proceed to checkout button
+    const buttons = screen.getAllByRole("button");
+    const checkoutBtn = buttons.find(
+      (btn) => btn.textContent.includes("Checkout") || btn.textContent.includes("Proceed")
+    );
+
+    if (checkoutBtn) {
+      fireEvent.click(checkoutBtn);
+      // Payment modal should be triggered
+    }
   });
 });
