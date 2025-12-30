@@ -1,4 +1,5 @@
-import { useState } from "react";
+// eslint-disable-next-line no-unused-vars
+import React, { useState } from "react";
 import { getCart, removeFromCart, updateProductQuantity } from "../features/cartSlice";
 import { useDispatch } from "react-redux";
 import { Trash2, ShoppingBag } from "lucide-react";

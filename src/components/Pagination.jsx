@@ -1,16 +1,21 @@
+// eslint-disable-next-line no-unused-vars
+import React, { memo, useCallback, useMemo } from "react";
 import "../assets/styles/admin/pagination.css";
 
 const Pagination = ({ currentPage, totalPages, onPageChange, hasNext, hasPrev }) => {
   const current = Number(currentPage);
   const total = Number(totalPages);
 
-  const handlePageClick = (page) => {
-    if (page !== current && page >= 1 && page <= total) {
-      onPageChange(page);
-    }
-  };
+  const handlePageClick = useCallback(
+    (page) => {
+      if (page !== current && page >= 1 && page <= total) {
+        onPageChange(page);
+      }
+    },
+    [current, total, onPageChange]
+  );
 
-  const renderPageNumbers = () => {
+  const pageNumbers = useMemo(() => {
     const pages = [];
     const maxVisiblePages = 5;
     let startPage = Math.max(1, current - Math.floor(maxVisiblePages / 2));
@@ -33,7 +38,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange, hasNext, hasPrev })
     }
 
     return pages;
-  };
+  }, [current, total, handlePageClick]);
 
   return (
     <div className="pagination">
@@ -45,7 +50,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange, hasNext, hasPrev })
         Précédent
       </button>
 
-      {renderPageNumbers()}
+      {pageNumbers}
 
       <button
         onClick={() => handlePageClick(current + 1)}
@@ -58,4 +63,4 @@ const Pagination = ({ currentPage, totalPages, onPageChange, hasNext, hasPrev })
   );
 };
 
-export default Pagination;
+export default memo(Pagination);

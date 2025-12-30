@@ -1,5 +1,5 @@
 // eslint-disable-next-line no-unused-vars
-import React from "react";
+import React, { memo } from "react";
 
 const Footer = () => (
   <footer className="tracking-wide bg-[#222] pt-12 pb-6 px-10">
@@ -213,4 +213,4 @@ const Footer = () => (
   </footer>
 );
 
-export default Footer;
+export default memo(Footer);

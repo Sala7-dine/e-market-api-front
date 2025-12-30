@@ -466,22 +466,8 @@
 <a name='L401'></a><a href='#L401'>401</a>
 <a name='L402'></a><a href='#L402'>402</a>
 <a name='L403'></a><a href='#L403'>403</a>
-<a name='L404'></a><a href='#L404'>404</a>
-<a name='L405'></a><a href='#L405'>405</a>
-<a name='L406'></a><a href='#L406'>406</a>
-<a name='L407'></a><a href='#L407'>407</a>
-<a name='L408'></a><a href='#L408'>408</a>
-<a name='L409'></a><a href='#L409'>409</a>
-<a name='L410'></a><a href='#L410'>410</a>
-<a name='L411'></a><a href='#L411'>411</a>
-<a name='L412'></a><a href='#L412'>412</a>
-<a name='L413'></a><a href='#L413'>413</a>
-<a name='L414'></a><a href='#L414'>414</a>
-<a name='L415'></a><a href='#L415'>415</a>
-<a name='L416'></a><a href='#L416'>416</a>
-<a name='L417'></a><a href='#L417'>417</a>
-<a name='L418'></a><a href='#L418'>418</a>
-<a name='L419'></a><a href='#L419'>419</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L404'></a><a href='#L404'>404</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -552,22 +538,6 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -899,15 +869,16 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { useState, useEffect } from "react";
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">// eslint-disable-next-line no-unused-vars
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "../config/axios.js";
 import Header from "../components/Header.jsx";
 import Footer from "../components/Footer.jsx";
-import hm1 from "../assets/images/hm1.webp";
-import hm2 from "../assets/images/hm2.webp";
-import bannerBg from "../assets/images/banner-bg.webp";
-import ctaImage from "../assets/images/cta.jpg";
+import hm1 from "../assets/images/hero-1.png";
+import hm2 from "../assets/images/hero-2.png";
+import bannerBg from "../assets/images/banner-bg.png";
+import ctaImage from "../assets/images/cta.png";
 import { useDispatch } from "react-redux";
 import { addToCart, getCart } from "../features/cartSlice.js";
 import { useAuth } from "../contexts/AuthContext";
@@ -1021,8 +992,8 @@ const Home = <span class="cstat-no" title="statement not covered" ><span class="
               &lt;h1 className="text-6xl md:text-7xl font-bold text-gray-800 mb-4"&gt;
                 &lt;span className="text-[#FF6B6B] font-serif italic"&gt;30% Off&lt;/span&gt;
               &lt;/h1&gt;
-              &lt;h2 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6"&gt;Comfort Chair&lt;/h2&gt;
-              &lt;p className="text-xl text-gray-700 mb-8"&gt;Collect from Daxone &amp; get 30% Discount.&lt;/p&gt;
+              &lt;h2 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6"&gt;Luxury Watch&lt;/h2&gt;
+              &lt;p className="text-xl text-gray-700 mb-8"&gt;Collect from Zendora &amp; get 30% Discount.&lt;/p&gt;
               &lt;button className="border-2 border-[#FF6B6B] text-[#FF6B6B] px-8 py-3 rounded hover:bg-[#FF6B6B] hover:text-white transition-colors duration-300 font-medium"&gt;
                 SHOP NOW
               &lt;/button&gt;
@@ -1040,23 +1011,7 @@ const Home = <span class="cstat-no" title="statement not covered" ><span class="
           &lt;div
             className="relative rounded-lg overflow-hidden shadow-xl min-h-[350px] bg-cover bg-center"
             style={{ backgroundImage: `url(${bannerBg})` }}
-          &gt;
-            &lt;div className="flex items-center justify-end h-full"&gt;
-              &lt;div className="md:w-1/2 p-12 text-center md:text-left"&gt;
-                &lt;h2 className="text-5xl md:text-5xl font-medium text-[#8B7355] leading-tight mb-8"&gt;
-                  Premium Home
-                  &lt;br /&gt;
-                  Decorator
-                &lt;/h2&gt;
-                &lt;Link
-                  to="#"
-                  className="inline-block border-b-2 border-[#8B7355] text-[#8B7355] text-lg font-medium pb-1 hover:text-[#6B5335] hover:border-[#6B5335] transition-colors duration-300"
-                &gt;
-                  LEARN MORE
-                &lt;/Link&gt;
-              &lt;/div&gt;
-            &lt;/div&gt;
-          &lt;/div&gt;
+          &gt;&lt;/div&gt;
         &lt;/div&gt;
       &lt;/section&gt;
 &nbsp;
@@ -1186,7 +1141,7 @@ const Home = <span class="cstat-no" title="statement not covered" ><span class="
               &lt;h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6 leading-tight"&gt;
                 Winter Discount
                 &lt;br /&gt;
-                Up to 30%
+                Up to 20%
               &lt;/h2&gt;
               &lt;p className="text-gray-600 mb-8 leading-relaxed"&gt;
                 Transform your home with our carefully curated collection of modern furniture and
@@ -1324,7 +1279,7 @@ export default Home;
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-12-16T11:16:18.141Z
+                at 2025-12-30T09:31:09.555Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

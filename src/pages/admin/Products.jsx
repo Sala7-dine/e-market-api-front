@@ -1,3 +1,5 @@
+// eslint-disable-next-line no-unused-vars
+import React from "react";
 import { FaEye, FaTrash } from "react-icons/fa";
 import "../../assets/styles/admin/Products.css";
 import { fetchAllProducts, deleteproduct } from "../../features/productSlice";

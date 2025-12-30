@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+// eslint-disable-next-line no-unused-vars
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "../config/axios.js";
 import Header from "../components/Header.jsx";
