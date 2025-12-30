@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
+// eslint-disable-next-line no-unused-vars
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
-import { getCart, selectCartId } from "../features/cartSlice";
+import { getCart, selectCartId, clearCart } from "../features/cartSlice";
 import { useAuth } from "../contexts/AuthContext";
 import PaymentModal from "../components/PaymentModal";
 
@@ -63,6 +64,7 @@ const Checkout = () => {
   };
 
   const handlePaymentSuccess = () => {
+    dispatch(clearCart());
     dispatch(getCart());
     setShowPaymentModal(false);
   };

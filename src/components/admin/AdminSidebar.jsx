@@ -11,7 +11,7 @@ import {
   FaTag,
   FaBars,
   FaTimes,
-  FaSignOutAlt,
+  FaSignOutAlt,FaChartLine
 } from "react-icons/fa";
 import "../../assets/styles/admin/sidebar.css";
 import { useAuth } from "../../contexts/AuthContext";
@@ -28,6 +28,8 @@ const AdminSidebar = () => {
     { name: "Gestion produits", icon: <FaShoppingBag />, link: "/admin/products" },
 
     { name: "Modération Avis", icon: <FaCommentDots />, link: "/admin/reviews" },
+    { name: "Logs Système", icon: <FaChartLine />, link: "/admin/logs" }
+
   ];
 
   const toggleSidebar = () => {

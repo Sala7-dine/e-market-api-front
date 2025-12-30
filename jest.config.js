@@ -11,14 +11,28 @@ export default {
   transform: {
     "^.+\\.(js|jsx)$": ["babel-jest", { presets: ["@babel/preset-env", "@babel/preset-react"] }],
   },
-  testMatch: ["**/__tests__/**/*.test.[jt]s?(x)", "**/?(*.)+(spec|test).[jt]s?(x)"],
-  testPathIgnorePatterns: ["/node_modules/", "/__mocks__/", "/setup.js", "test/chihaja.test.js"],
+  testMatch: [
+    "**/__tests__/**/*.test.[jt]s?(x)",
+    "**/?(*.)+(spec|test).[jt]s?(x)",
+  ],
+  testPathIgnorePatterns: [
+    "/node_modules/",
+    "/__mocks__/",
+    "/setup.js",
+    "test/chihaja.test.js",
+  ],
+  collectCoverage: true,
+  coverageReporters: ["text", "text-summary", "lcov", "html"],
   collectCoverageFrom: [
     "src/**/*.{js,jsx}",
     "!src/main.jsx",
-    "!src/**/*.test.{js,jsx}",
-    "!src/__tests__/**",
+    '!src/**/*.test.{js,jsx}',
+    '!src/__tests__/**',
+    "!src/**/__mocks__/**",
+    "!src/config/**/*",
+
   ],
+  coverageDirectory: "coverage",
   coverageThreshold: {
     global: {
       branches: 70,

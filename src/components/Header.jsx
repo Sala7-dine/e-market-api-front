@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+// eslint-disable-next-line no-unused-vars
+import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ShoppingBag } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
@@ -191,7 +192,7 @@ const Header = () => {
                           </div>
                           <Link
                             to="/checkout"
-                            className="w-full bg-gradient-to-r from-[#FF6B6B] to-[#FF5252] text-white py-2 px-2 rounded-xl  text-lg hover:from-[#FF5252] hover:to-[#FF6B6B] transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
+                            className="w-full bg-gradient-to-r from-[#FF6B6B] to-[#FF5252] text-white py-2 px-2 rounded-xl text-lg hover:from-[#FF5252] hover:to-[#FF6B6B] transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center"
                           >
                             <i className="la la-credit-card mr-2"></i>
                             Checkout

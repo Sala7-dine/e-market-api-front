@@ -6,10 +6,10 @@ import Footer from "../components/Footer";
 import { useDispatch } from "react-redux";
 import { addToCart, getCart } from "../features/cartSlice";
 import { useAuth } from "../contexts/AuthContext";
-import pro1 from "../assets/images/pro-1.webp";
-import pro2 from "../assets/images/pro-2.webp";
-import pro3 from "../assets/images/pro-3.webp";
-import pro4 from "../assets/images/pro-4.webp";
+import pro1 from "../assets/images/pro-1.png";
+import pro2 from "../assets/images/pro-2.png";
+import pro3 from "../assets/images/pro-3.png";
+import pro4 from "../assets/images/pro-4.png";
 
 const ProductDetail = () => {
   const { id } = useParams();

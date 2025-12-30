@@ -3,10 +3,10 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "../config/axios.js";
 import Header from "../components/Header.jsx";
 import Footer from "../components/Footer.jsx";
-import hm1 from "../assets/images/hm1.webp";
-import hm2 from "../assets/images/hm2.webp";
-import bannerBg from "../assets/images/banner-bg.webp";
-import ctaImage from "../assets/images/cta.jpg";
+import hm1 from "../assets/images/hero-1.png";
+import hm2 from "../assets/images/hero-2.png";
+import bannerBg from "../assets/images/banner-bg.png";
+import ctaImage from "../assets/images/cta.png";
 import { useDispatch } from "react-redux";
 import { addToCart, getCart } from "../features/cartSlice.js";
 import { useAuth } from "../contexts/AuthContext";
@@ -120,8 +120,8 @@ const Home = () => {
               <h1 className="text-6xl md:text-7xl font-bold text-gray-800 mb-4">
                 <span className="text-[#FF6B6B] font-serif italic">30% Off</span>
               </h1>
-              <h2 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">Comfort Chair</h2>
-              <p className="text-xl text-gray-700 mb-8">Collect from Daxone & get 30% Discount.</p>
+              <h2 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">Luxury Watch</h2>
+              <p className="text-xl text-gray-700 mb-8">Collect from Zendora & get 30% Discount.</p>
               <button className="border-2 border-[#FF6B6B] text-[#FF6B6B] px-8 py-3 rounded hover:bg-[#FF6B6B] hover:text-white transition-colors duration-300 font-medium">
                 SHOP NOW
               </button>
@@ -139,23 +139,7 @@ const Home = () => {
           <div
             className="relative rounded-lg overflow-hidden shadow-xl min-h-[350px] bg-cover bg-center"
             style={{ backgroundImage: `url(${bannerBg})` }}
-          >
-            <div className="flex items-center justify-end h-full">
-              <div className="md:w-1/2 p-12 text-center md:text-left">
-                <h2 className="text-5xl md:text-5xl font-medium text-[#8B7355] leading-tight mb-8">
-                  Premium Home
-                  <br />
-                  Decorator
-                </h2>
-                <Link
-                  to="#"
-                  className="inline-block border-b-2 border-[#8B7355] text-[#8B7355] text-lg font-medium pb-1 hover:text-[#6B5335] hover:border-[#6B5335] transition-colors duration-300"
-                >
-                  LEARN MORE
-                </Link>
-              </div>
-            </div>
-          </div>
+          ></div>
         </div>
       </section>
 
@@ -285,7 +269,7 @@ const Home = () => {
               <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6 leading-tight">
                 Winter Discount
                 <br />
-                Up to 30%
+                Up to 20%
               </h2>
               <p className="text-gray-600 mb-8 leading-relaxed">
                 Transform your home with our carefully curated collection of modern furniture and

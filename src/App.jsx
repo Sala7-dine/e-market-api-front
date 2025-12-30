@@ -23,6 +23,14 @@ import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import NotFound from "./pages/NotFound.jsx";
 import Forbidden from "./pages/Forbidden.jsx";
 import Dashboard from "./pages/admin/Dashboard.jsx";
+import LogsViewer from "./pages/admin/LogsViewer.jsx";
+import clientLogger from "./utils/clientLogger";
+import "./utils/axiosLogger";
+import performanceTracker from "./utils/performanceTracker";
+
+// Initialiser le logger et performance tracking
+clientLogger.info('Application started');
+performanceTracker.startTimer('app-initialization');
 
 const queryClient = new QueryClient();
 
@@ -54,6 +62,9 @@ const App = () => (
                 <Route path="categories" element={<Categories />} />
                 <Route path="products" element={<Products />} />
                 <Route path="reviews" element={<Reviews />} />
+                <Route path="logs" element={<LogsViewer />} />
+                
+
               </Route>
             </Route>
             <Route path="/403" element={<Forbidden />} />
