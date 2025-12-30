@@ -43,7 +43,9 @@ beforeAll(() => {
     if (
       typeof args[0] === "string" &&
       (args[0].includes("Warning: ReactDOM.render") ||
-        args[0].includes("Not implemented: HTMLFormElement.prototype.submit"))
+        args[0].includes("Not implemented: HTMLFormElement.prototype.submit") ||
+        args[0].startsWith("Payment failed:") ||
+        args[0].startsWith("Full API Error"))
     ) {
       return;
     }
