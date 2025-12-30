@@ -15,8 +15,8 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "test:unit": "jest --testPathPatterns=unit",
-    "test:integration": "jest --testPathPatterns=integration",
+    "test:unit": "jest --testPathPatterns=unit --coverageThreshold='{}'",
+    "test:integration": "jest --testPathPatterns=integration --coverageThreshold='{}'",
     "test:integ:cart": "jest --testPathPatterns=Carte.integration.test.js",
     "test:unit:addCart": "jest --testPathPatterns=addToCart.unit.test.js"
   },
